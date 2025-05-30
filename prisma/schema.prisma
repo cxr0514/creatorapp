@@ -74,6 +74,9 @@ model Video {
 model Clip {
   id            Int      @id @default(autoincrement())
   title         String
+  description   String?
+  hashtags      String[] @default([])
+  tags          String[] @default([])
   createdAt     DateTime @default(now())
   userId        String
   videoId       Int
@@ -81,7 +84,25 @@ model Clip {
   cloudinaryUrl String
   startTime     Int?
   endTime       Int?
+  aspectRatio   String   @default("16:9")
   thumbnailUrl  String?
   user          User     @relation(fields: [userId], references: [id])
   video         Video    @relation(fields: [videoId], references: [id])
+  exports       ClipExport[]
+}
+
+model ClipExport {
+  id            Int      @id @default(autoincrement())
+  clipId        Int
+  format        String   // "9:16", "1:1", "16:9", "4:3"
+  platform      String   // "tiktok", "instagram", "youtube", "twitter", "linkedin"
+  cloudinaryId  String
+  cloudinaryUrl String
+  croppingType  String   @default("center") // "center", "face", "action", "smart"
+  thumbnailUrl  String?
+  createdAt     DateTime @default(now())
+  fileSize      Int?
+  clip          Clip     @relation(fields: [clipId], references: [id], onDelete: Cascade)
+  
+  @@unique([clipId, format, platform])
 }

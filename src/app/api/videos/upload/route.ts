@@ -64,6 +64,7 @@ export async function POST(request: NextRequest) {
       ).end(buffer)
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cloudinaryResult = uploadResult as any
 
     // Create video record in database
@@ -73,9 +74,8 @@ export async function POST(request: NextRequest) {
     const video = await prisma.video.create({
       data: {
         title,
-        description: `Uploaded video: ${fileName}`,
-        url: cloudinaryResult.secure_url,
-        publicId: cloudinaryResult.public_id,
+        cloudinaryUrl: cloudinaryResult.secure_url,
+        cloudinaryId: cloudinaryResult.public_id,
         duration: cloudinaryResult.duration || 0,
         userId: user.id
       }
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
       video: {
         id: video.id,
         title: video.title,
-        url: video.url,
+        url: video.cloudinaryUrl,
         duration: video.duration
       }
     })

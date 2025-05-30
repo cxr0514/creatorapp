@@ -3,10 +3,10 @@
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { Button } from '@/components/ui/button'
-import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface VideoUploadProps {
-  onUploadComplete?: (videoId: number) => void
+  onUploadComplete?: () => void
 }
 
 export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
@@ -69,7 +69,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       
       // Call callback after a brief delay
       setTimeout(() => {
-        onUploadComplete?.(result.videoId)
+        onUploadComplete?.()
         // Reset state after callback
         setTimeout(() => {
           setSuccess(false)

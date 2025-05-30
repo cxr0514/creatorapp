@@ -5,7 +5,7 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const session = await getServerSession(authOptions)
@@ -14,7 +14,8 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const clipId = parseInt(params.id, 10)
+    const { id } = await params
+    const clipId = parseInt(id, 10)
     
     if (isNaN(clipId)) {
       return NextResponse.json({ error: 'Invalid clip ID' }, { status: 400 })

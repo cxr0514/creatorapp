@@ -1,13 +1,16 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
+import { ExportModal } from './export-modal'
 
 interface Clip {
   id: number
   title: string
   startTime: number
   endTime: number
+  aspectRatio?: string
   createdAt: string
   video: {
     id: number
@@ -16,11 +19,16 @@ interface Clip {
   }
   thumbnailUrl?: string
   status: 'processing' | 'ready' | 'failed'
+  description?: string
+  hashtags?: string[]
+  tags?: string[]
 }
 
 export function ClipList() {
   const [clips, setClips] = useState<Clip[]>([])
   const [loading, setLoading] = useState(true)
+  const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [selectedClip, setSelectedClip] = useState<Clip | null>(null)
 
   useEffect(() => {
     fetchClips()
@@ -52,6 +60,21 @@ export function ClipList() {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const openExportModal = (clip: Clip) => {
+    setSelectedClip(clip)
+    setExportModalOpen(true)
+  }
+
+  const closeExportModal = () => {
+    setExportModalOpen(false)
+    setSelectedClip(null)
+  }
+
+  const handleExportComplete = () => {
+    // Refresh clips list to show any updates
+    fetchClips()
   }
 
   const deleteClip = async (clipId: number) => {
@@ -155,15 +178,17 @@ export function ClipList() {
   }
 
   return (
+    <>
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {clips.map((clip) => (
         <div key={clip.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
           <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
             {clip.thumbnailUrl ? (
-              <img
+              <Image
                 src={clip.thumbnailUrl}
                 alt={clip.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
                 onError={(e) => {
                   // If thumbnail fails to load, hide the image and show the fallback icon
                   const target = e.target as HTMLImageElement;
@@ -195,19 +220,97 @@ export function ClipList() {
           <div className="p-4">
             <h3 className="font-medium text-gray-900 mb-1 truncate">{clip.title}</h3>
             <p className="text-sm text-gray-500 mb-1">From: {clip.video.title}</p>
-            <p className="text-xs text-gray-400 mb-3">
-              {formatTime(clip.startTime)} - {formatTime(clip.endTime)} • Created {formatDate(clip.createdAt)}
+            <p className="text-xs text-gray-400 mb-1">
+              {formatTime(clip.startTime)} - {formatTime(clip.endTime)} • {clip.aspectRatio || '16:9'}
             </p>
+            <p className="text-xs text-gray-400 mb-3">
+              Created {formatDate(clip.createdAt)}
+            </p>
+            
+            {/* Description */}
+            {clip.description && (
+              <div className="mb-3">
+                <p className="text-sm text-gray-700 overflow-hidden" 
+                   style={{
+                     display: '-webkit-box',
+                     WebkitLineClamp: 2,
+                     WebkitBoxOrient: 'vertical'
+                   }}
+                   title={clip.description}>
+                  {clip.description}
+                </p>
+              </div>
+            )}
+            
+            {/* Hashtags */}
+            {clip.hashtags && clip.hashtags.length > 0 && (
+              <div className="mb-2">
+                <div className="flex flex-wrap gap-1">
+                  {clip.hashtags.slice(0, 3).map((hashtag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                      title="AI-generated hashtag"
+                    >
+                      <svg className="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                      </svg>
+                      #{hashtag}
+                    </span>
+                  ))}
+                  {clip.hashtags.length > 3 && (
+                    <span className="text-xs text-gray-500 px-2 py-1">
+                      +{clip.hashtags.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+            
+            {/* Tags */}
+            {clip.tags && clip.tags.length > 0 && (
+              <div className="mb-3">
+                <div className="flex flex-wrap gap-1">
+                  {clip.tags.slice(0, 3).map((tag, index) => (
+                    <span
+                      key={index}
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200"
+                      title="AI-generated tag"
+                    >
+                      <svg className="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                      </svg>
+                      {tag}
+                    </span>
+                  ))}
+                  {clip.tags.length > 3 && (
+                    <span className="text-xs text-gray-500 px-2 py-1">
+                      +{clip.tags.length - 3} more
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
             
             <div className="flex space-x-2">
               {clip.status === 'ready' && (
-                <Button
-                  size="sm"
-                  onClick={() => downloadClip(clip.id, clip.title)}
-                  className="flex-1"
-                >
-                  Download
-                </Button>
+                <>
+                  <Button
+                    size="sm"
+                    onClick={() => downloadClip(clip.id, clip.title)}
+                    className="flex-1"
+                  >
+                    Download
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => openExportModal(clip)}
+                    className="flex-1"
+                  >
+                    Export
+                  </Button>
+                </>
               )}
               {clip.status === 'processing' && (
                 <Button size="sm" disabled className="flex-1">
@@ -234,5 +337,16 @@ export function ClipList() {
         </div>
       ))}
     </div>
+    
+    {/* Export Modal */}
+    {selectedClip && (
+      <ExportModal
+        clip={selectedClip}
+        isOpen={exportModalOpen}
+        onClose={closeExportModal}
+        onExportComplete={handleExportComplete}
+      />
+    )}
+    </>
   )
 }

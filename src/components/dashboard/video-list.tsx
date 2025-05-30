@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 
 interface Video {
@@ -110,10 +111,11 @@ export function VideoList({ onCreateClip }: VideoListProps) {
         <div key={video.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
           <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
             {video.thumbnailUrl ? (
-              <img
+              <Image
                 src={video.thumbnailUrl}
                 alt={video.title}
-                className="w-full h-full object-cover"
+                fill
+                className="object-cover"
                 onError={(e) => {
                   // If thumbnail fails to load, hide the image and show the fallback icon
                   const target = e.target as HTMLImageElement;

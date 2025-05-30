@@ -11,7 +11,8 @@ export const authOptions = {
   ],
   secret: process.env.NEXTAUTH_SECRET,
   callbacks: {
-    async signIn({ user, account, profile }: any) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async signIn({ user, account }: any) {
       console.log('SignIn callback triggered:', { user: user?.email, provider: account?.provider })
       
       if (account?.provider === 'google' && user?.email) {
@@ -39,7 +40,8 @@ export const authOptions = {
       }
       return true
     },
-    session: async ({ session, token }: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    session: async ({ session }: any) => {
       if (session?.user?.email) {
         try {
           // Get the user from database to ensure we have the correct ID
@@ -47,6 +49,7 @@ export const authOptions = {
             where: { email: session.user.email }
           })
           if (dbUser) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (session.user as any).id = dbUser.id
             console.log('Session callback - User ID set:', dbUser.id)
           } else {
@@ -58,6 +61,7 @@ export const authOptions = {
       }
       return session
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     jwt: async ({ user, token }: any) => {
       if (user) {
         token.uid = user.id

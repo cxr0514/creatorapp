@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { cloudinary, generateVideoThumbnail } from '@/lib/cloudinary'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -55,6 +55,7 @@ export async function POST(request: NextRequest) {
     console.log('Video upload - Session check:', { 
       hasSession: !!session, 
       userEmail: session?.user?.email,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       userId: (session?.user as any)?.id 
     })
     
@@ -140,6 +141,7 @@ export async function POST(request: NextRequest) {
       uploadStream.end(buffer)
     })
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const cloudinaryResult = uploadResult as any
 
     // Create video record in database

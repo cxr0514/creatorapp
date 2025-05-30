@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { cloudinary, generateClipThumbnail } from '@/lib/cloudinary'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions)
     
@@ -35,8 +35,12 @@ export async function GET(request: NextRequest) {
     const formattedClips = clips.map(clip => ({
       id: clip.id,
       title: clip.title,
+      description: clip.description,
+      hashtags: clip.hashtags,
+      tags: clip.tags,
       startTime: clip.startTime || 0,
       endTime: clip.endTime || 0,
+      aspectRatio: clip.aspectRatio || '16:9',
       createdAt: clip.createdAt.toISOString(),
       video: {
         id: clip.video.id,
@@ -64,7 +68,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { videoId, title, startTime, endTime } = await request.json()
+    const { videoId, title, description, hashtags = [], tags = [], startTime, endTime, aspectRatio = '16:9', clipCount = 1 } = await request.json()
 
     if (!videoId || !title || startTime === undefined || endTime === undefined) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
@@ -72,6 +76,10 @@ export async function POST(request: NextRequest) {
 
     if (startTime >= endTime) {
       return NextResponse.json({ error: 'End time must be after start time' }, { status: 400 })
+    }
+
+    if (clipCount < 1 || clipCount > 10) {
+      return NextResponse.json({ error: 'Clip count must be between 1 and 10' }, { status: 400 })
     }
 
     // Verify the video belongs to the current user
@@ -187,8 +195,12 @@ export async function POST(request: NextRequest) {
     const clip = await prisma.clip.create({
       data: {
         title,
+        description: description || null,
+        hashtags: Array.isArray(hashtags) ? hashtags : [],
+        tags: Array.isArray(tags) ? tags : [],
         startTime: Math.round(startTime),
         endTime: Math.round(endTime),
+        aspectRatio,
         videoId,
         userId: user.id,
         cloudinaryId: clipPublicId,

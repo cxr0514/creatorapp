@@ -152,4 +152,54 @@ Transform CreatorApp from a video upload/clip MVP into a full-stack, AI-powered,
 
 ---
 
-**End of PRD v3.0 – All MVP, Phase 2, and manual/AI requirements unified**
+## 9. Admin Portal & User Management
+
+### 9.1 Admin Dashboard
+
+* **Access:** Only for app owner(s) and designated admin roles.
+* **Features:**
+
+  * View, search, filter, and export all users (active, suspended, pending, deleted)
+  * View user profile and usage metrics (uploads, clip count, storage, recent activity)
+  * Suspend/unsuspend, reset password, or delete user accounts
+  * Grant/revoke admin or agency roles
+  * Manual adjustment of account credits, subscriptions, or pricing tier
+  * Impersonate a user session for support/troubleshooting
+  * View audit logs of user actions and platform changes
+  * Site-wide settings: email templates, integrations, feature flags
+  * Bulk email or notification tool (for maintenance, feature updates, critical comms)
+
+### 9.2 Issue & Support Management
+
+* **Lockouts:** Admins can unlock user accounts and reset passwords
+* **Email Tools:** Resend verification, password reset, and onboarding emails; manage user opt-ins
+* **Credit Management:** Adjust or top up credits and resolve disputes
+* **Activity/Audit Logs:** Track all admin and user actions for compliance and troubleshooting
+
+---
+
+## 10. Customer Support & Feedback
+
+### 10.1 Help/Support Section
+
+* **Accessible from main navigation**
+* **Features:**
+
+  * Intake form for users to submit support requests or contact us (name, email, subject, message, file upload option)
+  * Assigns ticket ID and sends confirmation email to user
+  * All support requests visible in admin dashboard with status (open, in-progress, closed)
+  * Users can track the status of their ticket from their profile page
+  * Optional knowledge base/FAQ section for self-service help
+
+### 10.2 Review & Feedback Page
+
+* **Public or authenticated access**
+* **Features:**
+
+  * Users can leave feedback/review for the app (star rating, comments)
+  * Review form captures user, date, rating, comment, optional screenshot/file
+  * Display aggregate rating and most recent feedback on a dedicated "Reviews" page
+  * Admins can review, reply, or flag/remove inappropriate feedback
+
+
+
