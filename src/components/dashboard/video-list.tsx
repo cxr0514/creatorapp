@@ -114,14 +114,23 @@ export function VideoList({ onCreateClip }: VideoListProps) {
                 src={video.thumbnailUrl}
                 alt={video.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // If thumbnail fails to load, hide the image and show the fallback icon
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <svg className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                </svg>
-              </div>
-            )}
+            ) : null}
+            <div 
+              className={`w-full h-full flex items-center justify-center ${video.thumbnailUrl ? 'hidden' : 'flex'}`}
+              style={{ display: video.thumbnailUrl ? 'none' : 'flex' }}
+            >
+              <svg className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+              </svg>
+            </div>
             <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
               {formatDuration(video.duration)}
             </div>

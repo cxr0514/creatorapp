@@ -66,6 +66,7 @@ model Video {
   cloudinaryUrl String
   duration      Int?
   fileSize      Int?
+  thumbnailUrl  String?
   clips         Clip[]
   user          User     @relation(fields: [userId], references: [id])
 }
@@ -80,6 +81,7 @@ model Clip {
   cloudinaryUrl String
   startTime     Int?
   endTime       Int?
+  thumbnailUrl  String?
   user          User     @relation(fields: [userId], references: [id])
   video         Video    @relation(fields: [videoId], references: [id])
 }

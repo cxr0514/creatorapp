@@ -164,15 +164,24 @@ export function ClipList() {
                 src={clip.thumbnailUrl}
                 alt={clip.title}
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // If thumbnail fails to load, hide the image and show the fallback icon
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  const fallback = target.nextElementSibling as HTMLElement;
+                  if (fallback) fallback.style.display = 'flex';
+                }}
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center">
-                <svg className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10L11 12L15 14V10Z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" />
-                </svg>
-              </div>
-            )}
+            ) : null}
+            <div 
+              className={`w-full h-full flex items-center justify-center ${clip.thumbnailUrl ? 'hidden' : 'flex'}`}
+              style={{ display: clip.thumbnailUrl ? 'none' : 'flex' }}
+            >
+              <svg className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10L11 12L15 14V10Z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" />
+              </svg>
+            </div>
             <div className="absolute top-2 right-2">
               <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(clip.status)}`}>
                 {getStatusText(clip.status)}

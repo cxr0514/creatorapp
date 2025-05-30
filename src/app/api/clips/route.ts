@@ -2,14 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { v2 as cloudinary } from 'cloudinary'
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+import { cloudinary, generateClipThumbnail } from '@/lib/cloudinary'
 
 export async function GET(request: NextRequest) {
   try {
@@ -29,7 +22,8 @@ export async function GET(request: NextRequest) {
         video: {
           select: {
             id: true,
-            title: true
+            title: true,
+            cloudinaryId: true
           }
         }
       },
@@ -49,7 +43,9 @@ export async function GET(request: NextRequest) {
         title: clip.video.title,
         filename: clip.video.title // Use title as filename for now
       },
-      thumbnailUrl: clip.cloudinaryUrl, // Use cloudinary URL as thumbnail
+      thumbnailUrl: clip.thumbnailUrl || (clip.video.cloudinaryId ? 
+        generateClipThumbnail(clip.video.cloudinaryId, clip.startTime || 0) : 
+        null),
       status: 'ready' as const // Assume all clips are ready for now
     }))
 
@@ -118,9 +114,23 @@ export async function POST(request: NextRequest) {
 
     let clipUrl = `https://example.com/clips/${Date.now()}-${title}.mp4`
     let clipPublicId = `clip_${Date.now()}_${videoId}`
+    let thumbnailUrl = null
 
     if (hasCloudinaryConfig && video.cloudinaryId) {
       try {
+        // Generate thumbnail for the clip from the original video at the start time
+        try {
+          thumbnailUrl = generateClipThumbnail(video.cloudinaryId, startTime, {
+            width: 640,
+            height: 360,
+            quality: 'auto'
+          })
+          console.log('✅ Generated clip thumbnail URL:', thumbnailUrl)
+        } catch (thumbError) {
+          console.warn('⚠️ Failed to generate clip thumbnail URL:', thumbError)
+          // Continue without thumbnail - the UI will show a fallback icon
+        }
+
         // Create user-specific folder for clips
         const userClipsFolder = `creator_uploads/clips/${user.id}`
         const clipFileName = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${startTime}s_${endTime}s`
@@ -182,7 +192,8 @@ export async function POST(request: NextRequest) {
         videoId,
         userId: user.id,
         cloudinaryId: clipPublicId,
-        cloudinaryUrl: clipUrl
+        cloudinaryUrl: clipUrl,
+        thumbnailUrl
       }
     })
 

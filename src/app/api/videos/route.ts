@@ -2,14 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { v2 as cloudinary } from 'cloudinary'
-
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-})
+import { cloudinary, generateVideoThumbnail } from '@/lib/cloudinary'
 
 export async function GET(request: NextRequest) {
   try {
@@ -40,8 +33,10 @@ export async function GET(request: NextRequest) {
     const formattedVideos = videos.map(video => ({
       id: video.id,
       title: video.title,
+      filename: video.title, // Use title as filename since we store title based on filename
       url: video.cloudinaryUrl,
       publicId: video.cloudinaryId,
+      thumbnailUrl: video.thumbnailUrl,
       duration: video.duration,
       createdAt: video.uploadedAt.toISOString(),
       clipCount: video._count.clips
@@ -151,11 +146,26 @@ export async function POST(request: NextRequest) {
     const fileName = file.name
     const title = fileName.replace(/\.[^/.]+$/, '') // Remove extension
     
+    // Generate thumbnail URL (with error handling)
+    let thumbnailUrl = null
+    try {
+      thumbnailUrl = generateVideoThumbnail(cloudinaryResult.public_id, {
+        width: 640,
+        height: 360,
+        quality: 'auto'
+      })
+      console.log('✅ Generated thumbnail URL:', thumbnailUrl)
+    } catch (error) {
+      console.warn('⚠️ Failed to generate thumbnail URL:', error)
+      // Continue without thumbnail - the UI will show a fallback icon
+    }
+    
     const video = await prisma.video.create({
       data: {
         title,
         cloudinaryUrl: cloudinaryResult.secure_url,
         cloudinaryId: cloudinaryResult.public_id,
+        thumbnailUrl,
         duration: Math.round(cloudinaryResult.duration) || null, // Round to integer if exists
         fileSize: file.size,
         userId: user.id
@@ -171,6 +181,7 @@ export async function POST(request: NextRequest) {
         id: video.id,
         title: video.title,
         url: video.cloudinaryUrl,
+        thumbnailUrl: video.thumbnailUrl,
         duration: video.duration,
         isProcessing: !cloudinaryResult.duration // Indicate if still processing
       }
