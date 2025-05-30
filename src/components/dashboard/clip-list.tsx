@@ -123,13 +123,13 @@ export function ClipList() {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready':
-        return 'bg-green-100 text-green-800'
+        return 'bg-green-100 text-green-700 border border-green-200'
       case 'processing':
-        return 'bg-yellow-100 text-yellow-800'
+        return 'bg-purple-100 text-purple-700 border border-purple-200'
       case 'failed':
-        return 'bg-red-100 text-red-800'
+        return 'bg-red-100 text-red-700 border border-red-200'
       default:
-        return 'bg-gray-100 text-gray-800'
+        return 'bg-gray-100 text-gray-700 border border-gray-200'
     }
   }
 
@@ -148,13 +148,18 @@ export function ClipList() {
 
   if (loading) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white rounded-lg shadow-sm border animate-pulse">
-            <div className="aspect-video bg-gray-200 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl"></div>
+            <div className="p-6">
+              <div className="h-5 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded-lg w-2/3 mb-2"></div>
+              <div className="h-3 bg-gray-100 rounded-lg w-1/2 mb-4"></div>
+              <div className="flex space-x-2">
+                <div className="h-8 bg-gray-200 rounded-lg flex-1"></div>
+                <div className="h-8 bg-gray-200 rounded-lg w-12"></div>
+              </div>
             </div>
           </div>
         ))}
@@ -164,31 +169,35 @@ export function ClipList() {
 
   if (clips.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="mb-4">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10L11 12L15 14V10Z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" />
-          </svg>
+      <div className="text-center py-16">
+        <div className="mb-6">
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+            <svg className="h-10 w-10 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
+            </svg>
+          </div>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No clips created yet</h3>
-        <p className="text-gray-500">Create your first clip from uploaded videos</p>
+        <h3 className="text-xl font-semibold text-gray-900 mb-3">No clips created yet</h3>
+        <p className="text-gray-500 text-lg mb-6">Upload videos and create your first clips to get started</p>
+        <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl">
+          Create Your First Clip
+        </Button>
       </div>
     )
   }
 
   return (
     <>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {clips.map((clip) => (
-        <div key={clip.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-          <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
+        <div key={clip.id} className="group bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300 overflow-hidden">
+          <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
             {clip.thumbnailUrl ? (
               <Image
                 src={clip.thumbnailUrl}
                 alt={clip.title}
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   // If thumbnail fails to load, hide the image and show the fallback icon
                   const target = e.target as HTMLImageElement;
@@ -202,29 +211,39 @@ export function ClipList() {
               className={`w-full h-full flex items-center justify-center ${clip.thumbnailUrl ? 'hidden' : 'flex'}`}
               style={{ display: clip.thumbnailUrl ? 'none' : 'flex' }}
             >
-              <svg className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10L11 12L15 14V10Z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" />
-              </svg>
+              <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-full p-4">
+                <svg className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
+                </svg>
+              </div>
             </div>
-            <div className="absolute top-2 right-2">
-              <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(clip.status)}`}>
+            <div className="absolute top-3 right-3">
+              <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(clip.status)}`}>
                 {getStatusText(clip.status)}
               </span>
             </div>
-            <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+            <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
               {formatTime(clip.endTime - clip.startTime)}
+            </div>
+            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-purple-700 text-xs px-2.5 py-1 rounded-full font-semibold">
+              {clip.aspectRatio || '16:9'}
             </div>
           </div>
           
-          <div className="p-4">
-            <h3 className="font-medium text-gray-900 mb-1 truncate">{clip.title}</h3>
-            <p className="text-sm text-gray-500 mb-1">From: {clip.video.title}</p>
-            <p className="text-xs text-gray-400 mb-1">
-              {formatTime(clip.startTime)} - {formatTime(clip.endTime)} • {clip.aspectRatio || '16:9'}
+          <div className="p-5">
+            <h3 className="font-semibold text-gray-900 mb-2 truncate text-lg group-hover:text-purple-700 transition-colors">{clip.title}</h3>
+            <p className="text-sm text-gray-600 mb-1 truncate">From: {clip.video.title}</p>
+            <p className="text-xs text-gray-500 mb-1 flex items-center">
+              <svg className="h-3 w-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              {formatTime(clip.startTime)} - {formatTime(clip.endTime)}
             </p>
-            <p className="text-xs text-gray-400 mb-3">
-              Created {formatDate(clip.createdAt)}
+            <p className="text-xs text-gray-500 mb-3 flex items-center">
+              <svg className="h-3 w-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {formatDate(clip.createdAt)}
             </p>
             
             {/* Description */}
@@ -298,27 +317,40 @@ export function ClipList() {
                   <Button
                     size="sm"
                     onClick={() => downloadClip(clip.id, clip.title)}
-                    className="flex-1"
+                    className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
                   >
+                    <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
                     Download
                   </Button>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => openExportModal(clip)}
-                    className="flex-1"
+                    className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 font-medium rounded-lg transition-all duration-200"
                   >
+                    <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
                     Export
                   </Button>
                 </>
               )}
               {clip.status === 'processing' && (
-                <Button size="sm" disabled className="flex-1">
+                <Button size="sm" disabled className="flex-1 bg-purple-100 text-purple-600 rounded-lg">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
                   Processing...
                 </Button>
               )}
               {clip.status === 'failed' && (
-                <Button size="sm" variant="outline" className="flex-1">
+                <Button size="sm" variant="outline" className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 rounded-lg">
+                  <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
                   Retry
                 </Button>
               )}
@@ -326,7 +358,7 @@ export function ClipList() {
                 size="sm"
                 variant="outline"
                 onClick={() => deleteClip(clip.id)}
-                className="px-3"
+                className="px-3 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-200 rounded-lg"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

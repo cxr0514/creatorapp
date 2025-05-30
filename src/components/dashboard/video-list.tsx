@@ -79,11 +79,12 @@ export function VideoList({ onCreateClip }: VideoListProps) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
-          <div key={i} className="bg-white rounded-lg shadow-sm border animate-pulse">
-            <div className="aspect-video bg-gray-200 rounded-t-lg"></div>
-            <div className="p-4">
-              <div className="h-4 bg-gray-200 rounded mb-2"></div>
-              <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl"></div>
+            <div className="p-6">
+              <div className="h-5 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded-lg w-2/3 mb-2"></div>
+              <div className="h-3 bg-gray-100 rounded-lg w-1/2"></div>
             </div>
           </div>
         ))}
@@ -93,29 +94,34 @@ export function VideoList({ onCreateClip }: VideoListProps) {
 
   if (videos.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="mb-4">
-          <svg className="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-          </svg>
+      <div className="text-center py-16">
+        <div className="mb-6">
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+            <svg className="h-10 w-10 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+            </svg>
+          </div>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No videos uploaded yet</h3>
-        <p className="text-gray-500">Upload your first video to get started creating clips</p>
+        <h3 className="text-xl font-semibold text-gray-900 mb-3">No videos uploaded yet</h3>
+        <p className="text-gray-500 text-lg mb-6">Upload your first video to get started creating clips</p>
+        <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl">
+          Upload Your First Video
+        </Button>
       </div>
     )
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {videos.map((video) => (
-        <div key={video.id} className="bg-white rounded-lg shadow-sm border hover:shadow-md transition-shadow">
-          <div className="aspect-video bg-gray-100 rounded-t-lg relative overflow-hidden">
+        <div key={video.id} className="group bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300 overflow-hidden">
+          <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
             {video.thumbnailUrl ? (
               <Image
                 src={video.thumbnailUrl}
                 alt={video.title}
                 fill
-                className="object-cover"
+                className="object-cover group-hover:scale-105 transition-transform duration-300"
                 onError={(e) => {
                   // If thumbnail fails to load, hide the image and show the fallback icon
                   const target = e.target as HTMLImageElement;
@@ -129,35 +135,48 @@ export function VideoList({ onCreateClip }: VideoListProps) {
               className={`w-full h-full flex items-center justify-center ${video.thumbnailUrl ? 'hidden' : 'flex'}`}
               style={{ display: video.thumbnailUrl ? 'none' : 'flex' }}
             >
-              <svg className="h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-              </svg>
+              <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-full p-4">
+                <svg className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+              </div>
             </div>
-            <div className="absolute bottom-2 right-2 bg-black bg-opacity-75 text-white text-xs px-2 py-1 rounded">
+            <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
               {formatDuration(video.duration)}
+            </div>
+            <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-purple-700 text-xs px-2.5 py-1 rounded-full font-semibold">
+              {video.clipCount} clips
             </div>
           </div>
           
-          <div className="p-4">
-            <h3 className="font-medium text-gray-900 mb-1 truncate">{video.title}</h3>
-            <p className="text-sm text-gray-500 mb-2">{video.filename}</p>
-            <p className="text-xs text-gray-400 mb-3">
-              Uploaded {formatDate(video.createdAt)} • {video.clipCount} clips
+          <div className="p-5">
+            <h3 className="font-semibold text-gray-900 mb-2 truncate text-lg group-hover:text-purple-700 transition-colors">
+              {video.title}
+            </h3>
+            <p className="text-sm text-gray-600 mb-1 truncate">{video.filename}</p>
+            <p className="text-xs text-gray-500 mb-4 flex items-center">
+              <svg className="h-3 w-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {formatDate(video.createdAt)}
             </p>
             
             <div className="flex space-x-2">
               <Button
                 size="sm"
                 onClick={() => onCreateClip?.(video.id)}
-                className="flex-1"
+                className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
               >
+                <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
+                </svg>
                 Create Clip
               </Button>
               <Button
                 size="sm"
                 variant="outline"
                 onClick={() => deleteVideo(video.id)}
-                className="px-3"
+                className="px-3 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-200"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

@@ -112,53 +112,79 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       <div
         {...getRootProps()}
         className={`
-          border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors
-          ${isDragActive ? 'border-blue-500 bg-blue-50' : 'border-gray-300'}
-          ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-gray-400'}
+          border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300
+          ${isDragActive ? 'border-purple-500 bg-purple-50 scale-105' : 'border-gray-300'}
+          ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-purple-400 hover:bg-purple-50/50'}
           ${error ? 'border-red-300 bg-red-50' : ''}
           ${success ? 'border-green-300 bg-green-50' : ''}
         `}
       >
         <input {...getInputProps()} />
         
-        <div className="flex flex-col items-center gap-4">
+        <div className="flex flex-col items-center gap-6">
           {success ? (
-            <CheckCircle className="w-12 h-12 text-green-500" />
+            <div className="bg-green-100 rounded-full p-4">
+              <CheckCircle className="w-12 h-12 text-green-600" />
+            </div>
           ) : error ? (
-            <AlertCircle className="w-12 h-12 text-red-500" />
+            <div className="bg-red-100 rounded-full p-4">
+              <AlertCircle className="w-12 h-12 text-red-600" />
+            </div>
           ) : (
-            <Upload className={`w-12 h-12 ${uploading ? 'text-blue-500' : 'text-gray-400'}`} />
+            <div className={`rounded-full p-4 transition-all duration-300 ${uploading ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-100 to-purple-200'}`}>
+              <Upload className={`w-12 h-12 transition-all duration-300 ${uploading ? 'text-purple-600 animate-pulse' : 'text-purple-600'}`} />
+            </div>
           )}
           
           <div>
             {uploading ? (
-              <div>
-                <p className="text-lg font-medium text-blue-600">Uploading...</p>
-                <div className="w-64 bg-gray-200 rounded-full h-2 mt-2">
+              <div className="space-y-4">
+                <p className="text-xl font-semibold text-purple-700">Uploading your video...</p>
+                <div className="w-80 bg-gray-200 rounded-full h-3 shadow-inner">
                   <div 
-                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 shadow-sm"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="text-sm text-gray-500 mt-1">{uploadProgress}% complete</p>
+                <p className="text-sm text-gray-600 font-medium">{uploadProgress}% complete</p>
+                <p className="text-xs text-gray-500">This may take a few minutes for large files</p>
               </div>
             ) : success ? (
-              <p className="text-lg font-medium text-green-600">Upload successful!</p>
+              <div className="space-y-2">
+                <p className="text-xl font-semibold text-green-700">Upload successful!</p>
+                <p className="text-sm text-green-600">Your video is ready for clip creation</p>
+              </div>
             ) : error ? (
-              <div>
-                <p className="text-lg font-medium text-red-600">Upload failed</p>
-                <p className="text-sm text-red-500 mt-1">{error}</p>
+              <div className="space-y-2">
+                <p className="text-xl font-semibold text-red-700">Upload failed</p>
+                <p className="text-sm text-red-600 max-w-md">{error}</p>
               </div>
             ) : isDragActive ? (
-              <p className="text-lg font-medium text-blue-600">Drop the video here...</p>
+              <div className="space-y-2">
+                <p className="text-xl font-semibold text-purple-700">Drop your video here!</p>
+                <p className="text-sm text-purple-600">Release to start uploading</p>
+              </div>
             ) : (
-              <div>
-                <p className="text-lg font-medium text-gray-900">
-                  Drag & drop a video file, or click to select
-                </p>
-                <p className="text-sm text-gray-500 mt-1">
-                  Supports MP4, MOV, AVI, MKV, WebM (max 500MB)
-                </p>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <p className="text-xl font-semibold text-gray-900">
+                    Upload Your Video
+                  </p>
+                  <p className="text-gray-600">
+                    Drag & drop a video file, or click to browse
+                  </p>
+                </div>
+                <div className="bg-gray-50 rounded-lg p-4 max-w-md mx-auto">
+                  <p className="text-sm text-gray-600 font-medium mb-2">Supported formats:</p>
+                  <div className="flex flex-wrap gap-2 justify-center">
+                    {['MP4', 'MOV', 'AVI', 'MKV', 'WebM'].map(format => (
+                      <span key={format} className="px-2 py-1 bg-white rounded border text-xs font-medium text-gray-700">
+                        {format}
+                      </span>
+                    ))}
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">Maximum file size: 500MB</p>
+                </div>
               </div>
             )}
           </div>
@@ -166,14 +192,15 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       </div>
 
       {error && (
-        <Button
-          onClick={() => setError(null)}
-          variant="outline"
-          size="sm"
-          className="mt-4"
-        >
-          Try Again
-        </Button>
+        <div className="mt-6 text-center">
+          <Button
+            onClick={() => setError(null)}
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
+            <Upload className="w-4 h-4 mr-2" />
+            Try Again
+          </Button>
+        </div>
       )}
     </div>
   )

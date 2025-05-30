@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { Dashboard } from '@/components/dashboard/dashboard'
+import { ModernDashboard } from '@/components/dashboard/modern-dashboard'
 import { LandingPage } from '@/components/landing/landing-page'
 
 export default function HomePage() {
@@ -16,7 +16,7 @@ export default function HomePage() {
   }
 
   if (session) {
-    return <Dashboard />
+    return <ModernDashboard />
   }
 
   return <LandingPage />
