@@ -1,36 +1,152 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Content Wizard 🎬
+
+Transform your long videos into engaging, shareable clips with the power of AI.
+
+## Features
+
+- 🔐 **Google OAuth Authentication** - Secure sign-in with Google
+- 📹 **Video Upload** - Drag & drop video files up to 500MB
+- ☁️ **Cloud Storage** - Videos stored securely on Cloudinary
+- 🎯 **AI-Powered Clipping** - Create clips from your videos (coming soon)
+- 📱 **Responsive Design** - Works on desktop and mobile
+- 🗄️ **Database Integration** - PostgreSQL with Prisma ORM
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
+- **Backend**: Next.js API Routes, NextAuth.js
+- **Database**: PostgreSQL with Prisma ORM
+- **Storage**: Cloudinary for video and image storage
+- **Authentication**: Google OAuth via NextAuth.js
+- **UI Components**: Shadcn/ui components
+
+## Prerequisites
+
+- Node.js 18+ and npm
+- PostgreSQL database
+- Google OAuth credentials
+- Cloudinary account
 
 ## Getting Started
 
-First, run the development server:
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd creatorapp
+   ```
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   
+   Create a `.env.local` file with the following variables:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://username:password@localhost:5432/contentwizard"
+   
+   # NextAuth
+   NEXTAUTH_SECRET="your-nextauth-secret"
+   NEXTAUTH_URL="http://localhost:3000"
+   
+   # Google OAuth
+   GOOGLE_CLIENT_ID="your-google-client-id"
+   GOOGLE_CLIENT_SECRET="your-google-client-secret"
+   
+   # Cloudinary
+   CLOUDINARY_CLOUD_NAME="your-cloud-name"
+   CLOUDINARY_API_KEY="your-api-key"
+   CLOUDINARY_API_SECRET="your-api-secret"
+   ```
+
+4. **Set up the database**
+   ```bash
+   npx prisma generate
+   npx prisma db push
+   ```
+
+5. **Run the development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+## Usage
+
+1. **Sign In**: Click "Sign In with Google" on the landing page
+2. **Upload Videos**: Drag and drop video files or click to select
+3. **Manage Content**: View your uploaded videos in the dashboard
+4. **Create Clips**: (Feature coming soon) Generate clips from your videos
+
+## Project Structure
+
+```
+src/
+├── app/
+│   ├── api/          # API routes
+│   │   ├── auth/     # NextAuth configuration
+│   │   ├── videos/   # Video management APIs
+│   │   └── clips/    # Clip management APIs
+│   ├── globals.css   # Global styles
+│   ├── layout.tsx    # Root layout
+│   └── page.tsx      # Home page
+├── components/
+│   ├── dashboard/    # Dashboard components
+│   ├── landing/      # Landing page components
+│   ├── providers/    # Context providers
+│   └── ui/           # Reusable UI components
+└── lib/
+    ├── prisma.ts     # Prisma client
+    └── utils.ts      # Utility functions
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Configuration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Google OAuth Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select an existing one
+3. Enable the Google+ API
+4. Create OAuth 2.0 credentials
+5. Add authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
 
-## Learn More
+### Cloudinary Setup
 
-To learn more about Next.js, take a look at the following resources:
+1. Sign up at [Cloudinary](https://cloudinary.com/)
+2. Get your cloud name, API key, and API secret from the dashboard
+3. Add the credentials to your `.env.local` file
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Database Setup
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Install PostgreSQL locally or use a cloud provider
+2. Create a database named `contentwizard`
+3. Update the `DATABASE_URL` in your `.env.local` file
 
-## Deploy on Vercel
+## Development
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Start development server**: `npm run dev`
+- **Build for production**: `npm run build`
+- **Start production server**: `npm start`
+- **Database operations**: `npx prisma studio` (database GUI)
+- **Reset database**: `npx prisma db push --force-reset`
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License.
+
+## Support
+
+If you have any questions or need help, please open an issue in the repository.
