@@ -36,12 +36,13 @@ model Session {
 
 model User {
   id            String    @id @default(cuid())
-  name          String?
+  username      String?   @unique
   email         String    @unique
+  password      String?
+  createdAt     DateTime  @default(now())
   emailVerified DateTime?
   image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+  name          String?
   accounts      Account[]
   clips         Clip[]
   sessions      Session[]
@@ -57,32 +58,28 @@ model VerificationToken {
 }
 
 model Video {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  url         String
-  publicId    String
-  duration    Int?
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  clips       Clip[]
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id            Int      @id @default(autoincrement())
+  title         String
+  uploadedAt    DateTime @default(now())
+  userId        String
+  cloudinaryId  String
+  cloudinaryUrl String
+  duration      Int?
+  fileSize      Int?
+  clips         Clip[]
+  user          User     @relation(fields: [userId], references: [id])
 }
 
 model Clip {
-  id          String   @id @default(cuid())
-  title       String
-  description String?
-  url         String
-  publicId    String
-  startTime   Float
-  endTime     Float
-  duration    Float
-  videoId     String
-  userId      String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  video       Video    @relation(fields: [videoId], references: [id], onDelete: Cascade)
+  id            Int      @id @default(autoincrement())
+  title         String
+  createdAt     DateTime @default(now())
+  userId        String
+  videoId       Int
+  cloudinaryId  String
+  cloudinaryUrl String
+  startTime     Int?
+  endTime       Int?
+  user          User     @relation(fields: [userId], references: [id])
+  video         Video    @relation(fields: [videoId], references: [id])
 }

@@ -45,5 +45,12 @@ src/generated/
 coverage/
 .nyc_output
 
+# --- Test files and scripts ---
+test-*.js
+*test*.js
+*test*.mp4
+list-*.js
+real_test_video.mp4
+
 # --- Vercel ---
 .vercel

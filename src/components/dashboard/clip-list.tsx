@@ -4,13 +4,13 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface Clip {
-  id: string
+  id: number
   title: string
   startTime: number
   endTime: number
   createdAt: string
   video: {
-    id: string
+    id: number
     title: string
     filename: string
   }
@@ -54,7 +54,7 @@ export function ClipList() {
     })
   }
 
-  const deleteClip = async (clipId: string) => {
+  const deleteClip = async (clipId: number) => {
     if (!confirm('Are you sure you want to delete this clip?')) {
       return
     }
@@ -75,7 +75,7 @@ export function ClipList() {
     }
   }
 
-  const downloadClip = async (clipId: string, title: string) => {
+  const downloadClip = async (clipId: number, title: string) => {
     try {
       const response = await fetch(`/api/clips/${clipId}/download`)
       if (response.ok) {

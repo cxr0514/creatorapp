@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Upload, X, CheckCircle, AlertCircle } from 'lucide-react'
 
 interface VideoUploadProps {
-  onUploadComplete?: (videoId: string) => void
+  onUploadComplete?: (videoId: number) => void
 }
 
 export function VideoUpload({ onUploadComplete }: VideoUploadProps) {

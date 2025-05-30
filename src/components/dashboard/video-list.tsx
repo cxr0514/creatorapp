@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface Video {
-  id: string
+  id: number
   title: string
-  filename: string
+  filename?: string
   duration: number
   createdAt: string
   thumbnailUrl?: string
@@ -14,7 +14,7 @@ interface Video {
 }
 
 interface VideoListProps {
-  onCreateClip?: (videoId: string) => void
+  onCreateClip?: (videoId: number) => void
 }
 
 export function VideoList({ onCreateClip }: VideoListProps) {
@@ -53,7 +53,7 @@ export function VideoList({ onCreateClip }: VideoListProps) {
     })
   }
 
-  const deleteVideo = async (videoId: string) => {
+  const deleteVideo = async (videoId: number) => {
     if (!confirm('Are you sure you want to delete this video? This action cannot be undone.')) {
       return
     }

@@ -13,17 +13,17 @@ export function Dashboard() {
   const [activeTab, setActiveTab] = useState('videos')
   const [showVideoUpload, setShowVideoUpload] = useState(false)
   const [showCreateClipModal, setShowCreateClipModal] = useState(false)
-  const [selectedVideoId, setSelectedVideoId] = useState<string>()
+  const [selectedVideoId, setSelectedVideoId] = useState<number>()
   const [refreshKey, setRefreshKey] = useState(0)
   const [clipRefreshKey, setClipRefreshKey] = useState(0)
 
-  const handleUploadComplete = () => {
+  const handleUploadComplete = (videoId: number) => {
     setShowVideoUpload(false)
     // Trigger video list refresh
     setRefreshKey(prev => prev + 1)
   }
 
-  const handleCreateClip = (videoId?: string) => {
+  const handleCreateClip = (videoId?: number) => {
     setSelectedVideoId(videoId)
     setShowCreateClipModal(true)
   }

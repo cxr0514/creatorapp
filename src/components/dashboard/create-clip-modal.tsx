@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 
 interface Video {
-  id: string
+  id: number
   title: string
   duration: number
 }
@@ -12,13 +12,13 @@ interface Video {
 interface CreateClipModalProps {
   isOpen: boolean
   onClose: () => void
-  videoId?: string
+  videoId?: number
   onClipCreated?: () => void
 }
 
 export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: CreateClipModalProps) {
   const [videos, setVideos] = useState<Video[]>([])
-  const [selectedVideoId, setSelectedVideoId] = useState(videoId || '')
+  const [selectedVideoId, setSelectedVideoId] = useState<number | undefined>(videoId)
   const [title, setTitle] = useState('')
   const [startTime, setStartTime] = useState(0)
   const [endTime, setEndTime] = useState(30)
@@ -111,7 +111,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
     setTitle('')
     setStartTime(0)
     setEndTime(30)
-    setSelectedVideoId('')
+    setSelectedVideoId(undefined)
     onClose()
   }
 
@@ -139,8 +139,8 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                 Video *
               </label>
               <select
-                value={selectedVideoId}
-                onChange={(e) => setSelectedVideoId(e.target.value)}
+                value={selectedVideoId || ''}
+                onChange={(e) => setSelectedVideoId(e.target.value ? parseInt(e.target.value, 10) : undefined)}
                 className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 disabled={!!videoId}
               >

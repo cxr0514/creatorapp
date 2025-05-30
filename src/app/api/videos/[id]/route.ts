@@ -14,7 +14,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const videoId = params.id
+    const videoId = parseInt(params.id, 10)
+    
+    if (isNaN(videoId)) {
+      return NextResponse.json({ error: 'Invalid video ID' }, { status: 400 })
+    }
 
     // Find the video and ensure it belongs to the current user
     const video = await prisma.video.findFirst({

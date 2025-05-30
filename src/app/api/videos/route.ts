@@ -33,18 +33,17 @@ export async function GET(request: NextRequest) {
         }
       },
       orderBy: {
-        createdAt: 'desc'
+        uploadedAt: 'desc'
       }
     })
 
     const formattedVideos = videos.map(video => ({
       id: video.id,
       title: video.title,
-      description: video.description,
-      url: video.url,
-      publicId: video.publicId,
+      url: video.cloudinaryUrl,
+      publicId: video.cloudinaryId,
       duration: video.duration,
-      createdAt: video.createdAt.toISOString(),
+      createdAt: video.uploadedAt.toISOString(),
       clipCount: video._count.clips
     }))
 
@@ -106,18 +105,25 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Upload to Cloudinary with optimized settings for large files
+    // Upload to Cloudinary with user-specific folder structure
+    const userFolder = `creator_uploads/videos/${user.id}`
+    
+    console.log('Uploading to Cloudinary folder:', userFolder)
+    console.log('Cloudinary config:', {
+      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+      hasApiKey: !!process.env.CLOUDINARY_API_KEY,
+      hasApiSecret: !!process.env.CLOUDINARY_API_SECRET
+    })
+
     const uploadResult = await new Promise((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
         {
           resource_type: 'video',
-          folder: 'creator_uploads/videos',
-          eager: [
-            { width: 300, height: 200, crop: 'scale', format: 'jpg' } // Generate thumbnail asynchronously
-          ],
-          eager_async: true,
+          folder: userFolder,
+          use_filename: true,
+          unique_filename: true,
           chunk_size: 6000000, // 6MB chunks for large files
-          timeout: 300000, // 5 minute timeout for large files
+          timeout: 120000, // 2 minute timeout
         },
         (error, result) => {
           if (error) {
@@ -148,10 +154,10 @@ export async function POST(request: NextRequest) {
     const video = await prisma.video.create({
       data: {
         title,
-        description: `Uploaded video: ${fileName}`,
-        url: cloudinaryResult.secure_url,
-        publicId: cloudinaryResult.public_id,
-        duration: cloudinaryResult.duration || 0, // May be 0 for async processing
+        cloudinaryUrl: cloudinaryResult.secure_url,
+        cloudinaryId: cloudinaryResult.public_id,
+        duration: Math.round(cloudinaryResult.duration) || null, // Round to integer if exists
+        fileSize: file.size,
         userId: user.id
       }
     })
@@ -164,15 +170,30 @@ export async function POST(request: NextRequest) {
       video: {
         id: video.id,
         title: video.title,
-        url: video.url,
+        url: video.cloudinaryUrl,
         duration: video.duration,
         isProcessing: !cloudinaryResult.duration // Indicate if still processing
       }
     })
   } catch (error) {
     console.error('Video upload error:', error)
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to upload video'
+    if (error instanceof Error) {
+      if (error.message.includes('ECONNRESET') || error.message.includes('socket hang up')) {
+        errorMessage = 'Upload connection failed. Please check your internet connection and try again.'
+      } else if (error.message.includes('timeout')) {
+        errorMessage = 'Upload timed out. Please try with a smaller file.'
+      } else if (error.message.includes('Invalid')) {
+        errorMessage = 'Invalid file format. Please upload a valid video file.'
+      } else {
+        errorMessage = error.message || errorMessage
+      }
+    }
+    
     return NextResponse.json(
-      { error: 'Failed to upload video' },
+      { error: errorMessage },
       { status: 500 }
     )
   }
