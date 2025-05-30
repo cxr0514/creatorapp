@@ -1,215 +1,155 @@
-# CreatorApp – Full‑Build PRD (v2.1)
-
-*Supersedes v2.0 — adds Multi‑Format Export, AI Enhancement, Publishing/Scheduling, and full Analytics stack*  
-*Prepared: May 30 2025*
+# CreatorApp – Unified PRD v3.0 (Complete)
 
 ---
 
-## 1  Purpose & Scope
-Evolve **CreatorApp** MVP into a **complete AI‑powered content‑repurposing platform** that:
+## 1. Purpose & Scope
 
-* **Automates** clip discovery, editing, formatting, and distribution.  
-* **Optimises** posts via analytics, A/B tests, and AI recommendations.  
-* **Scales** to agency workflows with white‑label branding and bulk processing.
+Transform CreatorApp from a video upload/clip MVP into a full-stack, AI-powered, multi-platform content repurposing platform. **Manual and AI workflows must both be present, fully integrated, and available to all users.**
 
 ---
 
-## 2  Delta Analysis (v1.0 → v2.1)
+## 2. Core Principles
 
-| Feature Group | Present in MVP? | Status Now | v2.1 Action |
-|---------------|-----------------|------------|-------------|
-| Video upload & storage | ✔️ | Stable | Keep |
-| Manual clip creation | ✔️ | Stable | Keep |
-| **Auto‑clip generation** | ✖️ missing | **Add** |
-| **Multi‑format export** (TikTok, Reels, Shorts, X, LinkedIn) | ✖️ | **Add** |
-| **Smart cropping** (face/action/thirds/motion) | ✖️ | **Add** |
-| **Captions, titles, hashtags, thumbnails** | ✖️ | **Add** |
-| **Style templates** (brand colours, intro/outro, lower thirds, CTA) | ✖️ | **Add** |
-| **Direct publishing APIs** (YT, TikTok, IG, X, LinkedIn) | ✖️ | **Add** |
-| **Smart scheduler** (best time, calendar, batch, cross‑post) | ✖️ | **Add** |
-| Basic dashboard stats | ✔️ minimal | Enhance to full analytics |
-| **Performance tracking (views, engagement, A/B)** | ✖️ | **Add** |
-| **AI recommendations** (length, style, trending) | ✖️ | **Add** |
-| AI Script Writer | ✖️ | **Add** |
-| Voice Cloning | ✖️ | **Add** |
-| Trend Predictor | ✖️ | **Add** |
-| Bulk processing (100+) | ✖️ partial | Extend |
-| White‑label branding | ✖️ | Add |
+* **Backward Compatibility:** Manual video and clip features (upload, trim, basic metadata, dashboard) remain usable and visible.
+* **Extensible Automation:** All new AI, analytics, export, and workflow features layer on top, not replacing, the MVP foundation.
+* **Multi-platform First:** Every feature must support creation, management, and deployment to all major content/social platforms.
+* **Monetization Ready:** App is built with subscription/membership models in mind (pricing page, usage tiers, etc.).
 
 ---
 
-## 3  Feature Details
+## 3. Features
 
-### 3.1  Auto‑Clip Generation Engine
-* FFmpeg slicing + AI scene & audio‑peak detection.  
-* Outputs clips + JSON metadata.
+### 3.1 Manual Clip Creation – Redefined
 
-### 3.2  **Multi‑Format Export**
-* **Aspect presets**:  
-  * TikTok / IG Reels / YT Shorts — 9:16  
-  * Twitter/X — 16:9 or 1:1  
-  * LinkedIn — 1:1 or 16:9  
-* **Encoding pipeline:** FFmpeg filter graphs per preset.  
-* **Smart Cropping:**  
-  * Face detection (TensorFlow BlazeFace)  
-  * Action tracking (Optical flow)  
-  * Rule‑of‑Thirds heuristic  
-  * Motion‑based framing (saliency map)  
-* Generates ready‑to‑post MP4 + thumbnail per variant.
+* Users can:
 
-### 3.3  **AI Enhancement**
-* Whisper transcription → SRT captions.  
-* GPT‑4o → titles, descriptions, hashtag set (JSON).  
-* Thumbnail generation via Cloudinary transformations + OpenAI vision to pick best frame.  
-* **Style Templates:**  
-  * Brand colours/fonts (Tailwind CSS classes)  
-  * Intro/outro stingers (MP4 overlays)  
-  * Lower thirds / CTA overlays (Lottie/json + FFmpeg burn‑in)
+  * **Select how many clips** to generate per source video (via UI, slider, or batch input)
+  * **Select specific start/end points** for each clip (timeline scrubber)
+  * **Choose aspect ratio** (9:16, 1:1, 16:9, etc.) for each clip
+  * **Name** each clip and preview before saving
+* **Clips saved with chosen names** both in cloud (Cloudinary) and UI state
+* **Embedded player** for previewing all videos and clips on the spot
 
-### 3.4  **Publishing & Scheduling**
-* OAuth & API integrations: YouTube, TikTok, Instagram, Twitter/X, LinkedIn.  
-* Unified **Content Calendar** with drag‑drop reschedule.  
-* Best‑time analysis (per‑platform engagement heatmaps).  
-* Batch & cross‑post logic.  
-* Background worker posts media, tracks status, updates `ScheduledPost` table.
+### 3.2 AI-Assisted Enhancement
 
-### 3.5  **Analytics & Optimisation**
-* Ingest view, engagement, audience metrics via platform APIs.  
-* **AnalyticsSnapshot** table for time‑series.  
-* **A/B Testing:**  
-  * Variants on title/thumbnail.  
-  * Significance calc (Chi‑square, 95 % CI).  
-* Dashboard widgets & charts (Recharts).
+* Optional AI (OpenAI API) features on any video/clip:
 
-### 3.6  **AI Recommendations**
-* Suggest clip length, style template, hashtags, post time.  
-* Trending topics from Twitter trends & TikTok sounds.
+  * **Generate or improve description, title, hashtags** (all SEO-optimized, with manual override)
+  * **Whisper/OpenAI** for automated captions/subtitles (SRT, VTT)
+  * AI can suggest tags/metadata for discoverability
+* All AI-generated metadata can be edited by user before saving
 
-### 3.7  **Content Generation Tools**
-* **Script Writer** (GPT‑4o).  
-* **Voice Clone** (ElevenLabs).  
-* **Trend Predictor** (Python microservice).
+### 3.3 Multi-Format Export & Smart Cropping
 
-### 3.8  **Scalability Features**
-* **Bulk Pipeline:** Queue batches 100+ videos.  
-* **White‑Label:** Workspace branding + custom domain.  
-* **Role ACL:** Owner / Editor / Viewer.
+* Users (manual or AI-driven):
 
----
+  * **Export clips to platform-specific aspect ratios:**
 
-## 4  Tech Stack Additions
+    * TikTok, Instagram Reels, YouTube Shorts (9:16)
+    * Twitter/X (1:1 or 16:9)
+    * LinkedIn (1:1 or 16:9)
+  * **Smart Cropping:**
 
-| Layer | New Libs / Services |
-|-------|---------------------|
-| Media processing | `fluent-ffmpeg`, `@ffmpeg-installer/ffmpeg`, `opencv4nodejs`, `@tensorflow-models/blazeface` |
-| AI | Whisper API, OpenAI GPT‑4o, ElevenLabs |
-| Job queue | `bullmq`, `ioredis` |
-| Publishing APIs | `googleapis` (YouTube), TikTok SDK, Meta Graph (IG), `twitter-api-v2`, LinkedIn REST |
-| Scheduler | Node‑Cron tasks persisted in DB |
-| Analytics | Platform API clients + CRON ingestion |
-| Charts | `recharts` (already via Shadcn/ui) |
-| Storage | Existing Cloudinary buckets plus `captions/`, `templates/`, `voice_clones/` |
+    * Face detection, action tracking, rule of thirds, motion-based framing
+    * Defaults to center if AI detection fails
 
----
+### 3.4 Style Templates
 
-## 5  Schema Additions
+* Brand color/font templates for overlays
+* Upload/choose intro/outro animations, lower thirds, and CTA overlays
+* Apply template presets to all exported clips
 
-```prisma
-model Template {
-  id         Int      @id @default(autoincrement())
-  workspaceId String
-  name       String
-  type       TemplateType
-  data       Json
-  createdAt  DateTime @default(now())
-  workspace  Workspace @relation(fields:[workspaceId], references:[id])
-}
+### 3.5 Direct Publishing & Scheduling
 
-enum TemplateType {
-  INTRO
-  OUTRO
-  LOWER_THIRD
-  CTA
-}
+* API integration for posting to YouTube, TikTok, Instagram, X, LinkedIn
+* **Smart Scheduler:**
 
-model ScheduledPost {
-  id           String   @id @default(cuid())
-  clipId       Int
-  platform     Platform
-  scheduledFor DateTime
-  status       PostStatus
-  response     Json?
-  createdAt    DateTime @default(now())
-  clip         Clip     @relation(fields:[clipId], references:[id])
-}
+  * Schedule deployments from clips (directly from their UI panels)
+  * Scheduled posts show up in in-app calendar
+  * Best time suggestions and batch/cross-posting
+* **Workflow Builder:**
 
-enum PostStatus {
-  QUEUED
-  POSTED
-  FAILED
-}
-```
+  * Users can create/save workflows (eg, "export + caption + cross-post to all platforms")
+  * Saved workflows can be applied to future uploads/batches
 
-Run:
+### 3.6 Analytics, A/B Testing, and Recommendations
 
-```bash
-npx prisma migrate dev --name add_templates_and_scheduler
-```
+* KPI dashboards (views, engagement, audience, click-through, drop-off)
+* **A/B test runner:** for title, thumbnail, and description variants
+* Ingests and visualizes platform analytics (via API)
+* AI-driven recommendations (optimal length, style, tags, trending topics)
+
+### 3.7 Bulk Processing
+
+* Queue-based processing for 100+ video jobs
+* UI for managing, previewing, and error-handling of batch jobs
+
+### 3.8 White-label/Agency Mode
+
+* Workspaces, branding (logo, colors, custom domain), role-based ACL (Owner/Editor/Viewer)
+* White-label settings per workspace
+
+### 3.9 User Onboarding & Profile Management
+
+* **Intake Form:** On first login, require full name, verified email
+* **Profile:** Edit name, email, profile pic, preferences after account creation
+
+### 3.10 Monetization & Pricing
+
+* Dedicated pricing/subscription page (placeholder until pricing tiers provided)
+* Subscription logic ready to enforce usage/feature gating later
 
 ---
 
-## 6  Key Services / Endpoints
+## 4. Database & Infra (Prisma + More)
 
-| Endpoint | Purpose |
-|----------|---------|
-| `POST /api/export/variants` | Generate multi‑format exports & smart crop |
-| `POST /api/captions` | Whisper transcription & SRT upload |
-| `POST /api/publish` | Schedule post to platform |
-| `GET  /api/analytics/snapshots` | Time‑series data for charts |
-| `POST /api/abtest/start` | Launch A/B test |
-| `GET  /api/abtest/:id` | Retrieve results |
+* Schema includes: User, Video, Clip, Workspace, UserWorkspace, AnalyticsSnapshot, Template, ScheduledPost, etc.
+* All schema extensions are backward-compatible with MVP data
+* Cloudinary for all media storage, including variants, templates, and AI outputs
+* BullMQ/Redis for all async media jobs (auto-clip, export, AI, posting)
 
 ---
 
-## 7  Milestones (Updated)
+## 5. UI & UX
 
-| Sprint | Deliverable | Duration |
-|--------|-------------|----------|
-| 0 | Queue infra & FFmpeg worker | 1 wk |
-| 1 | Auto‑clip + AI analysis | 2 wks |
-| 2 | **Multi‑format export + smart crop** | 2 wks |
-| 3 | **Captions + AI metadata + style templates** | 2 wks |
-| 4 | **Publishing APIs + Scheduler + Calendar UI** | 3 wks |
-| 5 | **Analytics ingestion + A/B testing** | 2 wks |
-| 6 | AI Recommendations + Script Writer + Voice Clone | 2 wks |
-| 7 | Trend Predictor + Bulk & White‑Label + QA | 2 wks |
-
-_Total ≈ 14 weeks._
+* **Dashboard is universal entry point** (no separate marketing splash page)
+* Multi-tab: Uploads, Clips, Calendar, Analytics, Workflows, Profile, Pricing
+* Modal interfaces for: Clip creation, AI metadata, scheduling, workflow save/apply
+* Inline video player for all videos/clips
+* Calendar widget for all scheduled deployments
+* All new features (AI, batch, workflows) must be discoverable but do not remove manual/legacy flows
 
 ---
 
-## 8  Acceptance Criteria (Key)
+## 6. Testing & Quality Assurance
 
-* User can select a video → receive 9:16, 1:1, 16:9 variants with smart crop.  
-* Captions, titles, hashtags auto‑generate and attach to clip records.  
-* User schedules a post; worker publishes to platform and updates status.  
-* Calendar shows scheduled & posted items with colour coding.  
-* Dashboard charts display views/engagement; A/B results visible.  
-* AI recommendations panel returns actionable suggestions.  
-* Workspace branding updates propagate site‑wide.
+* Regression tests for all MVP workflows after each major feature add
+* New feature integration/unit tests
+* Platform posting/analytics tested against sandbox accounts
+* Stress-test bulk pipeline (100+ jobs)
 
 ---
 
-## 9  Risks & Mitigations
+## 7. Acceptance Criteria
 
-| Risk | Mitigation |
-|------|------------|
-| Social‑API rate limits | Token caching, incremental backoff |
-| Face detection performance | Cache embeddings, GPU worker nodes |
-| Video processing cost | Batch, down‑scale intros, lifecycle rules |
-| Platform policy changes | Versioned API adapters |
+* User can create, name, and preview manual clips with full control
+* AI metadata available on any video/clip, always editable
+* Multi-format exports with smart cropping and manual fallback
+* Templates, publishing, and scheduling all available via UI and API
+* Workflow automation can be created, saved, and reused by user
+* All analytics and recommendations widgets work with new and legacy content
+* Pricing page present, profile management, user onboarding intact
+* No regression to legacy upload/clip/dashboard features
 
 ---
 
-**End of PRD (v2.1)**  
-*Project: **CreatorApp***
+## 8. Migration & Delivery
+
+* Prisma migrations and scripts ensure all MVP data remains accessible
+* .env keys for new APIs added without overwriting old keys
+* Docs updated to reflect both old and new workflows
+* Sprints and endpoints as per last roadmap, with explicit layering on MVP base
+
+---
+
+**End of PRD v3.0 – All MVP, Phase 2, and manual/AI requirements unified**
