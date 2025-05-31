@@ -10,6 +10,13 @@ import {
   CloudArrowUpIcon,
   RectangleStackIcon
 } from '@heroicons/react/24/outline'
+import { 
+  SiTiktok,
+  SiInstagram,
+  SiYoutube,
+  SiFacebook,
+  SiDropbox
+} from 'react-icons/si'
 
 interface WorkflowType {
   id: string
@@ -22,7 +29,7 @@ interface WorkflowType {
 interface Platform {
   id: string
   name: string
-  icon: string
+  icon: React.ComponentType<{ className?: string }>
   bgColor: string
   textColor: string
 }
@@ -64,35 +71,35 @@ export function CreateWorkflow() {
     {
       id: 'tiktok',
       name: 'TikTok',
-      icon: '🎵',
+      icon: SiTiktok,
       bgColor: 'bg-black',
       textColor: 'text-white'
     },
     {
       id: 'instagram',
       name: 'Instagram',
-      icon: '📸',
+      icon: SiInstagram,
       bgColor: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
       textColor: 'text-white'
     },
     {
       id: 'youtube',
       name: 'YouTube',
-      icon: '🎥',
+      icon: SiYoutube,
       bgColor: 'bg-red-600',
       textColor: 'text-white'
     },
     {
       id: 'facebook',
       name: 'Facebook',
-      icon: '👥',
+      icon: SiFacebook,
       bgColor: 'bg-blue-600',
       textColor: 'text-white'
     },
     {
       id: 'dropbox',
       name: 'Dropbox',
-      icon: '📦',
+      icon: SiDropbox,
       bgColor: 'bg-blue-500',
       textColor: 'text-white'
     }
@@ -213,7 +220,7 @@ export function CreateWorkflow() {
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium mr-3 ${platform.bgColor} ${platform.textColor}`}>
-                        {platform.icon}
+                        <platform.icon className="h-5 w-5" />
                       </div>
                       <span className="font-medium text-gray-900">{platform.name}</span>
                       {selectedSource === platform.id && (
@@ -249,7 +256,7 @@ export function CreateWorkflow() {
                       } ${selectedSource === platform.id ? 'pointer-events-none' : ''}`}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium mr-3 ${platform.bgColor} ${platform.textColor}`}>
-                        {platform.icon}
+                        <platform.icon className="h-5 w-5" />
                       </div>
                       <span className="font-medium text-gray-900">{platform.name}</span>
                       {selectedDestination === platform.id && selectedSource !== platform.id && (

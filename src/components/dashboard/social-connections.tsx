@@ -10,11 +10,19 @@ import {
   PlusIcon,
   LinkIcon
 } from '@heroicons/react/24/outline'
+import { 
+  SiTiktok,
+  SiInstagram,
+  SiYoutube,
+  SiFacebook,
+  SiX,
+  SiDropbox
+} from 'react-icons/si'
 
 interface SocialPlatform {
   id: string
   name: string
-  icon: string
+  icon: React.ComponentType<{ className?: string }>
   connected: boolean
   username?: string
   followerCount?: string
@@ -27,7 +35,7 @@ export function SocialConnections() {
     {
       id: 'tiktok',
       name: 'TikTok',
-      icon: '🎵',
+      icon: SiTiktok,
       connected: false,
       bgColor: 'bg-black',
       iconColor: 'text-white'
@@ -35,7 +43,7 @@ export function SocialConnections() {
     {
       id: 'instagram',
       name: 'Instagram',
-      icon: '📸',
+      icon: SiInstagram,
       connected: false,
       bgColor: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
       iconColor: 'text-white'
@@ -43,7 +51,7 @@ export function SocialConnections() {
     {
       id: 'youtube',
       name: 'YouTube',
-      icon: '🎥',
+      icon: SiYoutube,
       connected: false,
       bgColor: 'bg-red-600',
       iconColor: 'text-white'
@@ -51,7 +59,7 @@ export function SocialConnections() {
     {
       id: 'facebook',
       name: 'Facebook',
-      icon: '👥',
+      icon: SiFacebook,
       connected: false,
       bgColor: 'bg-blue-600',
       iconColor: 'text-white'
@@ -59,7 +67,7 @@ export function SocialConnections() {
     {
       id: 'x',
       name: 'X (Twitter)',
-      icon: '🐦',
+      icon: SiX,
       connected: false,
       bgColor: 'bg-black',
       iconColor: 'text-white'
@@ -67,7 +75,7 @@ export function SocialConnections() {
     {
       id: 'dropbox',
       name: 'Dropbox',
-      icon: '📦',
+      icon: SiDropbox,
       connected: false,
       bgColor: 'bg-blue-500',
       iconColor: 'text-white'
@@ -129,7 +137,7 @@ export function SocialConnections() {
                   key={platform.id}
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ring-2 ring-white ${platform.bgColor} ${platform.iconColor}`}
                 >
-                  {platform.icon}
+                  <platform.icon className="h-4 w-4" />
                 </div>
               ))}
               {platforms.length > 4 && (
@@ -171,7 +179,7 @@ export function SocialConnections() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-lg ${platform.bgColor} ${platform.iconColor}`}>
-                    {platform.icon}
+                    <platform.icon className="h-6 w-6" />
                   </div>
                   <div>
                     <h4 className="text-base font-medium text-gray-900">{platform.name}</h4>
