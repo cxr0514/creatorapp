@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
+import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
 import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
 
@@ -10,14 +11,38 @@ interface VideoUploadProps {
 }
 
 export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
+  const { data: session, status } = useSession()
   const [uploading, setUploading] = useState(false)
   const [uploadProgress, setUploadProgress] = useState(0)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
+  // Debug session state
+  console.log('VideoUpload - Session status:', status)
+  console.log('VideoUpload - Session data:', session)
+
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
     if (!file) return
+
+    // Check authentication before attempting upload
+    if (status === 'loading') {
+      setError('Please wait for authentication to complete')
+      return
+    }
+    
+    if (status === 'unauthenticated' || !session) {
+      setError('Please log in to upload videos. You must be authenticated to upload files.')
+      return
+    }
+
+    // Additional session validation
+    if (!session.user?.email) {
+      setError('Invalid session. Please log out and log back in.')
+      return
+    }
+
+    console.log('Starting upload with session:', session.user?.email)
 
     setUploading(true)
     setError(null)
@@ -49,15 +74,30 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       const response = await fetch('/api/videos', {
         method: 'POST',
         body: formData,
-        signal: controller.signal
+        signal: controller.signal,
+        credentials: 'include' // Include session cookies for authentication
       })
 
       if (timeoutId) clearTimeout(timeoutId)
       if (progressInterval) clearInterval(progressInterval)
 
       if (!response.ok) {
-        const errorData = await response.json()
-        const errorMessage = errorData.error || `Upload failed with status ${response.status}`
+        if (response.status === 401) {
+          throw new Error('Please log in to upload videos. You need to be authenticated to use this feature.')
+        }
+        
+        // Try to parse error response, fallback to generic message
+        let errorMessage = `Upload failed with status ${response.status}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.error || errorMessage
+        } catch (parseError) {
+          console.warn('Failed to parse error response:', parseError)
+          // If we can't parse the response, it might be a network issue
+          if (response.status === 0 || response.status >= 500) {
+            errorMessage = 'Upload connection failed. Please check your internet connection and try again.'
+          }
+        }
         throw new Error(errorMessage)
       }
 
@@ -86,8 +126,14 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       if (err instanceof Error) {
         if (err.name === 'AbortError') {
           errorMessage = 'Upload timed out. Please try with a smaller file or check your connection.'
-        } else if (err.message.includes('Failed to fetch')) {
+        } else if (err.message.includes('Failed to fetch') || err.message.includes('NetworkError')) {
           errorMessage = 'Network error. Please check your internet connection and try again.'
+        } else if (err.message.includes('Please log in to upload videos')) {
+          errorMessage = err.message
+        } else if (err.message.includes('Upload connection failed')) {
+          errorMessage = err.message
+        } else if (err.message.includes('Load failed') || err.message.includes('ERR_NETWORK')) {
+          errorMessage = 'Network connection failed. Please check your internet connection and try again.'
         } else {
           errorMessage = err.message
         }
@@ -96,7 +142,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
     } finally {
       setUploading(false)
     }
-  }, [onUploadComplete])
+  }, [onUploadComplete, session, status])
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -109,6 +155,25 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
 
   return (
     <div className="w-full">
+      {/* Authentication Status */}
+      {status === 'loading' && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-blue-700 text-sm">Loading authentication...</p>
+        </div>
+      )}
+      
+      {status === 'unauthenticated' && (
+        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p className="text-yellow-700 text-sm">Please log in to upload videos</p>
+        </div>
+      )}
+      
+      {status === 'authenticated' && session && (
+        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
+          <p className="text-green-700 text-sm">Logged in as {session.user?.email}</p>
+        </div>
+      )}
+
       <div
         {...getRootProps()}
         className={`

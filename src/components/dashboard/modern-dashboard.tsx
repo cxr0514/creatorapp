@@ -7,9 +7,11 @@ import { Button } from '@/components/ui/button'
 import { VideoUpload } from './video-upload'
 import { VideoList } from './video-list'
 import { ClipList } from './clip-list'
-import { CreateClipModal } from './create-clip-modal'
+import { EnhancedCreateClipModal } from './enhanced-create-clip-modal'
 import { SocialConnections } from './social-connections'
-import { CreateWorkflow } from './create-workflow'
+import { SchedulingCalendar } from './scheduling-calendar'
+import { WorkflowBuilder } from './workflow-builder'
+import { AnalyticsDashboard } from './analytics-dashboard-refactored'
 import { 
   HomeIcon, 
   VideoCameraIcon, 
@@ -39,7 +41,7 @@ export function ModernDashboard() {
   const [activeTab, setActiveTab] = useState('dashboard')
   const [showVideoUpload, setShowVideoUpload] = useState(false)
   const [showCreateClipModal, setShowCreateClipModal] = useState(false)
-  const [selectedVideoId, setSelectedVideoId] = useState<number>()
+  const [selectedVideo, setSelectedVideo] = useState<{ id: number; title: string; url: string; duration: number; thumbnailUrl?: string }>()
   const [refreshKey, setRefreshKey] = useState(0)
   const [clipRefreshKey, setClipRefreshKey] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -50,8 +52,12 @@ export function ModernDashboard() {
     setRefreshKey(prev => prev + 1)
   }
 
-  const handleCreateClip = (videoId?: number) => {
-    setSelectedVideoId(videoId)
+  const handleCreateClip = (video?: { id: number; title: string; url: string; duration: number; thumbnailUrl?: string }) => {
+    if (video) {
+      setSelectedVideo(video)
+    } else {
+      setSelectedVideo(undefined)
+    }
     setShowCreateClipModal(true)
   }
 
@@ -511,7 +517,12 @@ export function ModernDashboard() {
                       <VideoUpload onUploadComplete={handleUploadComplete} />
                     </div>
                   ) : (
-                    <VideoList key={refreshKey} onCreateClip={handleCreateClip} onRefresh={() => setRefreshKey(prev => prev + 1)} />
+                    <VideoList 
+                      key={refreshKey} 
+                      onCreateClip={handleCreateClip} 
+                      onRefresh={() => setRefreshKey(prev => prev + 1)}
+                      onUploadClick={() => setShowVideoUpload(true)}
+                    />
                   )}
                 </div>
               )}
@@ -546,39 +557,22 @@ export function ModernDashboard() {
                     </div>
                   </div>
                   
-                  <ClipList key={clipRefreshKey} onRefresh={() => setClipRefreshKey(prev => prev + 1)} />
+                  <ClipList 
+                    key={clipRefreshKey} 
+                    onRefresh={() => setClipRefreshKey(prev => prev + 1)}
+                    onCreateClip={() => handleCreateClip()}
+                  />
                 </div>
               )}
 
               {activeTab === 'workflows' && (
-                <CreateWorkflow />
+                <WorkflowBuilder />
+              )}              {activeTab === 'calendar' && (
+                <SchedulingCalendar />
               )}
 
-              {/* Other tabs with coming soon placeholders */}
-              {['calendar', 'analytics'].includes(activeTab) && (
-                <div className="space-y-6">
-                  <div className="flex justify-between items-center">
-                    <div>
-                      <h1 className="text-2xl font-semibold text-gray-900 capitalize">{activeTab}</h1>
-                      <p className="mt-1 text-sm text-gray-600">
-                        {activeTab === 'calendar' && 'Schedule and manage your social media posts'}
-                        {activeTab === 'analytics' && 'Track performance and engagement metrics'}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <div className="bg-white shadow rounded-lg p-12">
-                    <div className="text-center">
-                      {activeTab === 'calendar' && <CalendarIcon className="mx-auto h-12 w-12 text-gray-400" />}
-                      {activeTab === 'analytics' && <ChartBarIcon className="mx-auto h-12 w-12 text-gray-400" />}
-                      <h3 className="mt-2 text-lg font-medium text-gray-900 capitalize">{activeTab} Coming Soon</h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        {activeTab === 'calendar' && 'Schedule and manage your social media posts across platforms'}
-                        {activeTab === 'analytics' && 'Comprehensive analytics and performance insights for your content'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              {activeTab === 'analytics' && (
+                <AnalyticsDashboard />
               )}
 
               {activeTab === 'profile' && (
@@ -736,11 +730,11 @@ export function ModernDashboard() {
         </main>
       </div>
 
-      <CreateClipModal
+      <EnhancedCreateClipModal
         isOpen={showCreateClipModal}
         onClose={() => setShowCreateClipModal(false)}
-        videoId={selectedVideoId}
-        onClipCreated={handleClipCreated}
+        video={selectedVideo}
+        onClipsCreated={handleClipCreated}
       />
     </div>
   )

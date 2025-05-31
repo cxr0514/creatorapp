@@ -82,10 +82,14 @@ model Clip {
   videoId       Int
   cloudinaryId  String
   cloudinaryUrl String
-  startTime     Int?
-  endTime       Int?
-  aspectRatio   String   @default("16:9")
+  startTime     Int?     // Start time in seconds
+  endTime       Int?     // End time in seconds
+  duration      Int?     // Calculated duration in seconds
+  aspectRatio   String   @default("16:9") // "16:9", "9:16", "1:1", "4:3"
   thumbnailUrl  String?
+  status        String   @default("draft") // "draft", "processing", "ready", "failed"
+  processingProgress Int? @default(0) // 0-100 for processing status
+  metadata      Json?    // Additional metadata like AI suggestions
   user          User     @relation(fields: [userId], references: [id])
   video         Video    @relation(fields: [videoId], references: [id])
   exports       ClipExport[]

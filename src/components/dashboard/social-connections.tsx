@@ -1,299 +1,291 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { 
-  CheckCircleIcon,
-  XCircleIcon,
-  ArrowTopRightOnSquareIcon,
-  Cog6ToothIcon,
-  PlusIcon,
-  LinkIcon
-} from '@heroicons/react/24/outline'
-import { 
-  SiTiktok,
-  SiInstagram,
-  SiYoutube,
-  SiFacebook,
-  SiX,
-  SiDropbox
-} from 'react-icons/si'
-
-interface SocialPlatform {
-  id: string
-  name: string
-  icon: React.ComponentType<{ className?: string }>
-  connected: boolean
-  username?: string
-  followerCount?: string
-  bgColor: string
-  iconColor: string
-}
+  SOCIAL_PLATFORMS, 
+  type SocialAccount 
+} from '@/lib/social-publishing'
 
 export function SocialConnections() {
-  const [platforms, setPlatforms] = useState<SocialPlatform[]>([
-    {
-      id: 'tiktok',
-      name: 'TikTok',
-      icon: SiTiktok,
-      connected: false,
-      bgColor: 'bg-black',
-      iconColor: 'text-white'
-    },
-    {
-      id: 'instagram',
-      name: 'Instagram',
-      icon: SiInstagram,
-      connected: false,
-      bgColor: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
-      iconColor: 'text-white'
-    },
-    {
-      id: 'youtube',
-      name: 'YouTube',
-      icon: SiYoutube,
-      connected: false,
-      bgColor: 'bg-red-600',
-      iconColor: 'text-white'
-    },
-    {
-      id: 'facebook',
-      name: 'Facebook',
-      icon: SiFacebook,
-      connected: false,
-      bgColor: 'bg-blue-600',
-      iconColor: 'text-white'
-    },
-    {
-      id: 'x',
-      name: 'X (Twitter)',
-      icon: SiX,
-      connected: false,
-      bgColor: 'bg-black',
-      iconColor: 'text-white'
-    },
-    {
-      id: 'dropbox',
-      name: 'Dropbox',
-      icon: SiDropbox,
-      connected: false,
-      bgColor: 'bg-blue-500',
-      iconColor: 'text-white'
+  const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>([])
+  const [loading, setLoading] = useState(true)
+  const [connecting, setConnecting] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetchConnectedAccounts()
+  }, [])
+
+  const fetchConnectedAccounts = async () => {
+    try {
+      const response = await fetch('/api/social/connections')
+      if (response.ok) {
+        const data = await response.json()
+        setConnectedAccounts(data.connections)
+      }
+    } catch (error) {
+      console.error('Error fetching connected accounts:', error)
+    } finally {
+      setLoading(false)
     }
-  ])
-
-  const handleConnect = (platformId: string) => {
-    // In a real app, this would trigger OAuth flow
-    setPlatforms(prev => prev.map(platform => 
-      platform.id === platformId 
-        ? { 
-            ...platform, 
-            connected: true,
-            username: `@user_${platform.id}`,
-            followerCount: Math.floor(Math.random() * 10000).toLocaleString()
-          }
-        : platform
-    ))
   }
 
-  const handleDisconnect = (platformId: string) => {
-    setPlatforms(prev => prev.map(platform => 
-      platform.id === platformId 
-        ? { 
-            ...platform, 
-            connected: false,
-            username: undefined,
-            followerCount: undefined
-          }
-        : platform
-    ))
+  const connectPlatform = async (platformId: string) => {
+    setConnecting(platformId)
+    try {
+      const response = await fetch('/api/social/connections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ platform: platformId })
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        // In a real implementation, this would redirect to OAuth
+        alert(`OAuth flow would start: ${data.authUrl}`)
+        
+        // For demo purposes, simulate successful connection
+        setTimeout(() => {
+          setConnectedAccounts(prev => 
+            prev.map(acc => 
+              acc.platform === platformId 
+                ? { ...acc, isConnected: true, accountName: `Your ${SOCIAL_PLATFORMS.find(p => p.id === platformId)?.displayName}` }
+                : acc
+            )
+          )
+          setConnecting(null)
+        }, 2000)
+      }
+    } catch (error) {
+      console.error('Error connecting platform:', error)
+      setConnecting(null)
+    }
   }
 
-  const connectedCount = platforms.filter(p => p.connected).length
+  const disconnectPlatform = async (accountId: string) => {
+    try {
+      const response = await fetch(`/api/social/connections/${accountId}`, {
+        method: 'DELETE'
+      })
+      
+      if (response.ok) {
+        setConnectedAccounts(prev => 
+          prev.map(acc => 
+            acc.id === accountId 
+              ? { ...acc, isConnected: false, accountName: `Connect your ${SOCIAL_PLATFORMS.find(p => p.id === acc.platform)?.displayName}` }
+              : acc
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Error disconnecting platform:', error)
+    }
+  }
 
-  return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-2xl font-semibold text-gray-900">Social Media Connections</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Connect your social media accounts to streamline content publishing and automation.
-        </p>
-      </div>
+  const getPlatformIcon = (platformId: string) => {
+    switch (platformId) {
+      case 'youtube':
+        return '🎥'
+      case 'tiktok':
+        return '🎵'
+      case 'instagram':
+        return '📸'
+      case 'twitter':
+        return '🐦'
+      case 'linkedin':
+        return '💼'
+      default:
+        return '🔗'
+    }
+  }
 
-      {/* Status Overview */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-medium text-gray-900">Connection Status</h3>
-            <p className="mt-1 text-sm text-gray-500">
-              {connectedCount} of {platforms.length} platforms connected
-            </p>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="flex -space-x-1">
-              {platforms.slice(0, 4).map((platform) => (
-                <div
-                  key={platform.id}
-                  className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium ring-2 ring-white ${platform.bgColor} ${platform.iconColor}`}
-                >
-                  <platform.icon className="h-4 w-4" />
-                </div>
-              ))}
-              {platforms.length > 4 && (
-                <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600 ring-2 ring-white">
-                  +{platforms.length - 4}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        {/* Progress Bar */}
-        <div className="mt-4">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-gray-500">Progress</span>
-            <span className="font-medium text-gray-900">{Math.round((connectedCount / platforms.length) * 100)}%</span>
-          </div>
-          <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-gradient-to-r from-purple-500 to-purple-600 h-2 rounded-full transition-all duration-300"
-              style={{ width: `${(connectedCount / platforms.length) * 100}%` }}
-            />
-          </div>
-        </div>
-      </div>
+  const getPlatformColor = (platformId: string) => {
+    switch (platformId) {
+      case 'youtube':
+        return 'from-red-500 to-red-600'
+      case 'tiktok':
+        return 'from-black to-gray-800'
+      case 'instagram':
+        return 'from-purple-500 via-pink-500 to-orange-400'
+      case 'twitter':
+        return 'from-blue-400 to-blue-500'
+      case 'linkedin':
+        return 'from-blue-600 to-blue-700'
+      default:
+        return 'from-gray-500 to-gray-600'
+    }
+  }
 
-      {/* Platform Connections */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-medium text-gray-900 flex items-center">
-            <LinkIcon className="h-5 w-5 text-purple-600 mr-2" />
-            Available Platforms
-          </h3>
-        </div>
-        
-        <div className="divide-y divide-gray-200">
-          {platforms.map((platform) => (
-            <div key={platform.id} className="p-6 hover:bg-gray-50 transition-colors">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-lg ${platform.bgColor} ${platform.iconColor}`}>
-                    <platform.icon className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <h4 className="text-base font-medium text-gray-900">{platform.name}</h4>
-                    {platform.connected ? (
-                      <div className="mt-1 space-y-1">
-                        <p className="text-sm text-gray-600">{platform.username}</p>
-                        <p className="text-xs text-gray-500">{platform.followerCount} followers</p>
-                      </div>
-                    ) : (
-                      <p className="text-sm text-gray-500">Not connected</p>
-                    )}
-                  </div>
+  if (loading) {
+    return (
+      <div className="space-y-4">
+        <h2 className="text-2xl font-bold text-gray-900">Social Media Connections</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {[...Array(5)].map((_, i) => (
+            <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="flex-1">
+                  <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
+                  <div className="h-3 bg-gray-100 rounded w-32"></div>
                 </div>
-                
-                <div className="flex items-center space-x-3">
-                  {platform.connected ? (
-                    <>
-                      <div className="flex items-center text-green-600">
-                        <CheckCircleIcon className="h-5 w-5 mr-1" />
-                        <span className="text-sm font-medium">Connected</span>
-                      </div>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDisconnect(platform.id)}
-                        className="text-red-600 border-red-200 hover:bg-red-50"
-                      >
-                        <XCircleIcon className="h-4 w-4 mr-1" />
-                        Disconnect
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="text-gray-600"
-                      >
-                        <Cog6ToothIcon className="h-4 w-4 mr-1" />
-                        Settings
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      onClick={() => handleConnect(platform.id)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      <PlusIcon className="h-4 w-4 mr-1" />
-                      Connect
-                    </Button>
-                  )}
-                </div>
+                <div className="w-20 h-8 bg-gray-200 rounded"></div>
               </div>
-              
-              {platform.connected && (
-                <div className="mt-4 pt-4 border-t border-gray-100">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Publishing permissions</span>
-                    <div className="flex items-center space-x-4">
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✓ Post content
-                      </span>
-                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        ✓ Schedule posts
-                      </span>
-                      <Button variant="ghost" size="sm" className="text-purple-600">
-                        <ArrowTopRightOnSquareIcon className="h-4 w-4 mr-1" />
-                        View Profile
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           ))}
         </div>
       </div>
+    )
+  }
 
-      {/* Quick Actions */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <button className="relative block w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
-            <div className="flex flex-col items-center">
-              <div className="mx-auto h-8 w-8 text-gray-400 mb-2">🔗</div>
-              <span className="block text-sm font-medium text-gray-900">Connect All</span>
-              <span className="block text-xs text-gray-500 mt-1">Bulk connect accounts</span>
-            </div>
-          </button>
-          
-          <button className="relative block w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
-            <div className="flex flex-col items-center">
-              <div className="mx-auto h-8 w-8 text-gray-400 mb-2">⚙️</div>
-              <span className="block text-sm font-medium text-gray-900">Sync Settings</span>
-              <span className="block text-xs text-gray-500 mt-1">Update all permissions</span>
-            </div>
-          </button>
-          
-          <button className="relative block w-full border-2 border-dashed border-gray-300 rounded-lg p-4 text-center hover:border-purple-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors">
-            <div className="flex flex-col items-center">
-              <div className="mx-auto h-8 w-8 text-gray-400 mb-2">📊</div>
-              <span className="block text-sm font-medium text-gray-900">View Analytics</span>
-              <span className="block text-xs text-gray-500 mt-1">Cross-platform insights</span>
-            </div>
-          </button>
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Social Media Connections</h2>
+          <p className="text-gray-600 mt-1">Connect your social media accounts to publish content directly</p>
         </div>
+        <Button
+          onClick={fetchConnectedAccounts}
+          variant="outline"
+          size="sm"
+          className="border-purple-200 text-purple-700 hover:bg-purple-50"
+        >
+          <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          Refresh
+        </Button>
       </div>
 
-      {/* Tips */}
-      <div className="bg-purple-50 border border-purple-200 rounded-lg p-6">
-        <h3 className="text-base font-medium text-purple-900 mb-2">💡 Pro Tips</h3>
-        <ul className="text-sm text-purple-700 space-y-1">
-          <li>• Connect all platforms now to streamline future content publishing</li>
-          <li>• Each platform may have different content format requirements</li>
-          <li>• You can always disconnect and reconnect accounts as needed</li>
-          <li>• Settings are saved automatically when you make changes</li>
-        </ul>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {SOCIAL_PLATFORMS.map((platform) => {
+          const account = connectedAccounts.find(acc => acc.platform === platform.id)
+          const isConnected = account?.isConnected || false
+          const isConnecting = connecting === platform.id
+
+          return (
+            <div key={platform.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className={`w-12 h-12 bg-gradient-to-r ${getPlatformColor(platform.id)} rounded-full flex items-center justify-center text-white text-xl`}>
+                    {getPlatformIcon(platform.id)}
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">{platform.displayName}</h3>
+                    <p className="text-sm text-gray-600">
+                      {isConnected ? account?.accountName : `Connect your ${platform.displayName} account`}
+                    </p>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-300'}`}></div>
+                      <span className={`text-xs font-medium ${isConnected ? 'text-green-600' : 'text-gray-500'}`}>
+                        {isConnected ? 'Connected' : 'Not connected'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="flex flex-col space-y-2">
+                  {isConnected ? (
+                    <>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => disconnectPlatform(account?.id || '')}
+                        className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                      >
+                        Disconnect
+                      </Button>
+                      <div className="text-xs text-gray-500 text-center">
+                        {account?.permissions.join(', ')}
+                      </div>
+                    </>
+                  ) : (
+                    <Button
+                      size="sm"
+                      onClick={() => connectPlatform(platform.id)}
+                      disabled={isConnecting}
+                      className={`bg-gradient-to-r ${getPlatformColor(platform.id)} hover:opacity-90 text-white`}
+                    >
+                      {isConnecting ? (
+                        <>
+                          <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Connecting...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                          </svg>
+                          Connect
+                        </>
+                      )}
+                    </Button>
+                  )}
+                </div>
+              </div>
+
+              {/* Platform Details */}
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="text-gray-500">Max file size:</span>
+                    <span className="ml-1 font-medium">{platform.maxFileSize}MB</span>
+                  </div>
+                  <div>
+                    <span className="text-gray-500">Max duration:</span>
+                    <span className="ml-1 font-medium">{Math.floor(platform.maxDuration / 60)}min</span>
+                  </div>
+                  <div className="col-span-2">
+                    <span className="text-gray-500">Supported formats:</span>
+                    <span className="ml-1 font-medium">{platform.supportedFormats.join(', ')}</span>
+                  </div>
+                  <div className="col-span-2">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-gray-500">Scheduling:</span>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        platform.supportsScheduling 
+                          ? 'bg-green-100 text-green-700' 
+                          : 'bg-gray-100 text-gray-600'
+                      }`}>
+                        {platform.supportsScheduling ? 'Supported' : 'Not available'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
+
+      {/* Connection Status Summary */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="font-semibold text-gray-900">Connection Status</h3>
+            <p className="text-gray-600 mt-1">
+              {connectedAccounts.filter(acc => acc.isConnected).length} of {SOCIAL_PLATFORMS.length} platforms connected
+            </p>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-purple-600">
+              {Math.round((connectedAccounts.filter(acc => acc.isConnected).length / SOCIAL_PLATFORMS.length) * 100)}%
+            </div>
+            <div className="text-sm text-gray-600">Connected</div>
+          </div>
+        </div>
+        
+        {connectedAccounts.filter(acc => acc.isConnected).length === 0 && (
+          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Get started:</strong> Connect at least one social media account to begin publishing your content directly from CreatorApp.
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )

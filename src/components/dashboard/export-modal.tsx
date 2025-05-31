@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { EXPORT_FORMATS, getPlatformRecommendations } from '@/lib/video-export'
+import { 
+  EXPORT_FORMATS, 
+  CROPPING_STRATEGIES, 
+  getPlatformRecommendations,
+  getRecommendedCroppingStrategy,
+  getCroppingStrategyInfo 
+} from '@/lib/video-export'
 
 interface Clip {
   id: number
@@ -36,6 +42,8 @@ interface ExportResult {
 
 export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportModalProps) {
   const [selectedFormats, setSelectedFormats] = useState<{ [key: string]: Set<string> }>({})
+  const [croppingStrategy, setCroppingStrategy] = useState<string>('smart')
+  const [showAdvanced, setShowAdvanced] = useState(false)
   const [isExporting, setIsExporting] = useState(false)
   const [exportResults, setExportResults] = useState<ExportResult[]>([])
   const [showResults, setShowResults] = useState(false)
@@ -44,6 +52,8 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
     if (isOpen) {
       // Reset state when modal opens
       setSelectedFormats({})
+      setCroppingStrategy('smart')
+      setShowAdvanced(false)
       setExportResults([])
       setShowResults(false)
     }
@@ -97,7 +107,8 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
         },
         body: JSON.stringify({
           clipId: clip.id,
-          formats: exports
+          formats: exports,
+          croppingStrategy
         })
       })
 
@@ -153,6 +164,77 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
               <p className="text-sm text-gray-600">
                 Choose the formats and platforms you want to export to. Smart cropping will be applied automatically.
               </p>
+            </div>
+
+            {/* Advanced Cropping Options */}
+            <div className="mb-6 border rounded-lg p-4 bg-gray-50">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="font-medium">Smart Cropping Options</h4>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAdvanced(!showAdvanced)}
+                >
+                  {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
+                </Button>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium mb-1">Cropping Strategy</label>
+                  <select
+                    value={croppingStrategy}
+                    onChange={(e) => setCroppingStrategy(e.target.value)}
+                    className="w-full p-2 border rounded-md"
+                  >
+                    {CROPPING_STRATEGIES.map((strategy) => (
+                      <option key={strategy.type} value={strategy.type}>
+                        {strategy.displayName}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                
+                <div className="flex items-center">
+                  <div className="text-sm">
+                    <div className="font-medium text-green-700">
+                      {getCroppingStrategyInfo(croppingStrategy)?.displayName}
+                    </div>
+                    <div className="text-gray-600">
+                      {getCroppingStrategyInfo(croppingStrategy)?.description}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {showAdvanced && (
+                <div className="mt-4 pt-4 border-t">
+                  <div className="text-sm text-gray-600">
+                    <h5 className="font-medium mb-2">Best For:</h5>
+                    <div className="flex flex-wrap gap-1 mb-3">
+                      {getCroppingStrategyInfo(croppingStrategy)?.bestFor.map((use, index) => (
+                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                          {use}
+                        </span>
+                      ))}
+                    </div>
+                    
+                    <h5 className="font-medium mb-2">Recommendations by Format:</h5>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      {EXPORT_FORMATS.map((format) => {
+                        const recommended = getRecommendedCroppingStrategy('general', format, true)
+                        const isOptimal = recommended === croppingStrategy
+                        return (
+                          <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
+                            <span className="font-medium">{format.displayName}:</span> {recommended}
+                            {isOptimal && <span className="ml-1">✓</span>}
+                          </div>
+                        )
+                      })}
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="grid gap-6">

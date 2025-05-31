@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { clipId, formats } = body;
+    const { clipId, formats, croppingStrategy } = body;
 
     if (!clipId || !formats || !Array.isArray(formats)) {
       return NextResponse.json(
@@ -86,7 +86,8 @@ export async function POST(request: NextRequest) {
         const cropSettings = determineCropStrategy(
           clip.aspectRatio,
           exportFormat,
-          true // AI enabled
+          true, // AI enabled
+          croppingStrategy // Use preferred strategy from request
         );
 
         // Generate Cloudinary transformation

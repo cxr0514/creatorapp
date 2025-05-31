@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ExportModal } from './export-modal'
+import { BatchExportModal } from './batch-export-modal'
+import { PublishingModal } from './publishing-modal'
+import { WorkflowApplyModal } from './workflow-apply-modal'
 
 interface Clip {
   id: number
@@ -26,14 +29,20 @@ interface Clip {
 
 interface ClipListProps {
   onRefresh?: () => void
+  onCreateClip?: () => void
 }
 
-export function ClipList({ onRefresh }: ClipListProps = {}) {
+export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
   const [clips, setClips] = useState<Clip[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
   const [exportModalOpen, setExportModalOpen] = useState(false)
+  const [batchExportModalOpen, setBatchExportModalOpen] = useState(false)
+  const [publishModalOpen, setPublishModalOpen] = useState(false)
+  const [workflowModalOpen, setWorkflowModalOpen] = useState(false)
   const [selectedClip, setSelectedClip] = useState<Clip | null>(null)
+  const [selectedClips, setSelectedClips] = useState<Set<number>>(new Set())
+  const [selectionMode, setSelectionMode] = useState(false)
 
   useEffect(() => {
     fetchClips()
@@ -97,6 +106,84 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
   const handleExportComplete = () => {
     // Refresh clips list to show any updates
     fetchClips()
+  }
+
+  const openPublishModal = (clip: Clip) => {
+    setSelectedClip(clip)
+    setPublishModalOpen(true)
+  }
+
+  const closePublishModal = () => {
+    setPublishModalOpen(false)
+    setSelectedClip(null)
+  }
+
+  const handlePublishComplete = () => {
+    // Refresh clips list and close modal
+    fetchClips()
+    closePublishModal()
+  }
+
+  const openWorkflowModal = (clip: Clip) => {
+    setSelectedClip(clip)
+    setWorkflowModalOpen(true)
+  }
+
+  const closeWorkflowModal = () => {
+    setWorkflowModalOpen(false)
+    setSelectedClip(null)
+  }
+
+  const handleApplyWorkflow = async (clipId: number, workflowId: string) => {
+    // In a real app, this would make an API call to apply the workflow
+    // For now, we'll simulate the workflow application
+    console.log(`Applying workflow ${workflowId} to clip ${clipId}`)
+    
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 1000))
+    
+    // Refresh clips list
+    fetchClips()
+  }
+
+  const toggleSelectionMode = () => {
+    setSelectionMode(!selectionMode)
+    setSelectedClips(new Set())
+  }
+
+  const toggleClipSelection = (clipId: number) => {
+    const newSelected = new Set(selectedClips)
+    if (newSelected.has(clipId)) {
+      newSelected.delete(clipId)
+    } else {
+      newSelected.add(clipId)
+    }
+    setSelectedClips(newSelected)
+  }
+
+  const selectAllClips = () => {
+    const readyClipIds = clips.filter(clip => clip.status === 'ready').map(clip => clip.id)
+    setSelectedClips(new Set(readyClipIds))
+  }
+
+  const clearSelection = () => {
+    setSelectedClips(new Set())
+  }
+
+  const openBatchExportModal = () => {
+    setBatchExportModalOpen(true)
+  }
+
+  const closeBatchExportModal = () => {
+    setBatchExportModalOpen(false)
+    setSelectionMode(false)
+    setSelectedClips(new Set())
+  }
+
+  const handleBatchExportComplete = () => {
+    // Refresh clips list and close batch modal
+    fetchClips()
+    closeBatchExportModal()
   }
 
   const deleteClip = async (clipId: number) => {
@@ -202,7 +289,10 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
         <h3 className="text-xl font-semibold text-gray-900 mb-3">No clips created yet</h3>
         <p className="text-gray-500 text-lg mb-6">Upload videos and create your first clips to get started</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl">
+          <Button 
+            onClick={onCreateClip}
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
             Create Your First Clip
           </Button>
           <Button 
@@ -236,8 +326,65 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
   return (
     <>
     <div className="space-y-4">
-      {/* Sync button for when clips are present */}
-      <div className="flex justify-end">
+      {/* Header Controls */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div className="flex items-center gap-4">
+          {!selectionMode ? (
+            <Button 
+              onClick={toggleSelectionMode}
+              variant="outline"
+              size="sm"
+              className="border-purple-200 text-purple-700 hover:bg-purple-50"
+            >
+              <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+              Batch Export
+            </Button>
+          ) : (
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium text-gray-700">
+                {selectedClips.size} of {clips.filter(c => c.status === 'ready').length} selected
+              </span>
+              <Button 
+                onClick={selectAllClips}
+                variant="outline"
+                size="sm"
+                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+              >
+                Select All
+              </Button>
+              <Button 
+                onClick={clearSelection}
+                variant="outline"
+                size="sm"
+                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+              >
+                Clear
+              </Button>
+              <Button 
+                onClick={openBatchExportModal}
+                disabled={selectedClips.size === 0}
+                size="sm"
+                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+                Export Selected ({selectedClips.size})
+              </Button>
+              <Button 
+                onClick={toggleSelectionMode}
+                variant="outline"
+                size="sm"
+                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
+        </div>
+        
         <Button 
           onClick={syncClips}
           disabled={syncing}
@@ -266,7 +413,25 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {clips.map((clip) => (
-        <div key={clip.id} className="group bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-lg hover:border-purple-200 transition-all duration-300 overflow-hidden">
+        <div key={clip.id} className={`group bg-white rounded-xl shadow-sm border transition-all duration-300 overflow-hidden ${
+          selectionMode && selectedClips.has(clip.id) 
+            ? 'border-purple-300 shadow-lg ring-2 ring-purple-200' 
+            : selectionMode 
+              ? 'border-gray-200 hover:border-purple-200' 
+              : 'border-gray-100 hover:shadow-lg hover:border-purple-200'
+        }`}>
+          {/* Selection Checkbox */}
+          {selectionMode && clip.status === 'ready' && (
+            <div className="absolute top-3 left-3 z-10">
+              <input
+                type="checkbox"
+                checked={selectedClips.has(clip.id)}
+                onChange={() => toggleClipSelection(clip.id)}
+                className="w-5 h-5 text-purple-600 bg-white border-2 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+              />
+            </div>
+          )}
+          
           <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
             {clip.thumbnailUrl ? (
               <Image
@@ -293,7 +458,7 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
                 </svg>
               </div>
             </div>
-            <div className="absolute top-3 right-3">
+            <div className={`absolute top-3 right-3 ${selectionMode ? 'top-3' : 'top-3'}`}>
               <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(clip.status)}`}>
                 {getStatusText(clip.status)}
               </span>
@@ -387,30 +552,63 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
               </div>
             )}
             
-            <div className="flex space-x-2">
+            <div className="space-y-2">
               {clip.status === 'ready' && (
                 <>
-                  <Button
-                    size="sm"
-                    onClick={() => downloadClip(clip.id, clip.title)}
-                    className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
-                  >
-                    <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Download
-                  </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => openExportModal(clip)}
-                    className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 font-medium rounded-lg transition-all duration-200"
-                  >
-                    <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                    </svg>
-                    Export
-                  </Button>
+                  {/* First row of buttons */}
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      onClick={() => downloadClip(clip.id, clip.title)}
+                      disabled={selectionMode}
+                      className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Download
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openExportModal(clip)}
+                      disabled={selectionMode}
+                      className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      Export
+                    </Button>
+                  </div>
+                  
+                  {/* Second row of buttons */}
+                  <div className="flex space-x-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openPublishModal(clip)}
+                      disabled={selectionMode}
+                      className="flex-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m5 0H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zM9 12l2 2 4-4" />
+                      </svg>
+                      Publish
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => openWorkflowModal(clip)}
+                      disabled={selectionMode}
+                      className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5M14.25 3.104c.251.023.501.05.75.082M19.8 14.5l-2.407 2.407A2.25 2.25 0 0116.001 17.5H8.001a2.25 2.25 0 01-1.392-.493L4.2 14.5" />
+                      </svg>
+                      Workflow
+                    </Button>
+                  </div>
                 </>
               )}
               {clip.status === 'processing' && (
@@ -456,6 +654,32 @@ export function ClipList({ onRefresh }: ClipListProps = {}) {
         onExportComplete={handleExportComplete}
       />
     )}
+    
+    {/* Publishing Modal */}
+    {selectedClip && (
+      <PublishingModal
+        clip={selectedClip}
+        isOpen={publishModalOpen}
+        onClose={closePublishModal}
+        onPublishComplete={handlePublishComplete}
+      />
+    )}
+    
+    {/* Workflow Apply Modal */}
+    <WorkflowApplyModal
+      isOpen={workflowModalOpen}
+      onClose={closeWorkflowModal}
+      clip={selectedClip}
+      onApplyWorkflow={handleApplyWorkflow}
+    />
+    
+    {/* Batch Export Modal */}
+    <BatchExportModal
+      isOpen={batchExportModalOpen}
+      onClose={closeBatchExportModal}
+      clips={clips.filter(clip => selectedClips.has(clip.id))}
+      onExportComplete={handleBatchExportComplete}
+    />
     </>
   )
 }

@@ -8,6 +8,7 @@ interface Video {
   id: number
   title: string
   filename?: string
+  url: string
   duration: number
   createdAt: string
   thumbnailUrl?: string
@@ -15,11 +16,12 @@ interface Video {
 }
 
 interface VideoListProps {
-  onCreateClip?: (videoId: number) => void
+  onCreateClip?: (video: Video) => void
   onRefresh?: () => void
+  onUploadClick?: () => void
 }
 
-export function VideoList({ onCreateClip, onRefresh }: VideoListProps) {
+export function VideoList({ onCreateClip, onRefresh, onUploadClick }: VideoListProps) {
   const [videos, setVideos] = useState<Video[]>([])
   const [loading, setLoading] = useState(true)
   const [syncing, setSyncing] = useState(false)
@@ -124,7 +126,10 @@ export function VideoList({ onCreateClip, onRefresh }: VideoListProps) {
         <h3 className="text-xl font-semibold text-gray-900 mb-3">No videos uploaded yet</h3>
         <p className="text-gray-500 text-lg mb-6">Upload your first video to get started creating clips</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
-          <Button className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl">
+          <Button 
+            onClick={onUploadClick}
+            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+          >
             Upload Your First Video
           </Button>
           <Button 
@@ -237,7 +242,7 @@ export function VideoList({ onCreateClip, onRefresh }: VideoListProps) {
             <div className="flex space-x-2">
               <Button
                 size="sm"
-                onClick={() => onCreateClip?.(video.id)}
+                onClick={() => onCreateClip?.(video)}
                 className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md"
               >
                 <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
