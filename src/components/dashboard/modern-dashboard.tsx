@@ -485,13 +485,25 @@ export function ModernDashboard() {
                         Manage and organize your uploaded videos
                       </p>
                     </div>
-                    <Button 
-                      onClick={() => setShowVideoUpload(true)}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      Upload Video
-                    </Button>
+                    <div className="flex space-x-3">
+                      <Button 
+                        onClick={() => setRefreshKey(prev => prev + 1)}
+                        variant="outline"
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh
+                      </Button>
+                      <Button 
+                        onClick={() => setShowVideoUpload(true)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        Upload Video
+                      </Button>
+                    </div>
                   </div>
                   
                   {showVideoUpload ? (
@@ -499,7 +511,7 @@ export function ModernDashboard() {
                       <VideoUpload onUploadComplete={handleUploadComplete} />
                     </div>
                   ) : (
-                    <VideoList key={refreshKey} onCreateClip={handleCreateClip} />
+                    <VideoList key={refreshKey} onCreateClip={handleCreateClip} onRefresh={() => setRefreshKey(prev => prev + 1)} />
                   )}
                 </div>
               )}
@@ -513,16 +525,28 @@ export function ModernDashboard() {
                         View and manage your AI-generated video clips
                       </p>
                     </div>
-                    <Button 
-                      onClick={() => handleCreateClip()}
-                      className="bg-purple-600 hover:bg-purple-700 text-white"
-                    >
-                      <PlusIcon className="h-4 w-4 mr-2" />
-                      Create Clip
-                    </Button>
+                    <div className="flex space-x-3">
+                      <Button 
+                        onClick={() => setClipRefreshKey(prev => prev + 1)}
+                        variant="outline"
+                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
+                      >
+                        <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        Refresh
+                      </Button>
+                      <Button 
+                        onClick={() => handleCreateClip()}
+                        className="bg-purple-600 hover:bg-purple-700 text-white"
+                      >
+                        <PlusIcon className="h-4 w-4 mr-2" />
+                        Create Clip
+                      </Button>
+                    </div>
                   </div>
                   
-                  <ClipList key={clipRefreshKey} />
+                  <ClipList key={clipRefreshKey} onRefresh={() => setClipRefreshKey(prev => prev + 1)} />
                 </div>
               )}
 

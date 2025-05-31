@@ -4,12 +4,74 @@ import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { cloudinary, generateVideoThumbnail } from '@/lib/cloudinary'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const { searchParams } = new URL(request.url)
+    const sync = searchParams.get('sync') === 'true'
+
+    if (sync) {
+      // Sync with Cloudinary storage
+      try {
+        console.log('Syncing videos with Cloudinary...')
+        
+        // Get user folder path
+        const userFolderPath = `creatorapp/users/${session.user.email}/videos`
+        
+        // Get videos from Cloudinary
+        const cloudinaryResult = await cloudinary.search
+          .expression(`folder:${userFolderPath}`)
+          .with_field('context')
+          .max_results(100)
+          .execute()
+        
+        console.log(`Found ${cloudinaryResult.resources.length} videos in Cloudinary`)
+        
+        // Get existing videos from database
+        const existingVideos = await prisma.video.findMany({
+          where: {
+            user: {
+              email: session.user.email
+            }
+          }
+        })
+        
+        const existingCloudinaryIds = new Set(existingVideos.map(v => v.cloudinaryId))
+        
+        // Add missing videos to database
+        for (const resource of cloudinaryResult.resources) {
+          if (!existingCloudinaryIds.has(resource.public_id)) {
+            console.log(`Adding missing video: ${resource.public_id}`)
+            
+            // Generate thumbnail
+            const thumbnailUrl = await generateVideoThumbnail(resource.public_id)
+            
+            await prisma.video.create({
+              data: {
+                title: resource.filename || resource.public_id.split('/').pop() || 'Untitled',
+                cloudinaryUrl: resource.secure_url,
+                cloudinaryId: resource.public_id,
+                thumbnailUrl,
+                duration: resource.duration || 0,
+                fileSize: resource.bytes,
+                user: {
+                  connect: {
+                    email: session.user.email
+                  }
+                }
+              }
+            })
+          }
+        }
+      } catch (syncError) {
+        console.error('Error syncing with Cloudinary:', syncError)
+        // Continue with regular fetch even if sync fails
+      }
     }
 
     const videos = await prisma.video.findMany({
