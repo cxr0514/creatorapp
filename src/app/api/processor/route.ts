@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const healthCheck = await enhancedScheduledPostProcessor.getHealthCheck();
 
     await logger.info('Processor status requested', {
-      requestIP: request.ip || 'unknown',
+      requestIP: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
       isRunning: status.isRunning
     });
 

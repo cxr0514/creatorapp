@@ -2,8 +2,6 @@
 // This service handles the execution of scheduled posts at their designated times
 
 import { getPlatformPublisher } from './platform-publishers'
-import { logger } from './logging'
-import { errorMonitor } from './error-monitoring'
 // import { prisma } from './prisma' // TODO: Uncomment when database is ready
 
 export interface ScheduledPostJob {
@@ -18,7 +16,7 @@ export interface ScheduledPostJob {
   thumbnailUrl?: string
   aspectRatio: string
   scheduledFor: Date
-  platformSettings?: Record<string, any>
+  platformSettings?: Record<string, unknown>
   retryCount: number
   maxRetries: number
 }
@@ -199,30 +197,29 @@ export class ScheduledPostProcessor {
       console.error(`Error executing scheduled post ${job.id}:`, error)
 
       const errorMessage = error instanceof Error ? error.message : 'Unknown error'
-      const newRetryCount = job.retryCount + 1
 
       // TODO: Update database when available
       /*
-      if (newRetryCount >= job.maxRetries) {
+      if (job.retryCount + 1 >= job.maxRetries) {
         // Mark as failed
         await prisma.scheduledPost.update({
           where: { id: job.id },
           data: {
             status: 'failed',
             errorMessage,
-            retryCount: newRetryCount
+            retryCount: job.retryCount + 1
           }
         })
       } else {
         // Schedule retry
-        const retryDelay = this.calculateRetryDelay(newRetryCount)
+        const retryDelay = this.calculateRetryDelay(job.retryCount + 1)
         const newScheduledTime = new Date(Date.now() + retryDelay)
 
         await prisma.scheduledPost.update({
           where: { id: job.id },
           data: {
             scheduledFor: newScheduledTime,
-            retryCount: newRetryCount,
+            retryCount: job.retryCount + 1,
             errorMessage
           }
         })

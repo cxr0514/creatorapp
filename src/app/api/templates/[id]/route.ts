@@ -41,7 +41,7 @@ export async function GET(request: NextRequest, { params }: { params: { id: stri
     }
 
     // Note: This will cause a linter error until the schema is updated
-    const template = await (prisma as any).styleTemplate.findFirst({
+    const template = await prisma.styleTemplate.findFirst({
       where: {
         id: templateId,
         userId: user.id
@@ -82,7 +82,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
     const body: UpdateTemplateRequest = await request.json();
 
     // Verify template exists and belongs to user
-    const existingTemplate = await (prisma as any).styleTemplate.findFirst({
+    const existingTemplate = await prisma.styleTemplate.findFirst({
       where: {
         id: templateId,
         userId: user.id
@@ -95,7 +95,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
 
     // If name is being updated, check for duplicates
     if (body.name && body.name.trim() !== existingTemplate.name) {
-      const duplicateTemplate = await (prisma as any).styleTemplate.findFirst({
+      const duplicateTemplate = await prisma.styleTemplate.findFirst({
         where: {
           userId: user.id,
           name: body.name.trim(),
@@ -108,7 +108,7 @@ export async function PUT(request: NextRequest, { params }: { params: { id: stri
       }
     }
 
-    const updatedTemplate = await (prisma as any).styleTemplate.update({
+    const updatedTemplate = await prisma.styleTemplate.update({
       where: { id: templateId },
       data: {
         ...body,
@@ -146,7 +146,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     }
 
     // Verify template exists and belongs to user
-    const existingTemplate = await (prisma as any).styleTemplate.findFirst({
+    const existingTemplate = await prisma.styleTemplate.findFirst({
       where: {
         id: templateId,
         userId: user.id
@@ -157,7 +157,7 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
       return NextResponse.json({ error: 'Template not found' }, { status: 404 });
     }
 
-    await (prisma as any).styleTemplate.delete({
+    await prisma.styleTemplate.delete({
       where: { id: templateId }
     });
 

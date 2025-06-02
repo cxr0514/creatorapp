@@ -12,7 +12,7 @@ import {
 } from '@/lib/video-export'
 import { TemplateList } from '@/components/video/template-list'
 import { TemplatePreview } from '@/components/video/template-preview'
-import { useTemplates, StyleTemplate } from '@/lib/hooks/use-templates'
+import { StyleTemplate } from '@/lib/hooks/use-templates'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface Clip {
@@ -53,8 +53,6 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
   const [exportResults, setExportResults] = useState<ExportResult[]>([])
   const [showResults, setShowResults] = useState(false)
   const [selectedTemplate, setSelectedTemplate] = useState<StyleTemplate | null>(null)
-  
-  const { templates } = useTemplates()
 
   useEffect(() => {
     if (isOpen) {

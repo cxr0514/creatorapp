@@ -10,7 +10,8 @@ import {
   // getRecommendedCroppingStrategy, // TODO: Use when implementing smart recommendations
   type BatchExportRequest,
   type ExportQueueItem,
-  type ExportFormat
+  type ExportFormat,
+  type CroppingStrategyInfo
 } from '@/lib/video-export'
 
 interface Clip {
@@ -345,14 +346,14 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                   onChange={(e) => setCroppingStrategy(e.target.value)}
                   className="w-full p-2 border rounded-lg"
                 >
-                  {CROPPING_STRATEGIES.map((strategy: any) => (
+                  {CROPPING_STRATEGIES.map((strategy: CroppingStrategyInfo) => (
                     <option key={strategy.type} value={strategy.type}>
                       {strategy.displayName}
                     </option>
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  {CROPPING_STRATEGIES.find((s: any) => s.type === croppingStrategy)?.description}
+                  {CROPPING_STRATEGIES.find((s: CroppingStrategyInfo) => s.type === croppingStrategy)?.description}
                 </p>
               </div>
 

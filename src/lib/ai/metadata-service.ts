@@ -106,11 +106,10 @@ export class AIMetadataService {
    */
   static async generateCategories(
     videoTitle: string,
-    videoDescription: string,
-    options: AIMetadataOptions = {}
+    videoDescription: string
   ): Promise<{ categories: string[]; keywords: string[] }> {
     try {
-      const prompt = this.buildCategoriesPrompt(videoTitle, videoDescription, options);
+      const prompt = this.buildCategoriesPrompt(videoTitle, videoDescription);
       
       const response = await openai.chat.completions.create({
         model: AI_CONFIG.models.analysis,
@@ -140,7 +139,7 @@ export class AIMetadataService {
         this.generateTitle(videoDescription, options),
         this.generateDescription(videoTitle, videoDescription, options),
         this.generateHashtags(videoTitle, videoDescription, options),
-        this.generateCategories(videoTitle, videoDescription, options),
+        this.generateCategories(videoTitle, videoDescription),
       ]);
 
       return {
@@ -240,8 +239,7 @@ Categories to include:
 
   private static buildCategoriesPrompt(
     videoTitle: string,
-    videoDescription: string,
-    options: AIMetadataOptions
+    videoDescription: string
   ): string {
     return `Analyze this video content and categorize it:
 

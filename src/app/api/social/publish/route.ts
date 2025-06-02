@@ -13,7 +13,6 @@ export async function POST(request: NextRequest) {
     }
 
     const {
-      clipId,
       platforms,
       title,
       description,
@@ -210,7 +209,7 @@ export async function GET(request: NextRequest) {
       }
 
       return NextResponse.json({ validation })
-    } catch (error) {
+    } catch {
       return NextResponse.json(
         { error: `Platform ${platform} not supported` },
         { status: 400 }

@@ -5,11 +5,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { useTemplates, CreateTemplateData } from '@/lib/hooks/use-templates'
 import { useSession } from 'next-auth/react'
-import { Upload, X, Palette, Type, Video, Image } from 'lucide-react'
+import { X, Palette, Type, Image } from 'lucide-react'
 
 interface TemplateFormProps {
   open: boolean
@@ -227,6 +226,7 @@ export function TemplateForm({
           {/* Assets */}
           <div className="space-y-4">
             <div className="flex items-center gap-2">
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
               <Image className="h-4 w-4" />
               <h3 className="font-medium">Brand Assets</h3>
             </div>

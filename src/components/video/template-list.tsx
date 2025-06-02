@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from '@/components/ui/badge'
 import { TemplateForm } from './template-form'
 import { useTemplates, StyleTemplate } from '@/lib/hooks/use-templates'
-import { Plus, Edit, Trash2, Palette, Type, Image, Video } from 'lucide-react'
+import { Plus, Edit, Trash2, Palette, Type } from 'lucide-react'
 import {
   AlertDialog,
   AlertDialogAction,

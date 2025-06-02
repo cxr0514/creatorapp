@@ -91,8 +91,7 @@ export async function POST(request: NextRequest) {
           }
           result = await AIMetadataService.generateCategories(
             videoTitle,
-            videoDescription || '',
-            aiOptions
+            videoDescription || ''
           )
           break
 

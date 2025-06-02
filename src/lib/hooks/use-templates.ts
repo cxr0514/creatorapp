@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useSession } from 'next-auth/react'
 
 export interface StyleTemplate {
@@ -43,7 +43,7 @@ export function useTemplates() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchTemplates = async () => {
+  const fetchTemplates = useCallback(async () => {
     if (!session?.user) return
 
     setLoading(true)
@@ -63,7 +63,7 @@ export function useTemplates() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [session?.user])
 
   const createTemplate = async (templateData: CreateTemplateData): Promise<StyleTemplate> => {
     if (!session?.user) {
@@ -208,7 +208,7 @@ export function useTemplates() {
 
   useEffect(() => {
     fetchTemplates()
-  }, [session])
+  }, [fetchTemplates])
 
   return {
     templates,

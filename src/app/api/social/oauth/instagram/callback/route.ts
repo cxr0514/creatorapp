@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
-    const state = searchParams.get('state')
     const error = searchParams.get('error')
 
     if (error) {
@@ -29,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Exchange code for tokens
-      const tokenData = await exchangeCodeForToken('instagram', code, state || undefined)
+      const tokenData = await exchangeCodeForToken('instagram', code)
 
       // Get user profile from Instagram Basic Display API
       const profileResponse = await fetch(`https://graph.instagram.com/me?fields=id,username,account_type,media_count&access_token=${tokenData.access_token}`)

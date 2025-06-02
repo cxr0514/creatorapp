@@ -13,8 +13,6 @@ import { Loader2, Sparkles, RefreshCw, Copy, Check, Eye, EyeOff } from 'lucide-r
 import { useToast } from '@/hooks/use-toast'
 
 interface AIMetadataEnhancerProps {
-  videoId?: string
-  clipId?: string
   initialTitle?: string
   initialDescription?: string
   initialHashtags?: string[]
@@ -43,8 +41,6 @@ interface GeneratedMetadata {
 }
 
 export function AIMetadataEnhancer({
-  videoId,
-  clipId,
   initialTitle = '',
   initialDescription = '',
   initialHashtags = [],
@@ -67,7 +63,6 @@ export function AIMetadataEnhancer({
   
   // AI generated data
   const [generatedMetadata, setGeneratedMetadata] = useState<GeneratedMetadata>({})
-  const [selectedTitleIndex, setSelectedTitleIndex] = useState(0)
   
   // Loading states
   const [isGenerating, setIsGenerating] = useState(false)
@@ -191,24 +186,24 @@ export function AIMetadataEnhancer({
   }, [title, description, aiOptions, toast])
 
   // Apply generated metadata
-  const applyMetadata = useCallback((field: string, value: any) => {
+  const applyMetadata = useCallback((field: string, value: string | string[]) => {
     switch (field) {
       case 'title':
-        setTitle(value)
+        setTitle(value as string)
         break
       case 'description':
-        setDescription(value)
+        setDescription(value as string)
         break
       case 'hashtags':
-        setHashtags(value)
+        setHashtags(value as string[])
         break
     }
 
     // Notify parent component
     onMetadataUpdate?.({
-      title: field === 'title' ? value : title,
-      description: field === 'description' ? value : description,
-      hashtags: field === 'hashtags' ? value : hashtags,
+      title: field === 'title' ? (value as string) : title,
+      description: field === 'description' ? (value as string) : description,
+      hashtags: field === 'hashtags' ? (value as string[]) : hashtags,
       categories: generatedMetadata.categories,
       keywords: generatedMetadata.keywords
     })
@@ -230,7 +225,7 @@ export function AIMetadataEnhancer({
         title: 'Copied to Clipboard',
         description: `${field} copied successfully!`,
       })
-    } catch (error) {
+    } catch {
       toast({
         title: 'Copy Failed',
         description: 'Unable to copy to clipboard',
@@ -260,7 +255,7 @@ export function AIMetadataEnhancer({
             <label className="text-sm font-medium mb-2 block">Content Type</label>
             <Select 
               value={aiOptions.contentType} 
-              onValueChange={(value) => setAiOptions(prev => ({ ...prev, contentType: value as any }))}
+              onValueChange={(value) => setAiOptions(prev => ({ ...prev, contentType: value as AIOptions['contentType'] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -280,7 +275,7 @@ export function AIMetadataEnhancer({
             <label className="text-sm font-medium mb-2 block">Target Audience</label>
             <Select 
               value={aiOptions.targetAudience} 
-              onValueChange={(value) => setAiOptions(prev => ({ ...prev, targetAudience: value as any }))}
+              onValueChange={(value) => setAiOptions(prev => ({ ...prev, targetAudience: value as AIOptions['targetAudience'] }))}
             >
               <SelectTrigger>
                 <SelectValue />
@@ -299,7 +294,7 @@ export function AIMetadataEnhancer({
             <label className="text-sm font-medium mb-2 block">Platform</label>
             <Select 
               value={aiOptions.platform} 
-              onValueChange={(value) => setAiOptions(prev => ({ ...prev, platform: value as any }))}
+              onValueChange={(value) => setAiOptions(prev => ({ ...prev, platform: value as AIOptions['platform'] }))}
             >
               <SelectTrigger>
                 <SelectValue />

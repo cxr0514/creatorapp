@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { UserNotificationPreferences, NotificationPreference, NotificationType, NotificationChannel } from '@/types/notifications';
+import { UserNotificationPreferences, NotificationType, NotificationChannel } from '@/types/notifications';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';

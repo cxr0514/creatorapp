@@ -26,7 +26,7 @@ export const captionQueue = new Queue<CaptionJob>('video-captions', {
 // Process caption generation jobs
 const worker = new Worker<CaptionJob>('video-captions', async (job) => {
   try {
-    const { videoId, format = 'srt', language, userId } = job.data
+    const { videoId, format = 'srt', language } = job.data
 
     // Get video URL from Cloudinary
     const videoUrl = cloudinary.url(videoId, {

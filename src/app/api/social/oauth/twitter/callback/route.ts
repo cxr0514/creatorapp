@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
-    const state = searchParams.get('state')
     const error = searchParams.get('error')
 
     if (error) {
@@ -29,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Exchange code for tokens
-      const tokenData = await exchangeCodeForToken('twitter', code, state || undefined)
+      const tokenData = await exchangeCodeForToken('twitter', code)
 
       // Get user profile from Twitter API v2
       const profileResponse = await fetch('https://api.twitter.com/2/users/me?user.fields=id,name,username,profile_image_url,public_metrics', {

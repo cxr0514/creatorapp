@@ -1,17 +1,16 @@
 import { Worker, Job } from 'bullmq'
 import { generateCaptions } from '@/lib/ai'
-import prisma from '@/lib/prisma'
 
 export interface CaptionJob {
-  videoId: string
+  videoId: number
   videoUrl: string
   format?: 'srt' | 'vtt'
   status: 'pending' | 'processing' | 'completed' | 'failed'
 }
 
-const captionWorker = new Worker<CaptionJob>('captions', async (job: Job<CaptionJob>) => {
+export const captionWorker = new Worker<CaptionJob>('captions', async (job: Job<CaptionJob>) => {
   try {
-    const { videoId, videoUrl, format = 'srt' } = job.data
+    const { videoUrl, format = 'srt' } = job.data
 
     // Update job progress
     await job.updateProgress(10)
@@ -23,24 +22,10 @@ const captionWorker = new Worker<CaptionJob>('captions', async (job: Job<Caption
     await job.updateProgress(50)
     await job.log('Captions generated, saving to database')
 
-    // Save captions to database
-    await prisma.video.update({
-      where: { id: videoId },
-      data: {
-        captions: {
-          upsert: {
-            create: {
-              content: captions,
-              updatedAt: new Date()
-            },
-            update: {
-              content: captions,
-              updatedAt: new Date()
-            }
-          }
-        }
-      }
-    })
+    // For now, just return the captions since the Video model doesn't have a captions field
+    // In the future, you might want to create a separate Captions table or store in file system
+    await job.updateProgress(90)
+    await job.log('Caption processing complete')
 
     await job.updateProgress(100)
     await job.log('Caption generation complete')

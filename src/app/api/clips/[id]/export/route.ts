@@ -4,6 +4,7 @@ import { authOptions } from '../../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { EXPORT_FORMATS } from '@/lib/video-export';
 import { applyStyleTemplate } from '@/lib/cloudinary';
+import { smartCroppingEngine } from '@/lib/smart-cropping-engine';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
@@ -20,8 +21,10 @@ interface ExportFormatRequest {
 
 interface ExportRequestBody {
   formats: ExportFormatRequest[];
-  croppingStrategy?: 'face' | 'auto' | 'center';
+  croppingStrategy?: 'face' | 'auto' | 'center' | 'smart' | 'action' | 'rule-of-thirds' | 'motion-tracking' | 'auto-focus';
   templateId?: string | null;
+  useSmartCropping?: boolean;
+  qualityLevel?: 'standard' | 'high' | 'ultra';
 }
 
 interface ExportResult {
@@ -31,6 +34,11 @@ interface ExportResult {
   exportUrl?: string;
   newPublicId?: string;
   errorMessage?: string;
+  smartCropAnalysis?: {
+    strategy: string;
+    confidence: number;
+    reasoning: string;
+  };
 }
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -49,7 +57,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const body: ExportRequestBody = await request.json();
     // Ensure croppingStrategy has a default if not provided
-    const { formats, croppingStrategy = 'auto', templateId } = body;
+    const { formats, croppingStrategy = 'auto', templateId, useSmartCropping = true, qualityLevel = 'high' } = body;
 
     if (!Array.isArray(formats) || formats.length === 0) {
       return NextResponse.json({ error: 'Invalid or empty formats array' }, { status: 400 });
@@ -97,6 +105,53 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         });
         continue; // Skip to next format
       }
+
+      // Find the export format definition
+      const exportFormat = EXPORT_FORMATS.find(f => f.format === aspectRatio);
+      if (!exportFormat) {
+        results.push({
+          format: aspectRatio,
+          platform,
+          status: 'error',
+          errorMessage: `Export format not found for ${aspectRatio}`,
+        });
+        continue;
+      }
+
+      let smartCropAnalysis = null;
+      let finalCroppingStrategy = croppingStrategy;
+
+      // Use smart cropping if enabled
+      if (useSmartCropping && croppingStrategy === 'smart') {
+        try {
+          // Analyze content for smart cropping
+          const contentAnalysis = await smartCroppingEngine.analyzeContent();
+          const optimalStrategy = await smartCroppingEngine.determineCroppingStrategy(
+            clip.aspectRatio,
+            exportFormat,
+            contentAnalysis
+          );
+          
+          smartCropAnalysis = optimalStrategy;
+          
+          // Map smart cropping strategy to valid cropping strategy types
+          const strategyMapping: Record<string, typeof finalCroppingStrategy> = {
+            'face-detection': 'face',
+            'motion-tracking': 'motion-tracking',
+            'center-crop': 'center',
+            'auto-focus': 'auto-focus',
+            'rule-of-thirds': 'rule-of-thirds',
+            'action-detection': 'action'
+          };
+          
+          finalCroppingStrategy = strategyMapping[optimalStrategy.strategy] || 'auto';
+          
+          console.log(`[API/CLIPS EXPORT] Smart cropping analysis for ${aspectRatio}: ${optimalStrategy.strategy} -> ${finalCroppingStrategy} (${Math.round(optimalStrategy.confidence * 100)}% confidence)`);
+        } catch (smartCropError) {
+          console.warn(`[API/CLIPS EXPORT] Smart cropping failed, falling back to ${croppingStrategy}:`, smartCropError);
+          // Continue with original strategy
+        }
+      }
       
       // Generate the transformed URL using template if available
       let transformedUrl: string;
@@ -121,31 +176,51 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           quality: 'auto'
         });
       } else {
-        // Use basic transformation without template
+        // Use basic transformation with smart cropping if available
         const transformation: Record<string, string | number> = {
           aspect_ratio: aspectRatio.replace(':', '_'),
-          crop: 'fill', 
-          gravity: croppingStrategy,
+          crop: 'fill',
+          quality: qualityLevel === 'ultra' ? '100' : qualityLevel === 'high' ? 'auto:good' : 'auto:low'
         };
 
-        if (aspectRatio === '9:16') {
-          transformation.width = 1080;
-        } else if (aspectRatio === '1:1') {
-          transformation.width = 1080;
-        } else if (aspectRatio === '16:9') {
-          transformation.width = 1920;
-        }
+        // Apply smart cropping transformations if available
+        if (smartCropAnalysis && useSmartCropping) {
+          const cloudinaryTransformation = smartCroppingEngine.generateCloudinaryTransformation(
+            smartCropAnalysis,
+            exportFormat,
+            clip.startTime || undefined,
+            clip.endTime || undefined
+          );
+          // Parse the transformation string and apply it
+          transformedUrl = cloudinary.url(originalPublicId, {
+            resource_type: 'video',
+            transformation: cloudinaryTransformation,
+          });
+        } else {
+          // Use basic gravity-based cropping
+          transformation.gravity = finalCroppingStrategy === 'auto' ? 'auto' : finalCroppingStrategy;
 
-        transformedUrl = cloudinary.url(originalPublicId, {
-          resource_type: 'video',
-          transformation: [transformation, { fetch_format: 'mp4' }],
-        });
+          if (aspectRatio === '9:16') {
+            transformation.width = qualityLevel === 'ultra' ? 1440 : 1080;
+          } else if (aspectRatio === '1:1') {
+            transformation.width = qualityLevel === 'ultra' ? 1440 : 1080;
+          } else if (aspectRatio === '16:9') {
+            transformation.width = qualityLevel === 'ultra' ? 2560 : qualityLevel === 'high' ? 1920 : 1280;
+          } else if (aspectRatio === '4:3') {
+            transformation.width = qualityLevel === 'ultra' ? 1920 : qualityLevel === 'high' ? 1440 : 1024;
+          }
+
+          transformedUrl = cloudinary.url(originalPublicId, {
+            resource_type: 'video',
+            transformation: [transformation, { fetch_format: 'mp4' }],
+          });
+        }
       }
       
       // Sanitize platform and aspect ratio for use in public_id
       const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
       const safeAspectRatio = aspectRatio.replace(':', '_');
-      const newExportSuffix = `export_${safeAspectRatio}_${croppingStrategy}_${safePlatform}`;
+      const newExportSuffix = `export_${safeAspectRatio}_${finalCroppingStrategy}_${safePlatform}`;
       const newPublicId = `${originalPublicId}_${newExportSuffix}`;
 
       try {
@@ -174,6 +249,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           status: 'success',
           exportUrl: uploadResult.secure_url,
           newPublicId: uploadResult.public_id,
+          smartCropAnalysis: smartCropAnalysis ? {
+            strategy: smartCropAnalysis.strategy,
+            confidence: smartCropAnalysis.confidence,
+            reasoning: smartCropAnalysis.reasoning
+          } : undefined
         });
 
       } catch (uploadError: unknown) {

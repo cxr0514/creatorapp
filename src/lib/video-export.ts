@@ -34,6 +34,8 @@ export interface BatchExportRequest {
   platforms: string[];
   croppingStrategy?: string;
   priority?: 'low' | 'normal' | 'high';
+  useSmartCropping?: boolean;
+  qualityLevel?: 'standard' | 'high' | 'ultra';
 }
 
 export interface ExportQueueItem {

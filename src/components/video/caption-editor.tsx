@@ -87,7 +87,6 @@ function formatVTT(captions: Caption[]): string {
 }
 
 export function CaptionEditor({
-  videoId,
   initialCaptions = '',
   format = 'srt',
   onSave,

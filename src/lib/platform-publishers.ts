@@ -10,7 +10,7 @@ export interface PublishRequest {
   aspectRatio: string
   platform: string
   accessToken: string
-  platformSettings?: Record<string, any>
+  platformSettings?: Record<string, unknown>
 }
 
 export interface PublishResponse {
@@ -150,7 +150,7 @@ export class TikTokPublisher implements PlatformPublisher {
       const formData = new FormData()
       formData.append('video', new Blob([videoBuffer], { type: 'video/mp4' }))
 
-      const uploadResponse = await fetch(uploadUrl, {
+      await fetch(uploadUrl, {
         method: 'PUT',
         body: formData
       })
@@ -317,12 +317,15 @@ export class TwitterPublisher implements PlatformPublisher {
 
       // Step 1: Upload media
       const uploadResponse = await fetch('https://upload.twitter.com/1.1/media/upload.json', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${request.accessToken}`,
-          'Content-Type': 'multipart/form-data'
-        },
-        body: new FormData().append('media', new Blob([videoBuffer], { type: 'video/mp4' }))
+        method: 'POST',      headers: {
+        'Authorization': `Bearer ${request.accessToken}`,
+        'Content-Type': 'multipart/form-data'
+      },
+      body: (() => {
+        const formData = new FormData();
+        formData.append('media', new Blob([videoBuffer], { type: 'video/mp4' }));
+        return formData;
+      })()
       })
 
       const mediaData = await uploadResponse.json()

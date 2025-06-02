@@ -81,6 +81,7 @@ export function TemplatePreview({
                   right: '10px'
                 }}
               >
+                {/* eslint-disable-next-line jsx-a11y/alt-text */}
                 <Image className="h-4 w-4 text-white" />
               </div>
             )}
@@ -187,6 +188,7 @@ export function TemplatePreview({
             <div className="flex flex-wrap gap-1">
               {template.logoCloudinaryId && (
                 <Badge variant="outline" className="text-xs">
+                  {/* eslint-disable-next-line jsx-a11y/alt-text */}
                   <Image className="h-3 w-3 mr-1" />
                   Logo
                 </Badge>

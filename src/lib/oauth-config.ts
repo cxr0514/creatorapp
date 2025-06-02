@@ -145,8 +145,7 @@ export function generateOAuthUrl(platform: string, state?: string): string {
 // Exchange authorization code for access token
 export async function exchangeCodeForToken(
   platform: string,
-  code: string,
-  state?: string
+  code: string
 ): Promise<{
   access_token: string
   refresh_token?: string

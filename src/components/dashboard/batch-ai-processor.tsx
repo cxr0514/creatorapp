@@ -18,7 +18,14 @@ interface BatchItem {
   description?: string
   status: 'pending' | 'processing' | 'completed' | 'error'
   progress: number
-  generatedMetadata?: any
+  generatedMetadata?: {
+    title?: string
+    titles?: string[]
+    description?: string
+    hashtags?: string[]
+    categories?: string[]
+    keywords?: string[]
+  }
   error?: string
 }
 
@@ -29,7 +36,7 @@ interface BatchAIProcessorProps {
     title: string
     description?: string
   }[]
-  onComplete?: (results: { id: string; metadata: any; error?: string }[]) => void
+  onComplete?: (results: { id: string; metadata: BatchItem['generatedMetadata']; error?: string }[]) => void
   className?: string
 }
 
@@ -70,7 +77,6 @@ export function BatchAIProcessor({
   
   const [isProcessing, setIsProcessing] = useState(false)
   const [isPaused, setIsPaused] = useState(false)
-  const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedItems, setSelectedItems] = useState<string[]>(items.map(item => item.id))
 
   // Calculate overall progress
@@ -94,7 +100,7 @@ export function BatchAIProcessor({
 
     try {
       const requests = []
-      const results: any = {}
+      const results: Partial<BatchItem['generatedMetadata']> = {}
 
       // Generate titles if requested
       if (batchOptions.generateTitles && item.description) {
@@ -258,7 +264,6 @@ export function BatchAIProcessor({
       for (let i = 0; i < itemsToProcess.length; i++) {
         if (isPaused) break
         
-        setCurrentIndex(i)
         await processItem(itemsToProcess[i])
         
         // Small delay between items to avoid rate limiting
@@ -290,7 +295,6 @@ export function BatchAIProcessor({
       })
     } finally {
       setIsProcessing(false)
-      setCurrentIndex(0)
     }
   }, [selectedItems, batchItems, isPaused, processItem, onComplete, completedCount, errorCount, toast])
 
@@ -312,7 +316,6 @@ export function BatchAIProcessor({
       generatedMetadata: undefined,
       error: undefined
     })))
-    setCurrentIndex(0)
     setIsProcessing(false)
     setIsPaused(false)
     
@@ -432,7 +435,7 @@ export function BatchAIProcessor({
                 <label className="text-sm font-medium mb-2 block">Content Type</label>
                 <Select 
                   value={batchOptions.contentType} 
-                  onValueChange={(value) => setBatchOptions(prev => ({ ...prev, contentType: value as any }))}
+                  onValueChange={(value) => setBatchOptions(prev => ({ ...prev, contentType: value as BatchOptions['contentType'] }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -452,7 +455,7 @@ export function BatchAIProcessor({
                 <label className="text-sm font-medium mb-2 block">Target Audience</label>
                 <Select 
                   value={batchOptions.targetAudience} 
-                  onValueChange={(value) => setBatchOptions(prev => ({ ...prev, targetAudience: value as any }))}
+                  onValueChange={(value) => setBatchOptions(prev => ({ ...prev, targetAudience: value as BatchOptions['targetAudience'] }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -471,7 +474,7 @@ export function BatchAIProcessor({
                 <label className="text-sm font-medium mb-2 block">Platform</label>
                 <Select 
                   value={batchOptions.platform} 
-                  onValueChange={(value) => setBatchOptions(prev => ({ ...prev, platform: value as any }))}
+                  onValueChange={(value) => setBatchOptions(prev => ({ ...prev, platform: value as BatchOptions['platform'] }))}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -563,7 +566,7 @@ export function BatchAIProcessor({
 
         {/* Items List */}
         <div className="space-y-2">
-          {batchItems.map((item, index) => (
+          {batchItems.map((item) => (
             <Card key={item.id} className={`transition-all ${
               selectedItems.includes(item.id) ? 'ring-2 ring-blue-500' : ''
             }`}>

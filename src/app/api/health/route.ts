@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     await logger.info('Health check API called', {
       status: healthCheck.status,
       totalErrors: errorMetrics.totalErrors,
-      requestIP: request.ip || 'unknown'
+      requestIP: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     });
 
     return NextResponse.json(response, { status });

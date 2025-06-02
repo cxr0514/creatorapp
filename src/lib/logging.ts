@@ -1,4 +1,4 @@
-import { writeFile, appendFile, mkdir } from 'fs/promises';
+import { appendFile, mkdir } from 'fs/promises';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
@@ -6,7 +6,7 @@ export interface LogEntry {
   timestamp: string;
   level: 'info' | 'warn' | 'error' | 'debug';
   message: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   userId?: string;
   postId?: string;
   platform?: string;
@@ -85,19 +85,19 @@ class Logger {
     }
   }
 
-  async info(message: string, metadata?: Record<string, any>) {
+  async info(message: string, metadata?: Record<string, unknown>) {
     await this.log({ level: 'info', message, metadata });
   }
 
-  async warn(message: string, metadata?: Record<string, any>) {
+  async warn(message: string, metadata?: Record<string, unknown>) {
     await this.log({ level: 'warn', message, metadata });
   }
 
-  async error(message: string, error?: Error, metadata?: Record<string, any>) {
+  async error(message: string, error?: Error, metadata?: Record<string, unknown>) {
     await this.log({ level: 'error', message, error, metadata });
   }
 
-  async debug(message: string, metadata?: Record<string, any>) {
+  async debug(message: string, metadata?: Record<string, unknown>) {
     await this.log({ level: 'debug', message, metadata });
   }
 
@@ -197,6 +197,3 @@ class Logger {
 
 // Export singleton instance
 export const logger = new Logger();
-
-// Export types for external use
-export type { LogEntry };

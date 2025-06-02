@@ -19,7 +19,7 @@ interface CreateTemplateRequest {
   callToActionPosition?: string;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    const templates = await (prisma as any).styleTemplate.findMany({
+    const templates = await prisma.styleTemplate.findMany({
       where: {
         userId: user.id
       },
@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Check if template name already exists for this user
-    const existingTemplate = await (prisma as any).styleTemplate.findFirst({
+    const existingTemplate = await prisma.styleTemplate.findFirst({
       where: {
         userId: user.id,
         name: name.trim()
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Template name already exists' }, { status: 400 });
     }
 
-    const template = await (prisma as any).styleTemplate.create({
+    const template = await prisma.styleTemplate.create({
       data: {
         name: name.trim(),
         userId: user.id,

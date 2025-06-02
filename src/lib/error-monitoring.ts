@@ -32,7 +32,13 @@ export interface HealthCheck {
 
 class ErrorMonitor {
   private errorCounts: Map<string, number> = new Map();
-  private recentErrors: Array<any> = [];
+  private recentErrors: Array<{
+    timestamp: string;
+    platform: string;
+    error: string;
+    userId?: string;
+    postId?: string;
+  }> = [];
   private maxRecentErrors = 100;
   private healthMetrics = {
     totalPublishes: 0,
@@ -239,6 +245,3 @@ class ErrorMonitor {
 
 // Export singleton instance
 export const errorMonitor = new ErrorMonitor();
-
-// Export types
-export type { ErrorMetrics, HealthCheck };

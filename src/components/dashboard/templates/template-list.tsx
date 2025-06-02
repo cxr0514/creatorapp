@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { CreateTemplateModal } from './create-template-modal'
 import { EditTemplateModal } from './edit-template-modal'
-import { Palette, Plus, Edit, Trash2, Eye } from '@/lib/icons'
+import { Palette, Plus, Edit, Trash2 } from '@/lib/icons'
 
 interface StyleTemplate {
   id: string

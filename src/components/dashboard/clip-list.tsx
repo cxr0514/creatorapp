@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { ExportModal } from './export-modal'
-import { BatchExportModal } from './batch-export-modal'
+import { EnhancedBatchExportModal } from '../export/enhanced-batch-export-modal'
 import { PublishingModal } from './publishing-modal'
 import { WorkflowApplyModal } from './workflow-apply-modal'
 
@@ -685,8 +685,8 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
       onApplyWorkflow={handleApplyWorkflow}
     />
     
-    {/* Batch Export Modal */}
-    <BatchExportModal
+    {/* Enhanced Batch Export Modal */}
+    <EnhancedBatchExportModal
       isOpen={batchExportModalOpen}
       onClose={closeBatchExportModal}
       clips={clips.filter(clip => selectedClips.has(clip.id))}

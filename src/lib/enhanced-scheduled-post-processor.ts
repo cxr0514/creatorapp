@@ -4,7 +4,7 @@
 
 import { getPlatformPublisher } from './platform-publishers'
 import { logger } from './logging'
-import { errorMonitor } from './error-monitoring'
+import { errorMonitor, ErrorMetrics } from './error-monitoring'
 // import { prisma } from './prisma' // TODO: Uncomment when database is ready
 
 export interface ScheduledPostJob {
@@ -241,10 +241,9 @@ export class EnhancedScheduledPostProcessor {
       })
       await logger.logPublishFailure(job.id, job.platform, job.userId, error as Error)
 
-      const newRetryCount = job.retryCount + 1
-
       // TODO: Update database when available
       /*
+      const newRetryCount = job.retryCount + 1
       if (newRetryCount >= job.maxRetries) {
         // Mark as failed
         await prisma.scheduledPost.update({
@@ -366,7 +365,7 @@ export class EnhancedScheduledPostProcessor {
   getStatus(): { 
     isRunning: boolean; 
     isProcessing: boolean; 
-    errorMetrics: any;
+    errorMetrics: ErrorMetrics;
     uptime: number;
   } {
     return {

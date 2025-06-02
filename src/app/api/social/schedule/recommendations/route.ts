@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
     const recommendations = SmartScheduler.getOptimalTimes({
       platforms,
       contentType,
-      targetAudience: targetAudience as any,
+      targetAudience: targetAudience as 'general' | 'business' | 'entertainment' | 'educational',
       timezone,
       minHoursBetweenPosts: minHoursBetween,
       excludeWeekends

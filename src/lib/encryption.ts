@@ -2,8 +2,6 @@
 import crypto from 'crypto'
 
 const ALGORITHM = 'aes-256-gcm'
-const IV_LENGTH = 16 // For GCM, this is always 16
-const TAG_LENGTH = 16
 const SALT_LENGTH = 64
 
 /**
@@ -16,9 +14,8 @@ export function encrypt(text: string, key?: string): string {
       throw new Error('Encryption key not provided')
     }
 
-    // Generate random salt and IV
+    // Generate random salt
     const salt = crypto.randomBytes(SALT_LENGTH)
-    const iv = crypto.randomBytes(IV_LENGTH)
 
     // Derive key from password using PBKDF2
     const derivedKey = crypto.pbkdf2Sync(encryptionKey, salt, 100000, 32, 'sha512')
@@ -34,8 +31,8 @@ export function encrypt(text: string, key?: string): string {
     // Get the authentication tag
     const tag = cipher.getAuthTag()
 
-    // Combine salt, iv, tag, and encrypted data
-    const result = salt.toString('hex') + ':' + iv.toString('hex') + ':' + tag.toString('hex') + ':' + encrypted
+    // Combine salt, tag, and encrypted data
+    const result = salt.toString('hex') + ':' + tag.toString('hex') + ':' + encrypted
 
     return result
   } catch (error) {
@@ -56,14 +53,13 @@ export function decrypt(encryptedText: string, key?: string): string {
 
     // Split the encrypted text into components
     const parts = encryptedText.split(':')
-    if (parts.length !== 4) {
+    if (parts.length !== 3) {
       throw new Error('Invalid encrypted data format')
     }
 
     const salt = Buffer.from(parts[0], 'hex')
-    const iv = Buffer.from(parts[1], 'hex')
-    const tag = Buffer.from(parts[2], 'hex')
-    const encrypted = parts[3]
+    const tag = Buffer.from(parts[1], 'hex')
+    const encrypted = parts[2]
 
     // Derive the same key
     const derivedKey = crypto.pbkdf2Sync(encryptionKey, salt, 100000, 32, 'sha512')

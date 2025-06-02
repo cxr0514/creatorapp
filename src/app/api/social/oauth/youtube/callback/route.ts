@@ -15,7 +15,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const code = searchParams.get('code')
-    const state = searchParams.get('state')
     const error = searchParams.get('error')
 
     if (error) {
@@ -29,7 +28,7 @@ export async function GET(request: NextRequest) {
 
     try {
       // Exchange code for tokens
-      const tokenData = await exchangeCodeForToken('youtube', code, state || undefined)
+      const tokenData = await exchangeCodeForToken('youtube', code)
 
       // Get channel statistics for additional metadata
       const channelResponse = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=snippet,statistics&mine=true`, {

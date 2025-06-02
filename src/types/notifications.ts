@@ -31,5 +31,5 @@ export interface NotificationPayload {
   timestamp: Date;
   read: boolean;
   link?: string; // Optional link to relevant content (e.g., the generated clip)
-  metadata?: Record<string, any>; // For extra data specific to the notification type
+  metadata?: Record<string, unknown>; // For extra data specific to the notification type
 } 

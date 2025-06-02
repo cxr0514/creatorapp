@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 
 interface CaptionJobStatus {
   jobId: string
@@ -18,7 +18,10 @@ export default function useCaptionStatus(jobIds: string[]): CaptionStatusHookRes
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
 
-  const updateStatus = async () => {
+  // Memoize the joined jobIds to avoid complex expressions in dependency arrays
+  const jobIdsString = useMemo(() => jobIds.join(','), [jobIds])
+
+  const updateStatus = useCallback(async () => {
     if (!jobIds.length) return
 
     setIsLoading(true)
@@ -41,7 +44,7 @@ export default function useCaptionStatus(jobIds: string[]): CaptionStatusHookRes
     } finally {
       setIsLoading(false)
     }
-  }
+  }, [jobIds])
 
   useEffect(() => {
     let isMounted = true
@@ -71,7 +74,7 @@ export default function useCaptionStatus(jobIds: string[]): CaptionStatusHookRes
         clearTimeout(intervalId)
       }
     }
-  }, [jobIds.join(',')])
+  }, [jobIdsString, jobIds.length, updateStatus]) // eslint-disable-line react-hooks/exhaustive-deps
 
   return { jobStatuses, error, isLoading, updateStatus }
 }
