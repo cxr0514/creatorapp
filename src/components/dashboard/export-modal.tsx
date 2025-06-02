@@ -5,12 +5,15 @@ import { Button } from '@/components/ui/button'
 import { 
   EXPORT_FORMATS, 
   CROPPING_STRATEGIES, 
-  getPlatformRecommendations,
   type ExportFormat,
   type CroppingStrategyInfo,
   getRecommendedCroppingStrategy,
   getCroppingStrategyInfo 
 } from '@/lib/video-export'
+import { TemplateList } from '@/components/video/template-list'
+import { TemplatePreview } from '@/components/video/template-preview'
+import { useTemplates, StyleTemplate } from '@/lib/hooks/use-templates'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 
 interface Clip {
   id: number
@@ -49,6 +52,9 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
   const [isExporting, setIsExporting] = useState(false)
   const [exportResults, setExportResults] = useState<ExportResult[]>([])
   const [showResults, setShowResults] = useState(false)
+  const [selectedTemplate, setSelectedTemplate] = useState<StyleTemplate | null>(null)
+  
+  const { templates } = useTemplates()
 
   useEffect(() => {
     if (isOpen) {
@@ -58,6 +64,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
       setShowAdvanced(false)
       setExportResults([])
       setShowResults(false)
+      setSelectedTemplate(null)
     }
   }, [isOpen])
 
@@ -110,7 +117,8 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
         body: JSON.stringify({
           clipId: clip.id,
           formats: exports,
-          croppingStrategy
+          croppingStrategy,
+          templateId: selectedTemplate?.id || null
         })
       })
 
@@ -131,6 +139,10 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
     }
   }
 
+  const handleTemplateSelect = (template: StyleTemplate) => {
+    setSelectedTemplate(template)
+  }
+
   const isCurrentFormat = (format: string) => {
     return clip.aspectRatio === format
   }
@@ -146,7 +158,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold">Export Clip: {clip.title}</h2>
@@ -160,129 +172,239 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
         </div>
 
         {!showResults ? (
-          <div className="space-y-6">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Select Export Formats & Platforms</h3>
-              <p className="text-sm text-gray-600">
-                Choose the formats and platforms you want to export to. Smart cropping will be applied automatically.
-              </p>
-            </div>
+          <Tabs defaultValue="formats" className="space-y-6">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="formats">Export Formats</TabsTrigger>
+              <TabsTrigger value="templates">Style Templates</TabsTrigger>
+              <TabsTrigger value="preview">Preview</TabsTrigger>
+            </TabsList>
 
-            {/* Advanced Cropping Options */}
-            <div className="mb-6 border rounded-lg p-4 bg-gray-50">
-              <div className="flex items-center justify-between mb-3">
-                <h4 className="font-medium">Smart Cropping Options</h4>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                >
-                  {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
-                </Button>
+            <TabsContent value="formats" className="space-y-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-medium mb-2">Select Export Formats & Platforms</h3>
+                <p className="text-sm text-gray-600">
+                  Choose the formats and platforms you want to export to. Smart cropping will be applied automatically.
+                </p>
               </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">Cropping Strategy</label>
-                  <select
-                    value={croppingStrategy}
-                    onChange={(e) => setCroppingStrategy(e.target.value)}
-                    className="w-full p-2 border rounded-md"
+
+              {/* Advanced Cropping Options */}
+              <div className="mb-6 border rounded-lg p-4 bg-gray-50">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="font-medium">Smart Cropping Options</h4>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
                   >
-                    {CROPPING_STRATEGIES.map((strategy: CroppingStrategyInfo) => (
-                      <option key={strategy.type} value={strategy.type}>
-                        {strategy.displayName}
-                      </option>
-                    ))}
-                  </select>
+                    {showAdvanced ? 'Hide Advanced' : 'Show Advanced'}
+                  </Button>
                 </div>
                 
-                <div className="flex items-center">
-                  <div className="flex-1">
-                    <p className="text-sm text-gray-600">
-                      {getCroppingStrategyInfo(croppingStrategy)?.description}
-                    </p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium mb-1">Cropping Strategy</label>
+                    <select
+                      value={croppingStrategy}
+                      onChange={(e) => setCroppingStrategy(e.target.value)}
+                      className="w-full p-2 border rounded-md"
+                    >
+                      {CROPPING_STRATEGIES.map((strategy: CroppingStrategyInfo) => (
+                        <option key={strategy.type} value={strategy.type}>
+                          {strategy.displayName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="flex items-center">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600">
+                        {getCroppingStrategyInfo(croppingStrategy)?.description}
+                      </p>
+                    </div>
                   </div>
                 </div>
+
+                {showAdvanced && (
+                  <div className="mt-4 pt-4 border-t">
+                    <div className="text-sm text-gray-600">
+                      <h5 className="font-medium mb-2">Best For:</h5>
+                      <div className="flex flex-wrap gap-1 mb-3">
+                        {getCroppingStrategyInfo(croppingStrategy)?.bestFor.map((use: string, index: number) => (
+                          <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                            {use}
+                          </span>
+                        ))}
+                      </div>
+                      
+                      <h5 className="font-medium mb-2">Recommendations by Format:</h5>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        {EXPORT_FORMATS.map((format: ExportFormat) => {
+                          const recommended = getRecommendedCroppingStrategy('general', format, true)
+                          const isOptimal = recommended === croppingStrategy
+                          return (
+                            <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
+                              <span className="font-medium">{format.displayName}:</span> {recommended}
+                              {isOptimal && <span className="ml-1">✓</span>}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              {showAdvanced && (
-                <div className="mt-4 pt-4 border-t">
-                  <div className="text-sm text-gray-600">
-                    <h5 className="font-medium mb-2">Best For:</h5>
-                    <div className="flex flex-wrap gap-1 mb-3">
-                      {getCroppingStrategyInfo(croppingStrategy)?.bestFor.map((use: string, index: number) => (
-                        <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
-                          {use}
+              {/* Format Selection Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {EXPORT_FORMATS.map((format) => (
+                  <div key={format.format} className="border rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div>
+                        <h4 className="font-medium">{format.displayName}</h4>
+                        <p className="text-sm text-gray-600">{format.description}</p>
+                      </div>
+                      {isCurrentFormat(format.format) && (
+                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                          Current Format
                         </span>
+                      )}
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
+                      {format.platforms.map((platform) => (
+                        <button
+                          key={platform}
+                          onClick={() => togglePlatform(format.format, platform)}
+                          className={`p-2 text-sm rounded-md border ${
+                            selectedFormats[format.format]?.has(platform)
+                              ? 'bg-blue-50 border-blue-200 text-blue-700'
+                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                          }`}
+                        >
+                          {platform}
+                        </button>
                       ))}
                     </div>
-                    
-                    <h5 className="font-medium mb-2">Recommendations by Format:</h5>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      {EXPORT_FORMATS.map((format: ExportFormat) => {
-                        const recommended = getRecommendedCroppingStrategy('general', format, true)
-                        const isOptimal = recommended === croppingStrategy
-                        return (
-                          <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
-                            <span className="font-medium">{format.displayName}:</span> {recommended}
-                            {isOptimal && <span className="ml-1">✓</span>}
-                          </div>
-                        )
-                      })}
+                  </div>
+                ))}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="templates" className="space-y-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-medium mb-2">Choose a Style Template</h3>
+                <p className="text-sm text-gray-600">
+                  Apply consistent branding and styling to your exported videos.
+                </p>
+              </div>
+
+              {selectedTemplate && (
+                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h4 className="font-medium text-blue-900">Selected Template: {selectedTemplate.name}</h4>
+                      <p className="text-sm text-blue-700">This template will be applied to all exported videos</p>
                     </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setSelectedTemplate(null)}
+                    >
+                      Remove
+                    </Button>
                   </div>
                 </div>
               )}
-            </div>
 
-            {/* Format Selection */}
-            <div className="space-y-4">
-              {EXPORT_FORMATS.map((format) => (
-                <div key={format.format} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h4 className="font-medium">{format.displayName}</h4>
-                      <p className="text-sm text-gray-600">{format.description}</p>
+              <TemplateList
+                onSelectTemplate={handleTemplateSelect}
+                selectedTemplateId={selectedTemplate?.id}
+                selectionMode={true}
+              />
+            </TabsContent>
+
+            <TabsContent value="preview" className="space-y-6">
+              <div className="mb-4">
+                <h3 className="text-lg font-medium mb-2">Export Preview</h3>
+                <p className="text-sm text-gray-600">
+                  Preview how your clip will look with the selected template and formats.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Template Preview */}
+                {selectedTemplate ? (
+                  <div>
+                    <h4 className="font-medium mb-3">Template Preview</h4>
+                    <TemplatePreview 
+                      template={selectedTemplate}
+                      aspectRatio={Object.keys(selectedFormats)[0] || '16:9'}
+                    />
+                  </div>
+                ) : (
+                  <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                    <p className="text-gray-500 mb-2">No template selected</p>
+                    <p className="text-sm text-gray-400">Go to the Templates tab to choose a style template</p>
+                  </div>
+                )}
+
+                {/* Export Summary */}
+                <div>
+                  <h4 className="font-medium mb-3">Export Summary</h4>
+                  <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Clip:</span>
+                      <span className="text-sm font-medium">{clip.title}</span>
                     </div>
-                    {isCurrentFormat(format.format) && (
-                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
-                        Current Format
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Duration:</span>
+                      <span className="text-sm font-medium">{getDuration()}s</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Template:</span>
+                      <span className="text-sm font-medium">
+                        {selectedTemplate?.name || 'No template'}
                       </span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-sm text-gray-600">Formats:</span>
+                      <span className="text-sm font-medium">
+                        {getSelectedExports().length} selected
+                      </span>
+                    </div>
+                    
+                    {getSelectedExports().length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-gray-200">
+                        <p className="text-xs text-gray-500 mb-2">Selected exports:</p>
+                        <div className="space-y-1">
+                          {getSelectedExports().map((exp, idx) => (
+                            <div key={idx} className="text-xs bg-white px-2 py-1 rounded">
+                              {exp.format} → {exp.platform}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
-                    {format.platforms.map((platform) => (
-                      <button
-                        key={platform}
-                        onClick={() => togglePlatform(format.format, platform)}
-                        className={`p-2 text-sm rounded-md border ${
-                          selectedFormats[format.format]?.has(platform)
-                            ? 'bg-blue-50 border-blue-200 text-blue-700'
-                            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {platform}
-                      </button>
-                    ))}
-                  </div>
                 </div>
-              ))}
-            </div>
+              </div>
+            </TabsContent>
 
-            <div className="flex justify-end space-x-3 mt-6">
+            {/* Export Button */}
+            <div className="flex justify-end gap-4 pt-6 border-t">
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                onClick={handleExport}
+              <Button 
+                onClick={handleExport} 
                 disabled={isExporting || getSelectedExports().length === 0}
+                className="min-w-[120px]"
               >
-                {isExporting ? 'Exporting...' : 'Export'}
+                {isExporting ? 'Exporting...' : `Export ${getSelectedExports().length} Format${getSelectedExports().length !== 1 ? 's' : ''}`}
               </Button>
             </div>
-          </div>
+          </Tabs>
         ) : (
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Export Results</h3>

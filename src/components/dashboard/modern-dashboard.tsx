@@ -12,6 +12,8 @@ import { SocialConnections } from './social-connections'
 import { SchedulingCalendar } from './scheduling-calendar'
 import { WorkflowBuilder } from './workflow-builder'
 import { AnalyticsDashboard } from './analytics-dashboard-refactored'
+import { AIMetadataEnhancer } from './ai-metadata-enhancer'
+import { BatchAIProcessor } from './batch-ai-processor'
 import { 
   HomeIcon, 
   VideoCameraIcon, 
@@ -33,7 +35,8 @@ import {
   BellIcon,
   MagnifyingGlassIcon,
   Bars3Icon,
-  XMarkIcon
+  XMarkIcon,
+  SparklesIcon
 } from '@heroicons/react/24/outline'
 
 export function ModernDashboard() {
@@ -71,6 +74,7 @@ export function ModernDashboard() {
     { name: 'Dashboard', href: 'dashboard', icon: HomeIcon },
     { name: 'Videos', href: 'uploads', icon: VideoCameraIcon },
     { name: 'Clips', href: 'clips', icon: ScissorsIcon },
+    { name: 'AI Enhancement', href: 'ai', icon: SparklesIcon },
     { name: 'Calendar', href: 'calendar', icon: CalendarIcon },
     { name: 'Analytics', href: 'analytics', icon: ChartBarIcon },
     { name: 'Workflows', href: 'workflows', icon: Cog6ToothIcon },
@@ -567,7 +571,34 @@ export function ModernDashboard() {
 
               {activeTab === 'workflows' && (
                 <WorkflowBuilder />
-              )}              {activeTab === 'calendar' && (
+              )}
+
+              {activeTab === 'ai' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-gray-900">AI Enhancement Suite</h1>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Leverage AI to automatically generate optimized metadata for your content
+                    </p>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+                    <div className="xl:col-span-1">
+                      <AIMetadataEnhancer />
+                    </div>
+                    <div className="xl:col-span-1">
+                      <BatchAIProcessor 
+                        items={[]}
+                        onComplete={(results) => {
+                          console.log('Batch processing completed:', results)
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === 'calendar' && (
                 <SchedulingCalendar />
               )}
 

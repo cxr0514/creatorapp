@@ -48,6 +48,8 @@ model User {
   sessions      Session[]
   videos        Video[]
   styleTemplates StyleTemplate[]
+  socialAccounts SocialAccount[]
+  scheduledPosts ScheduledPost[]
 }
 
 model VerificationToken {
@@ -94,6 +96,7 @@ model Clip {
   user          User     @relation(fields: [userId], references: [id])
   video         Video    @relation(fields: [videoId], references: [id])
   exports       ClipExport[]
+  scheduledPosts ScheduledPost[]
 }
 
 model ClipExport {
@@ -140,6 +143,68 @@ model StyleTemplate {
   updatedAt DateTime @updatedAt
 
   @@index([userId])
+}
+
+model SocialAccount {
+  id                String  @id @default(cuid())
+  userId            String
+  platform          String  // "youtube", "tiktok", "instagram", "twitter", "linkedin"
+  platformUserId    String  // The user's ID on the platform
+  platformUsername  String? // The user's username/handle on the platform
+  displayName       String? // The user's display name on the platform
+  accessToken       String? // Encrypted access token
+  refreshToken      String? // Encrypted refresh token (if applicable)
+  tokenExpiresAt    DateTime? // When the access token expires
+  isActive          Boolean @default(true)
+  permissions       String[] @default([]) // Array of granted permissions
+  metadata          Json?   // Platform-specific metadata
+  connectedAt       DateTime @default(now())
+  lastUsedAt        DateTime?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, platform])
+  @@index([userId])
+  @@index([platform])
+}
+
+model ScheduledPost {
+  id              String    @id @default(cuid())
+  userId          String
+  clipId          Int?      // Optional - can schedule posts without clips
+  title           String
+  description     String?
+  hashtags        String[]  @default([])
+  platform        String    // "youtube", "tiktok", "instagram", "twitter", "linkedin"
+  scheduledFor    DateTime  // When to publish
+  status          String    @default("scheduled") // "scheduled", "publishing", "published", "failed", "cancelled"
+  publishedAt     DateTime? // When it was actually published
+  platformPostId  String?   // ID of the post on the platform after publishing
+  platformUrl     String?   // URL to the published post
+  errorMessage    String?   // Error message if publishing failed
+  retryCount      Int       @default(0)
+  maxRetries      Int       @default(3)
+  
+  // Platform-specific settings
+  platformSettings Json?    // Platform-specific options (visibility, comments, etc.)
+  
+  // Content variations for different platforms
+  content         Json?     // Platform-specific content variations
+  
+  // Workflow automation
+  workflowId      String?   // For batch/automated posting workflows
+  parentPostId    String?   // For cross-posting chains
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  clip            Clip?     @relation(fields: [clipId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([scheduledFor])
+  @@index([status])
+  @@index([platform])
+  @@index([workflowId])
 }
 
 // Optional: If users can upload multiple, arbitrary overlay assets per template

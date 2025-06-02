@@ -79,8 +79,14 @@
 - [x] Updated database schema to use integer IDs for better performance
 - [x] Enhanced authentication integration across all API endpoints
 - [x] Test end-to-end video upload → clip creation → download workflow
-- [ ] Implement actual video processing (currently simulated)
-- [ ] Add enhanced error handling and loading states
+- [x] Implemented AI-powered caption generation with Whisper
+- [x] Added caption editor with SRT/VTT support and manual override
+- [x] Integrated batch processing with BullMQ and Redis
+- [x] Added progress tracking and error handling for AI features
+- [x] Completed FFmpeg integration for audio extraction
+- [ ] Implement Style Templates feature (Brand colors, fonts, overlays)
+- [ ] Add intro/outro animation support
+- [ ] Create template presets system
 
 ------------------------------------------------------------
 🚧 BACKLOG / FUTURE

@@ -2,12 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
-import { 
-  EXPORT_FORMATS, 
-  determineCropStrategy, 
-  generateCloudinaryTransformation,
-  estimateProcessingTime 
-} from '@/lib/video-export';
+import { EXPORT_FORMATS } from '@/lib/video-export';
+import { applyStyleTemplate } from '@/lib/cloudinary';
 import { v2 as cloudinary } from 'cloudinary';
 
 // Configure Cloudinary
@@ -24,7 +20,8 @@ interface ExportFormatRequest {
 
 interface ExportRequestBody {
   formats: ExportFormatRequest[];
-  croppingStrategy?: 'face' | 'auto' | 'center'; 
+  croppingStrategy?: 'face' | 'auto' | 'center';
+  templateId?: string | null;
 }
 
 interface ExportResult {
@@ -52,7 +49,7 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     const body: ExportRequestBody = await request.json();
     // Ensure croppingStrategy has a default if not provided
-    const { formats, croppingStrategy = 'auto' } = body;
+    const { formats, croppingStrategy = 'auto', templateId } = body;
 
     if (!Array.isArray(formats) || formats.length === 0) {
       return NextResponse.json({ error: 'Invalid or empty formats array' }, { status: 400 });
@@ -67,6 +64,21 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
 
     if (!clip || !clip.cloudinaryId) {
       return NextResponse.json({ error: 'Clip not found or has no Cloudinary ID' }, { status: 404 });
+    }
+
+    // Fetch template if provided
+    let template = null;
+    if (templateId) {
+      template = await prisma.styleTemplate.findFirst({
+        where: {
+          id: templateId,
+          userId: session.user.id
+        }
+      });
+      
+      if (!template) {
+        console.warn(`[API/CLIPS EXPORT] Template ${templateId} not found for user ${session.user.id}`);
+      }
     }
     
     const originalPublicId = clip.cloudinaryId;
@@ -86,28 +98,49 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
         continue; // Skip to next format
       }
       
-      let transformation: any = {
-        aspect_ratio: aspectRatio.replace(':', '_'),
-        crop: 'fill', 
-        gravity: croppingStrategy,
-      };
+      // Generate the transformed URL using template if available
+      let transformedUrl: string;
+      
+      if (template) {
+        // Use template transformation
+        transformedUrl = applyStyleTemplate(originalPublicId, {
+          fontFamily: template.fontFamily || undefined,
+          primaryColor: template.primaryColor || undefined,
+          secondaryColor: template.secondaryColor || undefined,
+          backgroundColor: template.backgroundColor || undefined,
+          logoCloudinaryId: template.logoCloudinaryId || undefined,
+          introCloudinaryId: template.introCloudinaryId || undefined,
+          outroCloudinaryId: template.outroCloudinaryId || undefined,
+          lowerThirdText: template.lowerThirdText || undefined,
+          lowerThirdPosition: template.lowerThirdPosition || undefined,
+          callToActionText: template.callToActionText || undefined,
+          callToActionUrl: template.callToActionUrl || undefined,
+          callToActionPosition: template.callToActionPosition || undefined
+        }, {
+          aspectRatio,
+          quality: 'auto'
+        });
+      } else {
+        // Use basic transformation without template
+        const transformation: Record<string, string | number> = {
+          aspect_ratio: aspectRatio.replace(':', '_'),
+          crop: 'fill', 
+          gravity: croppingStrategy,
+        };
 
-      if (aspectRatio === '9:16') {
-        transformation.width = 1080;
-        // transformation.height = 1920; // Height is often implied by aspect ratio and width + crop mode
-      } else if (aspectRatio === '1:1') {
-        transformation.width = 1080;
-        // transformation.height = 1080;
-      } else if (aspectRatio === '16:9') {
-        transformation.width = 1920;
-        // transformation.height = 1080;
+        if (aspectRatio === '9:16') {
+          transformation.width = 1080;
+        } else if (aspectRatio === '1:1') {
+          transformation.width = 1080;
+        } else if (aspectRatio === '16:9') {
+          transformation.width = 1920;
+        }
+
+        transformedUrl = cloudinary.url(originalPublicId, {
+          resource_type: 'video',
+          transformation: [transformation, { fetch_format: 'mp4' }],
+        });
       }
-      // Add other aspect ratios or more sophisticated dimension logic as needed
-
-      const transformedUrl = cloudinary.url(originalPublicId, {
-        resource_type: 'video',
-        transformation: [transformation, { fetch_format: 'mp4' }],
-      });
       
       // Sanitize platform and aspect ratio for use in public_id
       const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
@@ -118,8 +151,6 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
       try {
         console.log(`[API/CLIPS EXPORT] Processing for clip ${clipId}: format ${aspectRatio}, platform ${platform}, strategy ${croppingStrategy}`);
         console.log(`[API/CLIPS EXPORT] Original Public ID: ${originalPublicId}`);
-        console.log(`[API/CLIPS EXPORT] Transformation: ${JSON.stringify(transformation)}`);
-        console.log(`[API/CLIPS EXPORT] Transformed URL for upload: ${transformedUrl}`);
         console.log(`[API/CLIPS EXPORT] New Public ID for export: ${newPublicId}`);
         console.log(`[API/CLIPS EXPORT] Target Folder for export: ${baseFolder}`);
 
@@ -145,24 +176,26 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           newPublicId: uploadResult.public_id,
         });
 
-      } catch (uploadError: any) {
+      } catch (uploadError: unknown) {
+        const errorMessage = uploadError instanceof Error ? uploadError.message : 'Cloudinary upload failed';
         console.error(`[API/CLIPS EXPORT] Error exporting format ${aspectRatio} for platform ${platform} (Clip ID: ${clipId}):`, uploadError);
         results.push({
           format: aspectRatio,
           platform,
           status: 'error',
-          errorMessage: uploadError.message || 'Cloudinary upload failed',
+          errorMessage,
         });
       }
     }
 
     return NextResponse.json({ results });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     console.error('[API/CLIPS EXPORT] General error in export handler:', error);
     // Ensure a generic error is returned if specific results cannot be formed
     return NextResponse.json({ 
-        error: error.message || 'Internal server error', 
+        error: errorMessage, 
         results // Include any partial results if available
     }, { status: 500 });
   }

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
+import { SmartScheduler } from '@/lib/smart-scheduler'
+import { getPlatformPublisher } from '@/lib/platform-publishers'
 // import { prisma } from '@/lib/prisma' // TODO: Uncomment when implementing real database connections
 
 // GET /api/social/posts - Get user's scheduled posts

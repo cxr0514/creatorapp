@@ -4,10 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { 
   SOCIAL_PLATFORMS, 
-  // getPlatformGuidelines, // TODO: Use when implementing platform-specific validation
   validateContentForPlatform, 
-  formatContentForPlatform,
-  // type SocialPlatform, // TODO: Use when implementing platform-specific features
   type PostContent,
   type SocialAccount
 } from '@/lib/social-publishing'
@@ -17,6 +14,8 @@ interface PublishResult {
   success: boolean
   data?: PostContent
   error?: string
+  platformPostId?: string
+  platformUrl?: string
 }
 
 interface Clip {
@@ -27,6 +26,7 @@ interface Clip {
   aspectRatio?: string
   duration?: number
   thumbnailUrl?: string
+  cloudinaryUrl?: string
 }
 
 interface PublishingModalProps {
@@ -42,6 +42,13 @@ interface ValidationResult {
   warnings: string[]
 }
 
+interface ScheduleOptions {
+  scheduleNow: boolean
+  scheduledTime?: Date
+  timezone: string
+  useSmartScheduling: boolean
+}
+
 export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: PublishingModalProps) {
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set())
   const [connectedAccounts, setConnectedAccounts] = useState<SocialAccount[]>([])
@@ -49,14 +56,24 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
     title: clip.title,
     description: clip.description || '',
     hashtags: clip.hashtags || [],
-    videoUrl: '',
+    videoUrl: clip.cloudinaryUrl || '',
     thumbnailUrl: clip.thumbnailUrl
   })
-  const [scheduleMode, setScheduleMode] = useState<'immediate' | 'schedule'>('immediate')
-  const [scheduledTime, setScheduledTime] = useState('')
+  const [scheduleOptions, setScheduleOptions] = useState<ScheduleOptions>({
+    scheduleNow: true,
+    timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    useSmartScheduling: false
+  })
+  const [smartRecommendations, setSmartRecommendations] = useState<Array<{
+    datetime: Date
+    confidence: number
+    reason: string
+    platform: string
+    timezone: string
+  }>>([])
   const [isPublishing, setIsPublishing] = useState(false)
   const [validationResults, setValidationResults] = useState<Record<string, ValidationResult>>({})
-  // const [showAdvanced, setShowAdvanced] = useState(false) // TODO: Use when implementing advanced options
+  const [publishMode, setPublishMode] = useState<'immediate' | 'schedule' | 'smart'>('immediate')
 
   useEffect(() => {
     if (isOpen) {
@@ -70,9 +87,14 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
         videoUrl: '',
         thumbnailUrl: clip.thumbnailUrl
       })
-      setScheduleMode('immediate')
-      setScheduledTime('')
+      setScheduleOptions({
+        scheduleNow: true,
+        timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        useSmartScheduling: false
+      })
+      setSmartRecommendations([])
       setValidationResults({})
+      setPublishMode('immediate')
     }
   }, [isOpen, clip])
 
@@ -88,6 +110,34 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
     setValidationResults(results)
   }, [postContent, selectedPlatforms])
 
+  useEffect(() => {
+    // Fetch smart scheduling recommendations when options change
+    const fetchRecommendations = async () => {
+      if (scheduleOptions.useSmartScheduling && selectedPlatforms.size > 0) {
+        try {
+          const platforms = Array.from(selectedPlatforms).join(',')
+          const response = await fetch(`/api/social/schedule/recommendations?${new URLSearchParams({
+            platforms,
+            contentType: 'video',
+            timezone: scheduleOptions.timezone,
+            daysAhead: '7'
+          })}`)
+          
+          if (response.ok) {
+            const data = await response.json()
+            setSmartRecommendations(data.recommendations || [])
+          }
+        } catch (error) {
+          console.error('Error fetching smart recommendations:', error)
+        }
+      } else {
+        setSmartRecommendations([])
+      }
+    }
+
+    fetchRecommendations()
+  }, [scheduleOptions, selectedPlatforms])
+
   const fetchConnectedAccounts = async () => {
     try {
       const response = await fetch('/api/social/connections')
@@ -97,6 +147,27 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
       }
     } catch (error) {
       console.error('Error fetching connected accounts:', error)
+    }
+  }
+
+  const fetchSmartRecommendations = async () => {
+    if (selectedPlatforms.size === 0) return
+
+    try {
+      const platforms = Array.from(selectedPlatforms)
+      const response = await fetch(`/api/social/schedule/recommendations?${new URLSearchParams({
+        platforms: platforms.join(','),
+        contentType: 'video',
+        timezone: scheduleOptions.timezone,
+        daysAhead: '7'
+      })}`)
+      
+      if (response.ok) {
+        const data = await response.json()
+        setSmartRecommendations(data.recommendations || [])
+      }
+    } catch (error) {
+      console.error('Error fetching smart recommendations:', error)
     }
   }
 
@@ -144,66 +215,76 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
   }
 
   const handlePublish = async () => {
-    if (selectedPlatforms.size === 0) {
-      alert('Please select at least one platform')
-      return
-    }
-
-    // Check for validation errors
-    const hasErrors = Object.values(validationResults).some(result => !result.valid)
-    if (hasErrors) {
-      alert('Please fix validation errors before publishing')
-      return
-    }
+    if (selectedPlatforms.size === 0) return
 
     setIsPublishing(true)
-
     try {
-      const publishPromises = Array.from(selectedPlatforms).map(async (platformId): Promise<PublishResult | null> => {
-        const platform = SOCIAL_PLATFORMS.find(p => p.id === platformId)
-        if (!platform) return null
+      const platforms = Array.from(selectedPlatforms)
 
-        const formattedContent = formatContentForPlatform(postContent, platform)
-        
-        const scheduleTime = scheduleMode === 'schedule' && scheduledTime 
-          ? new Date(scheduledTime)
-          : new Date()
-
-        const response = await fetch('/api/social/posts', {
+      if (publishMode === 'immediate') {
+        // Publish immediately
+        const response = await fetch('/api/social/publish', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             clipId: clip.id,
-            platform: platformId,
-            accountId: connectedAccounts.find(acc => acc.platform === platformId)?.accountId || 'mock-account',
-            scheduledTime: scheduleTime.toISOString(),
-            title: formattedContent.title,
-            description: formattedContent.description,
-            hashtags: formattedContent.hashtags,
-            videoUrl: `https://example.com/clips/${clip.id}.mp4`, // Mock URL
-            thumbnailUrl: formattedContent.thumbnailUrl
+            platforms,
+            title: postContent.title,
+            description: postContent.description,
+            hashtags: postContent.hashtags,
+            videoUrl: postContent.videoUrl,
+            thumbnailUrl: postContent.thumbnailUrl,
+            aspectRatio: clip.aspectRatio || '16:9'
           })
         })
 
         if (response.ok) {
           const data = await response.json()
-          return { platform: platformId, success: true, data }
+          onPublishComplete(data.results)
         } else {
-          const error = await response.json()
-          return { platform: platformId, success: false, error: error.error }
+          throw new Error('Publishing failed')
         }
-      })
+      } else {
+        // Schedule for later
+        const scheduledTime = scheduleOptions.scheduledTime || new Date()
+        
+        const response = await fetch('/api/social/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            clipId: clip.id,
+            platform: platforms[0], // For now, schedule one at a time
+            title: postContent.title,
+            description: postContent.description,
+            hashtags: postContent.hashtags,
+            videoUrl: postContent.videoUrl,
+            thumbnailUrl: postContent.thumbnailUrl,
+            scheduledTime: scheduledTime.toISOString(),
+            accountId: 'mock_account'
+          })
+        })
 
-      const publishResults = await Promise.all(publishPromises)
-      const results = publishResults.filter((result): result is PublishResult => result !== null)
-      const successCount = results.filter(r => r.success).length
-      
-      alert(`Successfully ${scheduleMode === 'immediate' ? 'published' : 'scheduled'} to ${successCount}/${results.length} platforms`)
-      onPublishComplete(results)
+        if (response.ok) {
+          const data = await response.json()
+          console.log('Scheduled post created:', data)
+          onPublishComplete([{
+            platform: platforms[0],
+            success: true,
+            data: postContent
+          }])
+        } else {
+          throw new Error('Scheduling failed')
+        }
+      }
+
       onClose()
     } catch (error) {
-      console.error('Error publishing:', error)
-      alert('Failed to publish content')
+      console.error('Publishing error:', error)
+      onPublishComplete([{
+        platform: 'error',
+        success: false,
+        error: error instanceof Error ? error.message : 'Unknown error'
+      }])
     } finally {
       setIsPublishing(false)
     }
@@ -375,8 +456,8 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                     type="radio"
                     name="scheduleMode"
                     value="immediate"
-                    checked={scheduleMode === 'immediate'}
-                    onChange={(e) => setScheduleMode(e.target.value as 'immediate')}
+                    checked={publishMode === 'immediate'}
+                    onChange={(e) => setPublishMode(e.target.value as 'immediate')}
                     className="text-purple-600 focus:ring-purple-500"
                   />
                   <span className="text-sm font-medium text-gray-700">Publish Now</span>
@@ -386,24 +467,68 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                     type="radio"
                     name="scheduleMode"
                     value="schedule"
-                    checked={scheduleMode === 'schedule'}
-                    onChange={(e) => setScheduleMode(e.target.value as 'schedule')}
+                    checked={publishMode === 'schedule'}
+                    onChange={(e) => setPublishMode(e.target.value as 'schedule')}
                     className="text-purple-600 focus:ring-purple-500"
                   />
                   <span className="text-sm font-medium text-gray-700">Schedule for Later</span>
                 </label>
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="radio"
+                    name="scheduleMode"
+                    value="smart"
+                    checked={publishMode === 'smart'}
+                    onChange={(e) => setPublishMode(e.target.value as 'smart')}
+                    className="text-purple-600 focus:ring-purple-500"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Smart Scheduling</span>
+                </label>
               </div>
 
-              {scheduleMode === 'schedule' && (
+              {publishMode === 'schedule' && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">Schedule Time</label>
                   <input
                     type="datetime-local"
-                    value={scheduledTime}
-                    onChange={(e) => setScheduledTime(e.target.value)}
+                    value={scheduleOptions.scheduledTime?.toISOString().slice(0, 16) || ''}
+                    onChange={(e) => setScheduleOptions(prev => ({ ...prev, scheduledTime: new Date(e.target.value) }))}
                     min={new Date().toISOString().slice(0, 16)}
                     className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
                   />
+                </div>
+              )}
+
+              {publishMode === 'smart' && (
+                <div>
+                  <p className="text-sm text-gray-600 mb-2">Recommended Times:</p>
+                  <ul className="text-sm text-gray-800 space-y-1">
+                    {smartRecommendations.length === 0 ? (
+                      <li>No recommendations available. Adjust your settings or try again later.</li>
+                    ) : (
+                      smartRecommendations.map((rec, index) => (
+                        <li key={index}>
+                          {new Date(rec.datetime).toLocaleString()} - {rec.platform} ({rec.confidence.toFixed(2)} confidence)
+                        </li>
+                      ))
+                    )}
+                  </ul>
+                  <div className="flex items-center space-x-2 mt-4">
+                    <Button
+                      onClick={fetchSmartRecommendations}
+                      variant="outline"
+                      size="sm"
+                      className="text-gray-500 hover:text-gray-700"
+                    >
+                      Refresh Recommendations
+                    </Button>
+                    <Button
+                      onClick={() => setScheduleOptions(prev => ({ ...prev, scheduleNow: true }))}
+                      className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white"
+                    >
+                      Use Recommended Time
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>
@@ -437,10 +562,10 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {scheduleMode === 'immediate' ? 'Publishing...' : 'Scheduling...'}
+                    {publishMode === 'immediate' ? 'Publishing...' : 'Scheduling...'}
                   </>
                 ) : (
-                  <>{scheduleMode === 'immediate' ? 'Publish Now' : 'Schedule Post'}</>
+                  <>{publishMode === 'immediate' ? 'Publish Now' : 'Schedule Post'}</>
                 )}
               </Button>
             </div>
