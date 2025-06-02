@@ -9,7 +9,8 @@ import {
   estimateBatchProcessingTime,
   // getRecommendedCroppingStrategy, // TODO: Use when implementing smart recommendations
   type BatchExportRequest,
-  type ExportQueueItem 
+  type ExportQueueItem,
+  type ExportFormat
 } from '@/lib/video-export'
 
 interface Clip {
@@ -98,16 +99,35 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
   const generateQueue = () => {
     const request: BatchExportRequest = {
       clipIds: Array.from(selectedClips),
-      formats: EXPORT_FORMATS.filter(f => selectedFormats.has(f.format)),
+      formats: EXPORT_FORMATS.filter((f: ExportFormat) => selectedFormats.has(f.format)),
       platforms: Array.from(selectedPlatforms),
       croppingStrategy,
       priority
     }
 
-    const queue = generateBatchExportQueue(request)
+    const queue = generateBatchExportQueue(request).map(item => ({ ...item, retryCount: 0 }))
     setExportQueue(queue)
     setShowQueue(true)
   }
+
+  const handleRetryItem = (itemId: string) => {
+    setExportQueue(prevQueue => 
+      prevQueue.map(item => {
+        if (item.id === itemId && item.status === 'failed') {
+          return {
+            ...item,
+            status: 'pending',
+            progress: 0,
+            error: undefined,
+            completedAt: undefined,
+            startedAt: undefined,
+            retryCount: (item.retryCount || 0) + 1,
+          };
+        }
+        return item;
+      })
+    );
+  };
 
   const startBatchExport = async () => {
     if (exportQueue.length === 0) return
@@ -203,9 +223,9 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
 
   const getAllPlatforms = () => {
     const platforms = new Set<string>()
-    EXPORT_FORMATS.forEach(format => {
+    EXPORT_FORMATS.forEach((format: ExportFormat) => {
       if (selectedFormats.has(format.format)) {
-        format.platforms.forEach(platform => platforms.add(platform))
+        format.platforms.forEach((platform: string) => platforms.add(platform))
       }
     })
     return Array.from(platforms)
@@ -271,7 +291,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
             <div>
               <h3 className="text-lg font-medium mb-3">Select Formats ({selectedFormats.size})</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {EXPORT_FORMATS.map((format) => (
+                {EXPORT_FORMATS.map((format: ExportFormat) => (
                   <button
                     key={format.format}
                     onClick={() => toggleFormat(format.format)}
@@ -325,14 +345,14 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                   onChange={(e) => setCroppingStrategy(e.target.value)}
                   className="w-full p-2 border rounded-lg"
                 >
-                  {CROPPING_STRATEGIES.map((strategy) => (
+                  {CROPPING_STRATEGIES.map((strategy: any) => (
                     <option key={strategy.type} value={strategy.type}>
                       {strategy.displayName}
                     </option>
                   ))}
                 </select>
                 <p className="text-xs text-gray-500 mt-1">
-                  {CROPPING_STRATEGIES.find(s => s.type === croppingStrategy)?.description}
+                  {CROPPING_STRATEGIES.find((s: any) => s.type === croppingStrategy)?.description}
                 </p>
               </div>
 
@@ -408,7 +428,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                             ? 'bg-red-100 text-red-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {item.status}
+                          {item.status} {item.retryCount && item.retryCount > 0 ? `(Retry ${item.retryCount})` : ''}
                         </span>
                         {item.status === 'processing' && (
                           <div className="w-12 h-2 bg-gray-200 rounded-full">
@@ -417,6 +437,16 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                               style={{ width: `${item.progress}%` }}
                             />
                           </div>
+                        )}
+                        {item.status === 'failed' && (
+                          <Button 
+                            variant="outline" 
+                            size="sm" 
+                            onClick={() => handleRetryItem(item.id)}
+                            className="ml-2 text-xs h-6 px-2 py-1"
+                          >
+                            Retry
+                          </Button>
                         )}
                       </div>
                     </div>

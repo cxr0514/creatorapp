@@ -1,8 +1,18 @@
 import OpenAI from 'openai'
+import { extractAudioFromVideo } from './video/audio-extractor'
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 })
+
+// Time format for captions/subtitles
+const formatTimestamp = (seconds: number): string => {
+  const hours = Math.floor(seconds / 3600)
+  const minutes = Math.floor((seconds % 3600) / 60)
+  const secs = Math.floor(seconds % 60)
+  const ms = Math.floor((seconds % 1) * 1000)
+  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')},${String(ms).padStart(3, '0')}`
+}
 
 interface AIMetadata {
   title?: string
@@ -20,6 +30,34 @@ interface GenerateMetadataParams {
   aspectRatio?: string
   existingTitle?: string
   existingDescription?: string
+}
+
+interface CaptionSegment {
+  id: number
+  start: number
+  end: number
+  text: string
+}
+
+interface CaptionOptions {
+  format?: 'srt' | 'vtt'
+  language?: string
+  startTime?: number
+  duration?: number
+}
+
+// Convert captions to SRT format
+function formatSRT(segments: CaptionSegment[]): string {
+  return segments.map(segment => {
+    return `${segment.id}\n${formatTimestamp(segment.start)} --> ${formatTimestamp(segment.end)}\n${segment.text}\n\n`
+  }).join('')
+}
+
+// Convert captions to WebVTT format
+function formatVTT(segments: CaptionSegment[]): string {
+  return `WEBVTT\n\n${segments.map(segment => {
+    return `${segment.id}\n${formatTimestamp(segment.start).replace(',', '.')} --> ${formatTimestamp(segment.end).replace(',', '.')}\n${segment.text}\n\n`
+  }).join('')}`
 }
 
 export async function generateVideoMetadata(params: GenerateMetadataParams): Promise<AIMetadata> {
@@ -166,16 +204,45 @@ Respond in JSON format:
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function generateCaptions(audioUrl: string): Promise<string> {
+export async function generateCaptions(audioUrl: string, options: CaptionOptions = {}): Promise<string> {
   try {
-    // Note: This is a placeholder for Whisper API integration
-    // In a full implementation, you would:
-    // 1. Download the audio from the video
-    // 2. Send it to OpenAI's Whisper API
-    // 3. Return the transcription in SRT or VTT format
-    
-    throw new Error('Caption generation not yet implemented - requires audio extraction and Whisper API integration')
+    // Extract audio from video URL
+    const audioFile = await extractAudioFromVideo(audioUrl, {
+      format: 'mp3',
+      startTime: options.startTime,
+      duration: options.duration
+    })
+
+    // Send to Whisper API
+    const transcription = await openai.audio.transcriptions.create({
+      file: audioFile,
+      model: 'whisper-1',
+      response_format: 'verbose_json',
+      language: options.language,
+      timestamp_granularities: ['segment']
+    }) as OpenAI.Audio.Transcription & {
+      segments?: {
+        start: number
+        end: number
+        text: string
+      }[]
+    }
+
+    if (!transcription.segments || transcription.segments.length === 0) {
+      throw new Error('No caption segments were generated')
+    }
+
+    // Offset timestamps if startTime was specified
+    const segments = transcription.segments.map((segment, index) => ({
+      id: index + 1,
+      start: segment.start + (options.startTime || 0),
+      end: segment.end + (options.startTime || 0),
+      text: segment.text.trim()
+    }))
+
+    // Return formatted captions
+    return options.format === 'vtt' ? formatVTT(segments) : formatSRT(segments)
+
   } catch (error) {
     console.error('Error generating captions:', error)
     throw new Error('Failed to generate captions')

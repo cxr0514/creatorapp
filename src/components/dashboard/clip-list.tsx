@@ -65,15 +65,27 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
   const syncClips = async () => {
     setSyncing(true)
     try {
-      // Call the sync endpoint to refresh from Cloudinary
-      const response = await fetch('/api/clips?sync=true')
+      // Call the sync endpoint to refresh from Cloudinary with credentials
+      const response = await fetch('/api/clips?sync=true', {
+        credentials: 'include', // Include session cookies
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      })
+      
       if (response.ok) {
         const data = await response.json()
         setClips(data)
         onRefresh?.()
+      } else if (response.status === 401) {
+        console.error('Authentication required for sync')
+        // Could add a toast notification here
+      } else {
+        throw new Error(`Sync failed with status ${response.status}`)
       }
     } catch (error) {
       console.error('Error syncing clips:', error)
+      // Could add a toast notification here
     } finally {
       setSyncing(false)
     }

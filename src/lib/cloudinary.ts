@@ -34,6 +34,7 @@ export function generateVideoThumbnail(
   return cloudinary.url(publicId, {
     resource_type: 'video',
     format: format, // This forces the output format to be an image
+    secure: true, // Always use HTTPS
     transformation: [
       {
         width,
@@ -41,7 +42,8 @@ export function generateVideoThumbnail(
         crop: 'fill',
         gravity: 'center',
         quality,
-        start_offset: `${startOffset}s`
+        start_offset: `${startOffset}s`,
+        fetch_format: 'auto' // Automatic format optimization
       }
     ]
   })

@@ -4,7 +4,7 @@ import { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { useSession } from 'next-auth/react'
 import { Button } from '@/components/ui/button'
-import { Upload, CheckCircle, AlertCircle } from 'lucide-react'
+import { Upload, CheckCircle, AlertCircle } from '@/lib/icons'
 
 interface VideoUploadProps {
   onUploadComplete?: () => void

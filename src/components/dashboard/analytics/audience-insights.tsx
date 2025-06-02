@@ -7,7 +7,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Users, Globe, Smartphone, Monitor, Tablet } from 'lucide-react'
+import { Users, Globe, Smartphone, Monitor, Tablet } from '@/lib/icons'
 import type { AudienceInsights as AudienceInsightsType } from '@/lib/types/analytics'
 
 interface AudienceInsightsProps {

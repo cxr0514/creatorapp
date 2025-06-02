@@ -47,6 +47,7 @@ model User {
   clips         Clip[]
   sessions      Session[]
   videos        Video[]
+  styleTemplates StyleTemplate[]
 }
 
 model VerificationToken {
@@ -110,3 +111,53 @@ model ClipExport {
   
   @@unique([clipId, format, platform])
 }
+
+model StyleTemplate {
+  id              String  @id @default(cuid())
+  name            String
+  userId          String
+  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  fontFamily      String? // e.g., "Arial", "Verdana"
+  primaryColor    String? // Hex color, e.g., "#FF0000"
+  secondaryColor  String? // Hex color
+  backgroundColor String? // Hex color for text backgrounds or overlays
+
+  // Cloudinary public IDs for video/image assets
+  introCloudinaryId   String? 
+  outroCloudinaryId   String?
+  logoCloudinaryId    String? // For a watermark/logo overlay
+
+  // Configuration for text overlays (lower thirds, CTAs)
+  lowerThirdText      String?
+  lowerThirdPosition  String? // e.g., "bottom_left", "bottom_right"
+
+  callToActionText    String?
+  callToActionUrl     String?
+  callToActionPosition String? // e.g., "top_right"
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
+
+// Optional: If users can upload multiple, arbitrary overlay assets per template
+// model TemplateOverlayAsset {
+//   id                String @id @default(cuid())
+//   styleTemplateId   String
+//   styleTemplate     StyleTemplate @relation(fields: [styleTemplateId], references: [id], onDelete: Cascade)
+//   cloudinaryId      String // Cloudinary public ID of the uploaded image/asset
+//   assetType         String // e.g., 'logo', 'watermark', 'banner', 'custom_graphic'
+//   position          String? // e.g., 'top_left', 'center', 'stretch_fill'
+//   xOffset           Int?    // For precise positioning
+//   yOffset           Int?    // For precise positioning
+//   opacity           Float?  // 0.0 to 1.0
+//   createdAt         DateTime @default(now())
+
+//   @@index([styleTemplateId])
+// }
+
+// Add relation to Clip if a clip can have a default template, or to Video
+// This is not explicitly in PRD 3.4 but could be an extension.
+// For now, templates are applied at export time.

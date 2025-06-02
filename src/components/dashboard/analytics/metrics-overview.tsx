@@ -6,7 +6,7 @@
 'use client'
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, TrendingDown, Eye, Heart, Share2, Clock } from 'lucide-react'
+import { TrendingUp, TrendingDown, Eye, Heart, Share2, Clock } from '@/lib/icons'
 import type { OverviewMetrics } from '@/lib/types/analytics'
 import { formatNumber, formatPercentage, getChangeColor } from '@/lib/utils/analytics'
 

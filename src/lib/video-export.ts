@@ -20,6 +20,43 @@ export interface CropSettings {
   fallback?: 'center' | 'face' | 'smart'; // Fallback strategy if primary fails
 }
 
+export interface CroppingStrategyInfo {
+  type: string;
+  displayName: string;
+  description: string;
+  bestFor: string[];
+  aiRequired: boolean;
+}
+
+export interface BatchExportRequest {
+  clipIds: number[];
+  formats: ExportFormat[];
+  platforms: string[];
+  croppingStrategy?: string;
+  priority?: 'low' | 'normal' | 'high';
+}
+
+export interface ExportQueueItem {
+  id: string;
+  clipId: number;
+  format: string;
+  platform: string;
+  status: 'pending' | 'processing' | 'completed' | 'failed';
+  progress: number;
+  croppingType: string;
+  estimatedTime: number;
+  retryCount?: number;
+  startedAt?: Date;
+  completedAt?: Date;
+  error?: string;
+  result?: {
+    url: string;
+    size: number;
+    duration: number;
+    metadata?: Record<string, unknown>;
+  };
+}
+
 // Supported export formats based on PRD requirements
 export const EXPORT_FORMATS: ExportFormat[] = [
   {
@@ -57,6 +94,58 @@ export const EXPORT_FORMATS: ExportFormat[] = [
     platforms: ['general'],
     displayName: 'Traditional (4:3)',
     description: 'Classic aspect ratio for general content'
+  }
+];
+
+export const CROPPING_STRATEGIES: CroppingStrategyInfo[] = [
+  {
+    type: 'center',
+    displayName: 'Center Crop',
+    description: 'Crops from the center of the video',
+    bestFor: ['General content', 'Landscapes', 'Products'],
+    aiRequired: false
+  },
+  {
+    type: 'face',
+    displayName: 'Face Detection',
+    description: 'Focuses on detected faces in the video',
+    bestFor: ['Talking heads', 'Interviews', 'Presentations'],
+    aiRequired: true
+  },
+  {
+    type: 'action',
+    displayName: 'Action Tracking',
+    description: 'Follows movement and action in the video',
+    bestFor: ['Sports', 'Gaming', 'Dynamic content'],
+    aiRequired: true
+  },
+  {
+    type: 'smart',
+    displayName: 'Smart Crop',
+    description: 'AI determines the best cropping area',
+    bestFor: ['Mixed content', 'Complex scenes'],
+    aiRequired: true
+  },
+  {
+    type: 'rule-of-thirds',
+    displayName: 'Rule of Thirds',
+    description: 'Crops based on rule of thirds composition',
+    bestFor: ['Artistic content', 'Photography'],
+    aiRequired: false
+  },
+  {
+    type: 'motion-tracking',
+    displayName: 'Motion Tracking',
+    description: 'Tracks and follows motion in the video',
+    bestFor: ['Sports', 'Action sequences'],
+    aiRequired: true
+  },
+  {
+    type: 'auto-focus',
+    displayName: 'Auto Focus',
+    description: 'Automatically focuses on the main subject',
+    bestFor: ['Product demos', 'Tutorials'],
+    aiRequired: true
   }
 ];
 
@@ -129,58 +218,33 @@ export function determineCropStrategy(
     if (validStrategies.includes(preferredStrategy as CropSettings['type'])) {
       return {
         type: preferredStrategy as CropSettings['type'],
-        confidence: 0.7,
         fallback: 'center'
       };
     }
   }
 
-  // For vertical content (9:16) from horizontal source - prioritize face detection
-  if (targetFormat.format === '9:16' && sourceRatio > 1) {
-    return hasAI ? { 
-      type: 'face', 
-      confidence: 0.6,
-      fallback: 'smart'
-    } : { type: 'center' };
+  // For vertical formats (like 9:16), prioritize face detection
+  if (targetFormat.format === '9:16' && hasAI) {
+    return { type: 'face', fallback: 'center' };
   }
 
-  // For horizontal content from vertical source - use motion tracking
-  if (targetFormat.format === '16:9' && sourceRatio < 1) {
-    return hasAI ? { 
-      type: 'motion-tracking',
-      confidence: 0.5,
-      fallback: 'center'
-    } : { type: 'center' };
+  // For square formats, use smart cropping to find the best center
+  if (targetFormat.format === '1:1' && hasAI) {
+    return { type: 'smart', fallback: 'center' };
   }
 
-  // For square content - prioritize face detection with smart fallback
-  if (targetFormat.format === '1:1') {
-    return hasAI ? { 
-      type: 'face',
-      confidence: 0.6,
-      fallback: 'smart'
-    } : { type: 'center' };
-  }
-
-  // Default to smart cropping with center fallback
-  return hasAI ? {
-    type: 'auto-focus',
-    confidence: 0.5,
-    fallback: 'center'
-  } : { type: 'center' };
+  // Default to center for landscape or when AI is not available
+  return { type: 'center' };
 }
 
-/**
- * Converts aspect ratio string to numeric ratio
- */
 function parseAspectRatio(aspectRatio: string): number {
-  const [width, height] = aspectRatio.split(':').map(Number);
-  return width / height;
+  const parts = aspectRatio.split(':');
+  if (parts.length === 2) {
+    return parseFloat(parts[0]) / parseFloat(parts[1]);
+  }
+  return 16 / 9; // Default fallback
 }
 
-/**
- * Generates Cloudinary transformation parameters for smart cropping
- */
 export function generateCloudinaryTransformation(
   format: ExportFormat,
   cropSettings: CropSettings,
@@ -189,243 +253,108 @@ export function generateCloudinaryTransformation(
 ): string {
   const transformations: string[] = [];
 
-  // Video trimming if start/end times are provided
+  // Video trimming
   if (startTime !== undefined && endTime !== undefined) {
-    const duration = endTime - startTime;
-    transformations.push(`so_${startTime}`);
-    transformations.push(`du_${duration}`);
+    transformations.push(`so_${startTime},eo_${endTime}`);
   }
 
-  // Resize and crop transformations
-  transformations.push(`w_${format.width}`);
-  transformations.push(`h_${format.height}`);
-  transformations.push('c_fill');
+  // Aspect ratio and cropping
+  transformations.push(`ar_${format.aspectRatio.replace(':', ':')}`);
+  transformations.push(`c_fill`);
+  transformations.push(`w_${format.width},h_${format.height}`);
 
-  // Apply smart cropping based on settings
+  // Cropping strategy
   switch (cropSettings.type) {
     case 'face':
       transformations.push('g_face');
       break;
     case 'action':
-      transformations.push('g_auto');
-      break;
-    case 'smart':
       transformations.push('g_auto:subject');
       break;
+    case 'smart':
+      transformations.push('g_auto');
+      break;
     case 'rule-of-thirds':
-      transformations.push('g_auto:composition');
+      transformations.push('g_auto:classic');
       break;
     case 'motion-tracking':
-      transformations.push('g_auto:motion');
+      transformations.push('g_auto:subject');
       break;
     case 'auto-focus':
-      transformations.push('g_auto:focus');
+      transformations.push('g_auto:subject');
       break;
     default:
       transformations.push('g_center');
   }
 
-  // Add confidence threshold for AI-based cropping
-  if (cropSettings.confidence && ['face', 'action', 'smart', 'rule-of-thirds', 'motion-tracking', 'auto-focus'].includes(cropSettings.type)) {
-    transformations.push(`q_auto:${Math.round(cropSettings.confidence * 100)}`);
-  } else {
-    transformations.push('q_auto');
-  }
-
+  // Quality and format
+  transformations.push('q_auto');
   transformations.push('f_mp4');
 
   return transformations.join(',');
 }
 
-/**
- * Gets platform recommendations for a given format
- */
 export function getPlatformRecommendations(format: ExportFormat): string[] {
-  return format.platforms.map(platform => {
+  const recommendations: string[] = [];
+
+  format.platforms.forEach(platform => {
     const settings = PLATFORM_SETTINGS[platform as keyof typeof PLATFORM_SETTINGS];
-    if (!settings) return platform;
-
-    const recommendations = [];
-    if (settings.recommendedDuration) {
-      recommendations.push(`${settings.recommendedDuration}s ideal`);
+    if (settings) {
+      recommendations.push(`${platform}: ${settings.recommendedDuration}s recommended`);
+      if (settings.audioRequired) {
+        recommendations.push(`${platform}: Audio required`);
+      }
+      if (settings.captionsRecommended) {
+        recommendations.push(`${platform}: Captions recommended`);
+      }
     }
-    if (settings.captionsRecommended) {
-      recommendations.push('captions recommended');
-    }
-    if (settings.audioRequired) {
-      recommendations.push('audio required');
-    }
-
-    return recommendations.length > 0 
-      ? `${platform} (${recommendations.join(', ')})`
-      : platform;
   });
+
+  return recommendations;
 }
 
 /**
  * Estimates processing time based on video duration and format complexity
  */
 export function estimateProcessingTime(durationSeconds: number, format: ExportFormat): number {
-  // Base processing time (seconds per video second)
-  let processingRatio = 0.5;
+  // Base processing time: 10% of video duration
+  let baseTime = durationSeconds * 0.1;
 
-  // Smart cropping adds processing time
-  if (format.format !== '16:9') {
-    processingRatio += 0.2;
+  // Portrait formats take longer due to AI processing
+  if (format.format === '9:16') {
+    baseTime *= 1.5;
   }
 
-  // Higher resolutions take longer
-  const pixels = format.width * format.height;
-  if (pixels > 1920 * 1080) {
-    processingRatio += 0.3;
-  }
-
-  return Math.ceil(durationSeconds * processingRatio);
+  // Minimum 5 seconds, maximum 300 seconds
+  return Math.min(Math.max(baseTime, 5), 300);
 }
 
-export interface BatchExportRequest {
-  clipIds: number[];
-  formats: ExportFormat[];
-  platforms: string[];
-  croppingStrategy?: string;
-  priority?: 'low' | 'normal' | 'high';
-}
-
-export interface ExportQueueItem {
-  id: string;
-  clipId: number;
-  format: string;
-  platform: string;
-  status: 'pending' | 'processing' | 'completed' | 'failed';
-  progress: number;
-  croppingType: string;
-  estimatedTime: number;
-  startedAt?: Date;
-  completedAt?: Date;
-  error?: string;
-  result?: {
-    url: string;
-    size: number;
-    duration: number;
-    metadata?: Record<string, unknown>;
-  }; // Export result data when completed
-}
-
-export interface CroppingStrategyInfo {
-  type: string;
-  displayName: string;
-  description: string;
-  bestFor: string[];
-  aiRequired: boolean;
-}
-
-// Available cropping strategies with descriptions
-export const CROPPING_STRATEGIES: CroppingStrategyInfo[] = [
-  {
-    type: 'face',
-    displayName: 'Face Detection',
-    description: 'Automatically detects and centers on faces in the video',
-    bestFor: ['portraits', 'interviews', 'talking heads', 'social content'],
-    aiRequired: true
-  },
-  {
-    type: 'action',
-    displayName: 'Action Tracking',
-    description: 'Follows movement and action in the video',
-    bestFor: ['sports', 'fitness', 'tutorials', 'demonstrations'],
-    aiRequired: true
-  },
-  {
-    type: 'smart',
-    displayName: 'Smart Subject',
-    description: 'AI identifies the main subject and keeps it in frame',
-    bestFor: ['general content', 'product demos', 'presentations'],
-    aiRequired: true
-  },
-  {
-    type: 'rule-of-thirds',
-    displayName: 'Rule of Thirds',
-    description: 'Uses composition principles for visually appealing crops',
-    bestFor: ['cinematic content', 'landscapes', 'artistic videos'],
-    aiRequired: true
-  },
-  {
-    type: 'motion-tracking',
-    displayName: 'Motion Tracking',
-    description: 'Tracks and follows motion throughout the video',
-    bestFor: ['dynamic content', 'moving subjects', 'sports'],
-    aiRequired: true
-  },
-  {
-    type: 'auto-focus',
-    displayName: 'Auto Focus',
-    description: 'Automatically finds and focuses on the most important area',
-    bestFor: ['mixed content', 'unknown content type'],
-    aiRequired: true
-  },
-  {
-    type: 'center',
-    displayName: 'Center Crop',
-    description: 'Simple center-based cropping (fallback option)',
-    bestFor: ['symmetric content', 'when AI fails'],
-    aiRequired: false
-  }
-];
-
-/**
- * Gets the appropriate cropping strategy info
- */
 export function getCroppingStrategyInfo(type: string): CroppingStrategyInfo | null {
   return CROPPING_STRATEGIES.find(strategy => strategy.type === type) || null;
 }
 
-/**
- * Validates if a cropping strategy is available
- */
-export function isCroppingStrategyAvailable(type: string, hasAI: boolean): boolean {
-  const strategy = getCroppingStrategyInfo(type);
-  if (!strategy) return false;
-  return !strategy.aiRequired || hasAI;
+export function getRecommendedCroppingStrategy(
+  contentType: 'portrait' | 'landscape' | 'action' | 'presentation' | 'general',
+  targetFormat: ExportFormat,
+  hasAI: boolean = true
+): string {
+  if (!hasAI) {
+    return 'center';
+  }
+
+  switch (contentType) {
+    case 'portrait':
+    case 'presentation':
+      return 'face';
+    case 'action':
+      return 'motion-tracking';
+    case 'landscape':
+      return targetFormat.format === '1:1' ? 'smart' : 'center';
+    default:
+      return 'smart';
+  }
 }
 
-/**
- * Generates a batch export queue from a batch request
- */
-export function generateBatchExportQueue(request: BatchExportRequest): ExportQueueItem[] {
-  const queue: ExportQueueItem[] = [];
-  
-  request.clipIds.forEach(clipId => {
-    request.formats.forEach(format => {
-      request.platforms.forEach(platform => {
-        // Only include platform if it's supported by the format
-        if (format.platforms.includes(platform)) {
-          const estimatedTime = estimateProcessingTime(30, format); // Default 30s estimate
-          
-          queue.push({
-            id: `${clipId}_${format.format}_${platform}_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-            clipId,
-            format: format.format,
-            platform,
-            status: 'pending',
-            progress: 0,
-            croppingType: request.croppingStrategy || 'smart',
-            estimatedTime,
-          });
-        }
-      });
-    });
-  });
-  
-  // Sort by priority and estimated time
-  return queue.sort((a, b) => {
-    const priorityWeight = request.priority === 'high' ? -100 : request.priority === 'low' ? 100 : 0;
-    return (a.estimatedTime + priorityWeight) - (b.estimatedTime + priorityWeight);
-  });
-}
-
-/**
- * Estimates total batch processing time
- */
 export function estimateBatchProcessingTime(queue: ExportQueueItem[]): {
   totalTime: number;
   averagePerItem: number;
@@ -439,48 +368,28 @@ export function estimateBatchProcessingTime(queue: ExportQueueItem[]): {
   };
 }
 
-/**
- * Gets recommended cropping strategy based on content type and target format
- */
-export function getRecommendedCroppingStrategy(
-  contentType: 'portrait' | 'landscape' | 'action' | 'presentation' | 'general',
-  targetFormat: ExportFormat,
-  hasAI: boolean = true
-): string {
-  if (!hasAI) return 'center';
-  
-  const recommendations = {
-    'portrait': {
-      '9:16': 'face',
-      '1:1': 'face',
-      '16:9': 'smart',
-      '4:3': 'smart'
-    },
-    'landscape': {
-      '9:16': 'rule-of-thirds',
-      '1:1': 'rule-of-thirds',
-      '16:9': 'center',
-      '4:3': 'center'
-    },
-    'action': {
-      '9:16': 'motion-tracking',
-      '1:1': 'action',
-      '16:9': 'action',
-      '4:3': 'action'
-    },
-    'presentation': {
-      '9:16': 'smart',
-      '1:1': 'smart',
-      '16:9': 'center',
-      '4:3': 'center'
-    },
-    'general': {
-      '9:16': 'auto-focus',
-      '1:1': 'smart',
-      '16:9': 'smart',
-      '4:3': 'smart'
-    }
-  };
-  
-  return recommendations[contentType][targetFormat.format as keyof typeof recommendations[typeof contentType]] || 'smart';
-}
+export function generateBatchExportQueue(request: BatchExportRequest): ExportQueueItem[] {
+  const queue: ExportQueueItem[] = [];
+  const timestamp = Date.now();
+
+  request.clipIds.forEach((clipId, index) => {
+    request.formats.forEach(format => {
+      request.platforms.forEach(platform => {
+        const estimatedTime = estimateProcessingTime(30, format); // Assuming 30s clips by default
+        queue.push({
+          id: `${clipId}-${format.format}-${platform}-${timestamp}-${index}`,
+          clipId,
+          format: format.format,
+          platform,
+          status: 'pending',
+          progress: 0,
+          croppingType: request.croppingStrategy || 'smart',
+          estimatedTime,
+          retryCount: 0
+        });
+      });
+    });
+  });
+
+  return queue;
+} 

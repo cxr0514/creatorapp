@@ -535,3 +535,26 @@ Successfully implemented comprehensive analytics dashboard with AI-powered recom
 - Dashboard navigation and UI components
 
 🚀 NEXT PHASE: Manual user testing and production deployment preparation
+
+---
+Date: 2025-06-01
+- PRD 3.5: Advanced Video Editing Features - Trimming & Cutting
+  - Created `ClipTrimmer.tsx` component with basic range sliders for start/end time. (PARTIAL - Basic Trimming UI)
+  - Integrated `ClipTrimmer` into `EnhancedCreateClipModal.tsx`.
+    - Users can now adjust start/end times for individual clip segments within the modal.
+  - Note: Advanced visual timeline and "Cutting/Splitting" functionality are future enhancements for full completion of PRD 3.5. (PARTIAL)
+
+- PRD 3.6: Content Repurposing Suggestions
+  - Defined data structures (`SourceClipAnalysis`, `RepurposingSuggestion`, etc.) in `src/types/suggestions.ts`. (COMPLETE)
+  - Created mock API endpoint `/api/ai/suggestions/route.ts` to return sample suggestions. (COMPLETE)
+  - Developed `AISuggestionList.tsx` component to display suggestions and allow user selection. (COMPLETE)
+  - Integrated `AISuggestionList` into `EnhancedCreateClipModal.tsx` with a toggleable section. (COMPLETE)
+  - Note: Actual AI suggestion generation logic is pending implementation. (PARTIAL - Mock data only)
+
+- PRD 3.7: Bulk Processing & Queue Management V2
+  - Added `retryCount` to `ExportQueueItem` interface in `video-export.ts`. (COMPLETE)
+  - Enhanced `BatchExportModal.tsx`:
+    - Initialized `retryCount` for queue items. (COMPLETE)
+    - Added a "Retry" button and handler (`handleRetryItem`) for failed jobs, updating their status and incrementing retry count. (COMPLETE)
+    - Updated status display to include retry count. (COMPLETE)
+  - Note: Full V2 implementation requires a persistent backend queue, which is a larger architectural change. Current retries are client-side state changes. (PARTIAL - Frontend retry UI/logic only)

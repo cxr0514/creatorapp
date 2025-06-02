@@ -8,7 +8,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Eye, Heart, Calendar, ExternalLink, TrendingUp } from 'lucide-react'
+import { Eye, Heart, Calendar, ExternalLink, TrendingUp } from '@/lib/icons'
 import Image from 'next/image'
 import type { TopPerformingContent } from '@/lib/types/analytics'
 import { formatNumber } from '@/lib/utils/analytics'

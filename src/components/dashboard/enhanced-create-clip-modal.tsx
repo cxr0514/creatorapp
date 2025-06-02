@@ -18,8 +18,12 @@ import {
   Plus, 
   Trash2,
   Clock,
-  Wand2
+  Wand2,
+  X
 } from 'lucide-react'
+import ClipTrimmer from '@/components/video/ClipTrimmer'
+import AISuggestionList from '@/components/suggestions/AISuggestionList'
+import type { RepurposingSuggestion } from '@/types/suggestions'
 
 interface Video {
   id: number
@@ -76,10 +80,19 @@ export function EnhancedCreateClipModal({
   const [selectedClipId, setSelectedClipId] = useState<string | null>(null)
   const [isCreating, setIsCreating] = useState(false)
   const [creationProgress, setCreationProgress] = useState(0)
+  const [trimmingClip, setTrimmingClip] = useState<ClipData | null>(null)
+  const [showAISuggestions, setShowAISuggestions] = useState(false)
 
   // Timeline state
   const [selectionStart, setSelectionStart] = useState<number | null>(null)
   const [selectionEnd, setSelectionEnd] = useState<number | null>(null)
+
+  // Auto-save state
+  const [isDirty, setIsDirty] = useState(false)
+  const [lastSaveTime, setLastSaveTime] = useState<Date | null>(null)
+  
+  // Validation state
+  const [validationErrors, setValidationErrors] = useState<string[]>([])
 
   // Fetch available videos when modal opens and no video is provided
   useEffect(() => {
@@ -228,13 +241,13 @@ export function EnhancedCreateClipModal({
     if (!duration) return
     
     const segmentLength = duration / numberOfClips
-    const newClips: ClipData[] = []
+    const newClipsData: ClipData[] = []
     
     for (let i = 0; i < numberOfClips; i++) {
       const startTime = i * segmentLength
       const endTime = Math.min((i + 1) * segmentLength, duration)
       
-      newClips.push({
+      newClipsData.push({
         id: `clip-${Date.now()}-${i}`,
         title: `Auto Clip ${i + 1}`,
         startTime,
@@ -243,13 +256,54 @@ export function EnhancedCreateClipModal({
       })
     }
     
-    setClips(newClips)
+    setClips(newClipsData)
   }
 
-  // Create clips
-  const handleCreateClips = async () => {
-    if (!selectedVideo || clips.length === 0) return
+  const handleSuggestionSelect = (suggestion: RepurposingSuggestion) => {
+    const newClip: ClipData = {
+      id: `clip-sugg-${Date.now()}`,
+      title: suggestion.suggestedTitle,
+      startTime: suggestion.startTime,
+      endTime: suggestion.endTime,
+      aspectRatio: suggestion.suggestedFormat,
+    };
+    setClips(prev => [...prev, newClip]);
+    setNumberOfClips(prev => prev + 1);
+  };
 
+  // Validate clips before saving/creating
+  const validateClips = (): boolean => {
+    const errors: string[] = []
+    
+    if (clips.length === 0) {
+      errors.push('Create at least one clip')
+      return false
+    }
+
+    clips.forEach((clip, index) => {
+      if (!clip.title.trim()) {
+        errors.push(`Clip ${index + 1} needs a title`)
+      }
+      if (clip.endTime <= clip.startTime) {
+        errors.push(`Clip ${index + 1} end time must be after start time`)
+      }
+      if (clip.endTime - clip.startTime < 1) {
+        errors.push(`Clip ${index + 1} must be at least 1 second long`)
+      }
+    })
+
+    setValidationErrors(errors)
+    return errors.length === 0
+  }
+
+  // Enhanced create clips function with validation
+  const handleCreateClips = async () => {
+    if (!validateClips()) return
+    if (!selectedVideo) {
+      setValidationErrors(['No video selected'])
+      return
+    }
+    
     setIsCreating(true)
     setCreationProgress(0)
 
@@ -276,11 +330,18 @@ export function EnhancedCreateClipModal({
         setCreationProgress(((i + 1) / clips.length) * 100)
       }
 
+      // Clear saved data after successful creation
+      localStorage.removeItem(`clipEditor_${selectedVideo.id}`)
+
       onClipsCreated?.()
       onClose()
     } catch (error) {
       console.error('Error creating clips:', error)
-      alert('Failed to create clips. Please try again.')
+      if (error instanceof Error) {
+        setValidationErrors([error.message])
+      } else {
+        setValidationErrors(['Failed to create clips. Please try again.'])
+      }
     } finally {
       setIsCreating(false)
       setCreationProgress(0)
@@ -294,15 +355,81 @@ export function EnhancedCreateClipModal({
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
+  // Auto-save clips to localStorage
+  useEffect(() => {
+    if (!selectedVideo || !isDirty) return
+    
+    const saveToStorage = () => {
+      const storageKey = `clipEditor_${selectedVideo.id}`
+      const dataToSave = {
+        clips,
+        lastModified: new Date().toISOString()
+      }
+      localStorage.setItem(storageKey, JSON.stringify(dataToSave))
+      setLastSaveTime(new Date())
+      setIsDirty(false)
+    }
+
+    const timerId = setTimeout(saveToStorage, 1000) // Save after 1 second of no changes
+    return () => clearTimeout(timerId)
+  }, [clips, selectedVideo, isDirty])
+
+  // Load saved clips when video is selected
+  useEffect(() => {
+    if (!selectedVideo) return
+    
+    const storageKey = `clipEditor_${selectedVideo.id}`
+    const savedData = localStorage.getItem(storageKey)
+    if (savedData) {
+      try {
+        const { clips: savedClips, lastModified } = JSON.parse(savedData)
+        // Only restore if less than 24 hours old
+        if (new Date().getTime() - new Date(lastModified).getTime() < 24 * 60 * 60 * 1000) {
+          setClips(savedClips)
+          setNumberOfClips(savedClips.length)
+          setLastSaveTime(new Date(lastModified))
+        } else {
+          localStorage.removeItem(storageKey) // Clean up old data
+        }
+      } catch (error) {
+        console.error('Error loading saved clips:', error)
+      }
+    }
+  }, [selectedVideo])
+
+  // Mark as dirty whenever clips change
+  useEffect(() => {
+    setIsDirty(true)
+  }, [clips])
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <Scissors className="w-5 h-5" />
-            {selectedVideo ? `Create Clips from "${selectedVideo.title}"` : 'Create Clips'}
+          <DialogTitle className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Scissors className="w-5 h-5" />
+              {selectedVideo ? `Create Clips from "${selectedVideo.title}"` : 'Create Clips'}
+            </div>
+            {isDirty && (
+              <span className="text-xs text-gray-500">
+                {lastSaveTime ? `Last saved ${lastSaveTime.toLocaleTimeString()}` : 'Saving...'}
+              </span>
+            )}
           </DialogTitle>
         </DialogHeader>
+
+        {/* Validation Errors */}
+        {validationErrors.length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <h4 className="text-sm font-semibold text-red-800 mb-2">Please fix these issues:</h4>
+            <ul className="list-disc list-inside text-sm text-red-700">
+              {validationErrors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </div>
+        )}
 
         {/* Video Selection Section (when no video is provided) */}
         {!selectedVideo && (
@@ -552,6 +679,17 @@ export function EnhancedCreateClipModal({
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setTrimmingClip(clip);
+                        }}
+                        className="h-8 w-8 p-0 ml-1"
+                      >
+                        <Scissors className="w-3 h-3" />
+                      </Button>
                     </div>
                     
                     <div className="space-y-2">
@@ -573,10 +711,26 @@ export function EnhancedCreateClipModal({
                         <SelectContent>
                           {ASPECT_RATIOS.map((ratio) => (
                             <SelectItem key={ratio.value} value={ratio.value}>
-                              <div>
-                                <div className="font-medium">{ratio.label}</div>
-                                <div className="text-xs text-gray-500">
-                                  {ratio.platforms.join(', ')}
+                              <div className="flex items-center gap-3">
+                                <div className="relative w-12 h-8 bg-purple-100 rounded overflow-hidden">
+                                  <div
+                                    className="absolute inset-0 border-2 border-purple-500"
+                                    style={{
+                                      aspectRatio: ratio.value,
+                                      margin: 'auto',
+                                      top: '50%',
+                                      left: '50%',
+                                      transform: 'translate(-50%, -50%)',
+                                      height: ratio.value === '9:16' ? '100%' : 'auto',
+                                      width: ratio.value === '9:16' ? 'auto' : '100%'
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <div className="font-medium">{ratio.label}</div>
+                                  <div className="text-xs text-gray-500">
+                                    {ratio.platforms.join(', ')}
+                                  </div>
                                 </div>
                               </div>
                             </SelectItem>
@@ -587,6 +741,51 @@ export function EnhancedCreateClipModal({
                   </div>
                 ))}
               </CardContent>
+            </Card>
+
+            {/* Conditionally render ClipTrimmer */}
+            {trimmingClip && selectedVideo && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-sm flex items-center justify-between">
+                    Trim: {trimmingClip.title}
+                    <Button variant="ghost" size="sm" onClick={() => setTrimmingClip(null)}>
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ClipTrimmer
+                    videoSrc={selectedVideo.url}
+                    initialStartTime={trimmingClip.startTime}
+                    initialEndTime={trimmingClip.endTime}
+                    maxDuration={duration} // Full video duration
+                    onTrimChange={(newStartTime, newEndTime) => {
+                      updateClip(trimmingClip.id, { startTime: newStartTime, endTime: newEndTime });
+                    }}
+                  />
+                </CardContent>
+              </Card>
+            )}
+
+            {/* AI Suggestions Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-sm flex items-center justify-between">
+                  AI Repurposing Suggestions
+                  <Button variant="outline" size="sm" onClick={() => setShowAISuggestions(!showAISuggestions)}>
+                    {showAISuggestions ? 'Hide' : '✨ Show Ideas'}
+                  </Button>
+                </CardTitle>
+              </CardHeader>
+              {showAISuggestions && (
+                <CardContent>
+                  <AISuggestionList
+                    videoId={selectedVideo.id}
+                    onSuggestionSelect={handleSuggestionSelect}
+                  />
+                </CardContent>
+              )}
             </Card>
 
             {/* Create Button */}

@@ -17,157 +17,154 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-export async function POST(request: NextRequest) {
+interface ExportFormatRequest {
+  format: '16:9' | '9:16' | '1:1' | '4:3'; // This is effectively the aspect ratio
+  platform: string; // For context, e.g., 'YouTube', 'TikTok'
+}
+
+interface ExportRequestBody {
+  formats: ExportFormatRequest[];
+  croppingStrategy?: 'face' | 'auto' | 'center'; 
+}
+
+interface ExportResult {
+  format: string;
+  platform: string;
+  status: 'success' | 'error' | 'exists'; // Added 'exists' for future use
+  exportUrl?: string;
+  newPublicId?: string;
+  errorMessage?: string;
+}
+
+export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
+  const results: ExportResult[] = [];
   try {
-    // Check authentication
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
+      // Note: No console.error here as it's an expected client error path
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { clipId, formats, croppingStrategy } = body;
-
-    if (!clipId || !formats || !Array.isArray(formats)) {
-      return NextResponse.json(
-        { error: 'Missing required fields: clipId, formats' },
-        { status: 400 }
-      );
+    const clipId = parseInt(params.id);
+    if (isNaN(clipId)) {
+      return NextResponse.json({ error: 'Invalid clip ID' }, { status: 400 });
     }
 
-    // Get the clip with user verification
+    const body: ExportRequestBody = await request.json();
+    // Ensure croppingStrategy has a default if not provided
+    const { formats, croppingStrategy = 'auto' } = body;
+
+    if (!Array.isArray(formats) || formats.length === 0) {
+      return NextResponse.json({ error: 'Invalid or empty formats array' }, { status: 400 });
+    }
+
     const clip = await prisma.clip.findFirst({
       where: {
         id: clipId,
-        user: { email: session.user.email }
+        userId: session.user.id, 
       },
-      include: {
-        video: true,
-        exports: true
-      }
     });
 
-    if (!clip) {
-      return NextResponse.json({ error: 'Clip not found' }, { status: 404 });
+    if (!clip || !clip.cloudinaryId) {
+      return NextResponse.json({ error: 'Clip not found or has no Cloudinary ID' }, { status: 404 });
     }
-
-    const results = [];
-    const errors = [];
+    
+    const originalPublicId = clip.cloudinaryId;
+    // Determine the base folder from the original clip's public ID
+    const baseFolder = originalPublicId.includes('/') ? originalPublicId.substring(0, originalPublicId.lastIndexOf('/')) : '';
 
     for (const formatRequest of formats) {
+      const { format: aspectRatio, platform } = formatRequest; 
+
+      if (!aspectRatio || !['16:9', '9:16', '1:1', '4:3'].includes(aspectRatio)) {
+        results.push({
+          format: aspectRatio,
+          platform,
+          status: 'error',
+          errorMessage: `Invalid aspect ratio: ${aspectRatio}`,
+        });
+        continue; // Skip to next format
+      }
+      
+      let transformation: any = {
+        aspect_ratio: aspectRatio.replace(':', '_'),
+        crop: 'fill', 
+        gravity: croppingStrategy,
+      };
+
+      if (aspectRatio === '9:16') {
+        transformation.width = 1080;
+        // transformation.height = 1920; // Height is often implied by aspect ratio and width + crop mode
+      } else if (aspectRatio === '1:1') {
+        transformation.width = 1080;
+        // transformation.height = 1080;
+      } else if (aspectRatio === '16:9') {
+        transformation.width = 1920;
+        // transformation.height = 1080;
+      }
+      // Add other aspect ratios or more sophisticated dimension logic as needed
+
+      const transformedUrl = cloudinary.url(originalPublicId, {
+        resource_type: 'video',
+        transformation: [transformation, { fetch_format: 'mp4' }],
+      });
+      
+      // Sanitize platform and aspect ratio for use in public_id
+      const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
+      const safeAspectRatio = aspectRatio.replace(':', '_');
+      const newExportSuffix = `export_${safeAspectRatio}_${croppingStrategy}_${safePlatform}`;
+      const newPublicId = `${originalPublicId}_${newExportSuffix}`;
+
       try {
-        const { format, platform } = formatRequest;
-        
-        // Find the export format configuration
-        const exportFormat = EXPORT_FORMATS.find(f => f.format === format);
-        if (!exportFormat) {
-          errors.push(`Unsupported format: ${format}`);
-          continue;
-        }
+        console.log(`[API/CLIPS EXPORT] Processing for clip ${clipId}: format ${aspectRatio}, platform ${platform}, strategy ${croppingStrategy}`);
+        console.log(`[API/CLIPS EXPORT] Original Public ID: ${originalPublicId}`);
+        console.log(`[API/CLIPS EXPORT] Transformation: ${JSON.stringify(transformation)}`);
+        console.log(`[API/CLIPS EXPORT] Transformed URL for upload: ${transformedUrl}`);
+        console.log(`[API/CLIPS EXPORT] New Public ID for export: ${newPublicId}`);
+        console.log(`[API/CLIPS EXPORT] Target Folder for export: ${baseFolder}`);
 
-        // Check if this export already exists
-        const existingExport = clip.exports.find(
-          exp => exp.format === format && exp.platform === platform
-        );
-        
-        if (existingExport) {
-          results.push({
-            format,
-            platform,
-            status: 'exists',
-            exportId: existingExport.id,
-            url: existingExport.cloudinaryUrl,
-            message: 'Export already exists'
-          });
-          continue;
-        }
-
-        // Determine cropping strategy
-        const cropSettings = determineCropStrategy(
-          clip.aspectRatio,
-          exportFormat,
-          true, // AI enabled
-          croppingStrategy // Use preferred strategy from request
-        );
-
-        // Generate Cloudinary transformation
-        const transformation = generateCloudinaryTransformation(
-          exportFormat,
-          cropSettings,
-          clip.startTime || undefined,
-          clip.endTime || undefined
-        );
-
-        // Calculate video duration for processing estimate
-        const duration = (clip.endTime || 0) - (clip.startTime || 0);
-        const estimatedTime = estimateProcessingTime(duration, exportFormat);
-
-        // Generate unique public_id for the export
-        const exportPublicId = `creator_uploads/clips/${session.user.email}/${clip.id}_${format}_${platform}_${Date.now()}`;
-
-        // Create the export using Cloudinary's video transformation
-        const cloudinaryResult = await cloudinary.uploader.upload(clip.cloudinaryUrl, {
-          transformation: transformation,
-          public_id: exportPublicId,
-          resource_type: 'video'
-        });
-
-        // Generate thumbnail for the export
-        const thumbnailUrl = cloudinary.url(exportPublicId, {
+        const uploadResult = await cloudinary.uploader.upload(transformedUrl, {
+          public_id: newPublicId,
+          folder: baseFolder, 
           resource_type: 'video',
-          transformation: [
-            { width: 400, height: 300, crop: 'fill', quality: 'auto' },
-            { format: 'jpg' }
-          ]
-        });
-
-        // Save export record to database
-        const newExport = await prisma.clipExport.create({
-          data: {
-            clipId: clip.id,
-            format,
-            platform,
-            cloudinaryId: exportPublicId,
-            cloudinaryUrl: cloudinaryResult.secure_url,
-            croppingType: cropSettings.type,
-            thumbnailUrl,
-            fileSize: null // Will be updated when processing completes
+          context: { 
+            exported_from_clip_id: clip.id.toString(),
+            original_public_id: originalPublicId,
+            export_aspect_ratio: aspectRatio,
+            export_platform: platform,
+            cropping_strategy: croppingStrategy,
           }
         });
 
+        console.log(`[API/CLIPS EXPORT] Successfully exported ${newPublicId}: ${uploadResult.secure_url}`);
         results.push({
-          format,
+          format: aspectRatio,
           platform,
-          status: 'created',
-          exportId: newExport.id,
-          url: newExport.cloudinaryUrl,
-          thumbnailUrl: newExport.thumbnailUrl,
-          estimatedProcessingTime: estimatedTime,
-          croppingType: cropSettings.type,
-          message: 'Export created successfully'
+          status: 'success',
+          exportUrl: uploadResult.secure_url,
+          newPublicId: uploadResult.public_id,
         });
 
-      } catch (formatError: unknown) {
-        console.error(`Error processing format ${formatRequest.format}:`, formatError);
-        const errorMessage = formatError instanceof Error ? formatError.message : 'Unknown error';
-        errors.push(`Failed to process ${formatRequest.format}: ${errorMessage}`);
+      } catch (uploadError: any) {
+        console.error(`[API/CLIPS EXPORT] Error exporting format ${aspectRatio} for platform ${platform} (Clip ID: ${clipId}):`, uploadError);
+        results.push({
+          format: aspectRatio,
+          platform,
+          status: 'error',
+          errorMessage: uploadError.message || 'Cloudinary upload failed',
+        });
       }
     }
 
-    return NextResponse.json({
-      success: true,
-      results,
-      errors: errors.length > 0 ? errors : undefined,
-      clipId,
-      totalExports: results.filter(r => r.status === 'created').length
-    });
+    return NextResponse.json({ results });
 
-  } catch (error) {
-    console.error('Export API error:', error);
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    );
+  } catch (error: any) {
+    console.error('[API/CLIPS EXPORT] General error in export handler:', error);
+    // Ensure a generic error is returned if specific results cannot be formed
+    return NextResponse.json({ 
+        error: error.message || 'Internal server error', 
+        results // Include any partial results if available
+    }, { status: 500 });
   }
 }
 

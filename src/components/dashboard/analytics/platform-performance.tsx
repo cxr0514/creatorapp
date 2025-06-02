@@ -7,7 +7,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Users, Eye, Heart, Share2, Clock, Globe, Play, Music, Camera, MessageCircle, Briefcase } from 'lucide-react'
+import { Users, Eye, Heart, Share2, Clock, Globe, Play, Music, Camera, MessageCircle, Briefcase } from '@/lib/icons'
 import type { PlatformMetrics } from '@/lib/types/analytics'
 import { formatNumber } from '@/lib/utils/analytics'
 import { PLATFORMS } from '@/lib/analytics-constants'

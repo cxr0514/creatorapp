@@ -6,6 +6,8 @@ import {
   EXPORT_FORMATS, 
   CROPPING_STRATEGIES, 
   getPlatformRecommendations,
+  type ExportFormat,
+  type CroppingStrategyInfo,
   getRecommendedCroppingStrategy,
   getCroppingStrategyInfo 
 } from '@/lib/video-export'
@@ -187,7 +189,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                     onChange={(e) => setCroppingStrategy(e.target.value)}
                     className="w-full p-2 border rounded-md"
                   >
-                    {CROPPING_STRATEGIES.map((strategy) => (
+                    {CROPPING_STRATEGIES.map((strategy: CroppingStrategyInfo) => (
                       <option key={strategy.type} value={strategy.type}>
                         {strategy.displayName}
                       </option>
@@ -196,13 +198,10 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                 </div>
                 
                 <div className="flex items-center">
-                  <div className="text-sm">
-                    <div className="font-medium text-green-700">
-                      {getCroppingStrategyInfo(croppingStrategy)?.displayName}
-                    </div>
-                    <div className="text-gray-600">
+                  <div className="flex-1">
+                    <p className="text-sm text-gray-600">
                       {getCroppingStrategyInfo(croppingStrategy)?.description}
-                    </div>
+                    </p>
                   </div>
                 </div>
               </div>
@@ -212,7 +211,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                   <div className="text-sm text-gray-600">
                     <h5 className="font-medium mb-2">Best For:</h5>
                     <div className="flex flex-wrap gap-1 mb-3">
-                      {getCroppingStrategyInfo(croppingStrategy)?.bestFor.map((use, index) => (
+                      {getCroppingStrategyInfo(croppingStrategy)?.bestFor.map((use: string, index: number) => (
                         <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
                           {use}
                         </span>
@@ -221,7 +220,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                     
                     <h5 className="font-medium mb-2">Recommendations by Format:</h5>
                     <div className="grid grid-cols-2 gap-2 text-xs">
-                      {EXPORT_FORMATS.map((format) => {
+                      {EXPORT_FORMATS.map((format: ExportFormat) => {
                         const recommended = getRecommendedCroppingStrategy('general', format, true)
                         const isOptimal = recommended === croppingStrategy
                         return (
@@ -237,130 +236,86 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
               )}
             </div>
 
-            <div className="grid gap-6">
+            {/* Format Selection */}
+            <div className="space-y-4">
               {EXPORT_FORMATS.map((format) => (
                 <div key={format.format} className="border rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2">
                     <div>
-                      <h4 className="font-medium flex items-center gap-2">
-                        {format.displayName}
-                        {isCurrentFormat(format.format) && (
-                          <span className="px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
-                            Current
-                          </span>
-                        )}
-                      </h4>
+                      <h4 className="font-medium">{format.displayName}</h4>
                       <p className="text-sm text-gray-600">{format.description}</p>
-                      <p className="text-xs text-gray-500">
-                        Resolution: {format.width} × {format.height}
-                      </p>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm font-medium">
-                        {selectedFormats[format.format]?.size || 0} selected
-                      </div>
-                    </div>
+                    {isCurrentFormat(format.format) && (
+                      <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                        Current Format
+                      </span>
+                    )}
                   </div>
 
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                    {format.platforms.map((platform) => {
-                      const isSelected = selectedFormats[format.format]?.has(platform) || false
-                      const recommendations = getPlatformRecommendations(format)
-                      const platformRec = recommendations.find(rec => rec.startsWith(platform))
-                      
-                      return (
-                        <button
-                          key={platform}
-                          onClick={() => togglePlatform(format.format, platform)}
-                          className={`p-3 rounded-lg border text-sm transition-colors ${
-                            isSelected
-                              ? 'bg-blue-50 border-blue-200 text-blue-800'
-                              : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
-                          }`}
-                        >
-                          <div className="font-medium capitalize">
-                            {platform.replace('-', ' ')}
-                          </div>
-                          {platformRec && (
-                            <div className="text-xs text-gray-500 mt-1">
-                              {platformRec.split('(')[1]?.replace(')', '') || ''}
-                            </div>
-                          )}
-                        </button>
-                      )
-                    })}
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2 mt-3">
+                    {format.platforms.map((platform) => (
+                      <button
+                        key={platform}
+                        onClick={() => togglePlatform(format.format, platform)}
+                        className={`p-2 text-sm rounded-md border ${
+                          selectedFormats[format.format]?.has(platform)
+                            ? 'bg-blue-50 border-blue-200 text-blue-700'
+                            : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {platform}
+                      </button>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t">
+            <div className="flex justify-end space-x-3 mt-6">
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleExport} 
+              <Button
+                onClick={handleExport}
                 disabled={isExporting || getSelectedExports().length === 0}
               >
-                {isExporting ? 'Exporting...' : `Export ${getSelectedExports().length} Format${getSelectedExports().length !== 1 ? 's' : ''}`}
+                {isExporting ? 'Exporting...' : 'Export'}
               </Button>
             </div>
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Export Results</h3>
-              <p className="text-sm text-gray-600">
-                Your exports have been processed. You can download them or view them in your clips list.
-              </p>
-            </div>
-
-            <div className="space-y-3">
+            <h3 className="text-lg font-medium">Export Results</h3>
+            <div className="space-y-2">
               {exportResults.map((result, index) => (
-                <div key={index} className="border rounded-lg p-4">
+                <div
+                  key={index}
+                  className={`p-3 rounded-md ${
+                    result.status === 'error'
+                      ? 'bg-red-50 text-red-700'
+                      : result.status === 'exists'
+                      ? 'bg-yellow-50 text-yellow-700'
+                      : 'bg-green-50 text-green-700'
+                  }`}
+                >
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium">
-                        {result.format} for {result.platform.replace('-', ' ')}
-                      </h4>
-                      <p className="text-sm text-gray-600">{result.message}</p>
-                      {result.estimatedProcessingTime && (
-                        <p className="text-xs text-gray-500">
-                          Processing time: ~{result.estimatedProcessingTime}s
-                        </p>
-                      )}
+                      <p className="font-medium">
+                        {result.format} - {result.platform}
+                      </p>
+                      <p className="text-sm">{result.message}</p>
                     </div>
-                    <div className="flex items-center space-x-2">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        result.status === 'created' 
-                          ? 'bg-green-100 text-green-800'
-                          : result.status === 'exists'
-                          ? 'bg-blue-100 text-blue-800'
-                          : 'bg-red-100 text-red-800'
-                      }`}>
-                        {result.status === 'created' ? 'New' : result.status === 'exists' ? 'Existing' : 'Error'}
-                      </span>
-                      {result.url && (
-                        <Button 
-                          size="sm" 
-                          onClick={() => window.open(result.url, '_blank')}
-                        >
-                          Download
-                        </Button>
-                      )}
-                    </div>
+                    {result.status === 'created' && result.estimatedProcessingTime && (
+                      <p className="text-sm">
+                        Est. time: {result.estimatedProcessingTime}s
+                      </p>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-
-            <div className="flex justify-end space-x-3 pt-4 border-t">
-              <Button variant="outline" onClick={() => setShowResults(false)}>
-                Export More
-              </Button>
-              <Button onClick={onClose}>
-                Done
-              </Button>
+            <div className="flex justify-end mt-6">
+              <Button onClick={onClose}>Close</Button>
             </div>
           </div>
         )}
