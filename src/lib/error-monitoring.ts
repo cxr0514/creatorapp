@@ -60,9 +60,7 @@ class ErrorMonitor {
     this.recentErrors.unshift({
       timestamp: new Date().toISOString(),
       platform: context.platform || 'unknown',
-      operation: context.operation || 'unknown',
       error: error.message,
-      stack: error.stack,
       userId: context.userId,
       postId: context.postId
     });

@@ -489,7 +489,8 @@ export function AIMetadataEnhancer({
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => applyMetadata('description', generatedMetadata.description)}
+                        onClick={() => generatedMetadata.description && applyMetadata('description', generatedMetadata.description)}
+                        disabled={!generatedMetadata.description}
                       >
                         Use This
                       </Button>
@@ -524,7 +525,8 @@ export function AIMetadataEnhancer({
                       </Button>
                       <Button
                         size="sm"
-                        onClick={() => applyMetadata('hashtags', generatedMetadata.hashtags)}
+                        onClick={() => generatedMetadata.hashtags && applyMetadata('hashtags', generatedMetadata.hashtags)}
+                        disabled={!generatedMetadata.hashtags}
                       >
                         Use These
                       </Button>

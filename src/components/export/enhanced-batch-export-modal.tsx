@@ -181,7 +181,7 @@ export function EnhancedBatchExportModal({
         
         if (clip?.cloudinaryId) {
           try {
-            const contentAnalysis = await smartCroppingEngine.analyzeContent(clip.cloudinaryId)
+            const contentAnalysis = await smartCroppingEngine.analyzeContent()
             const targetFormat = EXPORT_FORMATS.find(f => f.format === item.format)
             
             if (targetFormat) {
