@@ -1,21 +1,47 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Basecom Dark-Violet Theme Colors */
+  --background: #0a0a0f;
+  --foreground: #e6e6ff;
+  --surface: #1a1a2e;
+  --surface-secondary: #2d2d44;
+  --primary: #6b46c1;
+  --primary-hover: #7c3aed;
+  --accent: #8b5cf6;
+  --accent-light: #a78bfa;
+  --text-primary: #e6e6ff;
+  --text-secondary: #b3b3d9;
+  --text-muted: #8080b3;
+  --border: #404066;
+  --hero-gradient-from: #1e1b4b;
+  --hero-gradient-to: #312e81;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+  --color-border: var(--border);
+  --color-hero-gradient-from: var(--hero-gradient-from);
+  --color-hero-gradient-to: var(--hero-gradient-to);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Keep the same dark-violet theme in dark mode */
+    --background: #0a0a0f;
+    --foreground: #e6e6ff;
   }
 }
 
