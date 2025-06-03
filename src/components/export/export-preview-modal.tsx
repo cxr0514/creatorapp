@@ -413,13 +413,13 @@ export function ExportPreviewModal({
                   </div>
 
                   {currentPreview.smartCropAnalysis && (
-                    <div className="mt-4 p-3 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-blue-800 mb-2">Recommended Strategy</h4>
-                      <p className="text-blue-700 text-sm">
+                    <div className="mt-4 p-3 bg-primary/10 rounded-lg">
+                      <h4 className="font-medium text-primary mb-2">Recommended Strategy</h4>
+                      <p className="text-primary/80 text-sm">
                         {currentPreview.smartCropAnalysis.reasoning}
                       </p>
                       <div className="mt-2">
-                        <Badge variant="outline" className="text-blue-800 border-blue-300">
+                        <Badge variant="outline" className="text-primary border-primary/30">
                           {currentPreview.smartCropAnalysis.strategy} - {Math.round(currentPreview.smartCropAnalysis.confidence * 100)}% confidence
                         </Badge>
                       </div>

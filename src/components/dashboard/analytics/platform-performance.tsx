@@ -35,13 +35,13 @@ function PlatformCard({ platform }: PlatformCardProps) {
   const platformName = platformConfig?.label || platform.platform
   const platformIconName = platformConfig?.icon || 'Globe'
   const PlatformIcon = PlatformIcons[platformIconName as keyof typeof PlatformIcons] || Globe
-  const iconColorClass = platformConfig?.colorClass || 'text-gray-600'
+  const iconColorClass = platformConfig?.colorClass || 'text-muted-foreground'
 
   const metrics = [
-    { label: 'Views', value: platform.views, icon: Eye, color: 'text-blue-600' },
-    { label: 'Engagement', value: platform.engagement, icon: Heart, color: 'text-pink-600' },
-    { label: 'Shares', value: platform.shares, icon: Share2, color: 'text-green-600' },
-    { label: 'Followers', value: platform.followers, icon: Users, color: 'text-purple-600' }
+    { label: 'Views', value: platform.views, icon: Eye, color: 'text-primary' },
+    { label: 'Engagement', value: platform.engagement, icon: Heart, color: 'text-accent-success' },
+    { label: 'Shares', value: platform.shares, icon: Share2, color: 'text-accent-success' },
+    { label: 'Followers', value: platform.followers, icon: Users, color: 'text-primary' }
   ]
 
   const watchTimeDisplay = `${Math.floor(platform.avgWatchTime / 60)}:${(platform.avgWatchTime % 60).toString().padStart(2, '0')}`
@@ -58,7 +58,7 @@ function PlatformCard({ platform }: PlatformCardProps) {
               <CardTitle className="text-lg font-semibold capitalize">
                 {platformName}
               </CardTitle>
-              <p className="text-sm text-gray-600">
+              <p className="text-sm text-muted-foreground">
                 Social Media Platform
               </p>
             </div>
@@ -74,10 +74,10 @@ function PlatformCard({ platform }: PlatformCardProps) {
           {metrics.map((metric, index) => {
             const Icon = metric.icon
             return (
-              <div key={index} className="flex items-center space-x-2 p-2 bg-gray-50 rounded-lg">
+              <div key={index} className="flex items-center space-x-2 p-2 bg-muted/30 rounded-lg">
                 <Icon className={`h-4 w-4 ${metric.color}`} />
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs text-gray-600 truncate">{metric.label}</p>
+                  <p className="text-xs text-muted-foreground truncate">{metric.label}</p>
                   <p className="text-sm font-semibold">{formatNumber(metric.value)}</p>
                 </div>
               </div>
@@ -85,12 +85,12 @@ function PlatformCard({ platform }: PlatformCardProps) {
           })}
         </div>
 
-        <div className="flex items-center justify-between pt-2 border-t border-gray-200">
+        <div className="flex items-center justify-between pt-2 border-t border-border">
           <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-orange-600" />
-            <span className="text-sm text-gray-600">Avg Watch Time</span>
+            <Clock className="h-4 w-4 text-accent-warning" />
+            <span className="text-sm text-muted-foreground">Avg Watch Time</span>
           </div>
-          <span className="text-sm font-semibold text-orange-600">
+          <span className="text-sm font-semibold text-accent-warning">
             {watchTimeDisplay}
           </span>
         </div>

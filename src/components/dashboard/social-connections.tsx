@@ -86,17 +86,17 @@ export function SocialConnections() {
   const getPlatformColor = (platformId: string) => {
     switch (platformId) {
       case 'youtube':
-        return 'from-red-500 to-red-600'
+        return 'from-accent-danger to-accent-danger'
       case 'tiktok':
-        return 'from-black to-gray-800'
+        return 'from-black to-background'
       case 'instagram':
-        return 'from-purple-500 via-pink-500 to-orange-400'
+        return 'from-primary to-primary'
       case 'twitter':
-        return 'from-blue-400 to-blue-500'
+        return 'from-primary to-primary'
       case 'linkedin':
-        return 'from-blue-600 to-blue-700'
+        return 'from-primary to-primary'
       default:
-        return 'from-gray-500 to-gray-600'
+        return 'from-muted to-muted'
     }
   }
 
@@ -133,7 +133,7 @@ export function SocialConnections() {
           onClick={fetchConnectedAccounts}
           variant="outline"
           size="sm"
-          className="border-purple-200 text-purple-700 hover:bg-purple-50"
+          className="border-primary/20 text-primary hover:bg-primary/10"
         >
           <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -176,7 +176,7 @@ export function SocialConnections() {
                         size="sm"
                         variant="outline"
                         onClick={() => disconnectPlatform(account?.id || '')}
-                        className="border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+                        className="border-accent-danger/20 text-accent-danger hover:bg-accent-danger/10 hover:border-accent-danger/30"
                       >
                         Disconnect
                       </Button>
@@ -247,7 +247,7 @@ export function SocialConnections() {
       </div>
 
       {/* Connection Status Summary */}
-      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
+      <div className="bg-gradient-to-r from-primary/5 to-primary/10 rounded-xl p-6 border border-primary/20">
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-card-foreground">Connection Status</h3>

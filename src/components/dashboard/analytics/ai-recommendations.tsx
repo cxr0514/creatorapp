@@ -68,15 +68,15 @@ function RecommendationCard({ recommendation, onApply, onDismiss }: Recommendati
   }
 
   return (
-    <Card className={`transition-all duration-300 ${isApplied ? 'border-green-200 bg-green-50' : 'hover:shadow-md'}`}>
+    <Card className={`transition-all duration-300 ${isApplied ? 'border-accent-success/50 bg-accent-success/5' : 'hover:shadow-md'}`}>
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-start space-x-3">
-            <div className={`p-2 rounded-lg ${isApplied ? 'bg-green-100' : 'bg-blue-50'}`}>
+            <div className={`p-2 rounded-lg ${isApplied ? 'bg-accent-success/20' : 'bg-primary/10'}`}>
               {isApplied ? (
-                <CheckCircle className="h-5 w-5 text-green-600" />
+                <CheckCircle className="h-5 w-5 text-accent-success" />
               ) : (
-                <Icon className="h-5 w-5 text-blue-600" />
+                <Icon className="h-5 w-5 text-primary" />
               )}
             </div>
             <div className="flex-1">
@@ -120,14 +120,14 @@ function RecommendationCard({ recommendation, onApply, onDismiss }: Recommendati
             <Button 
               size="sm" 
               onClick={handleApply}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-primary hover:bg-primary-hover text-white"
             >
               Apply Suggestion
             </Button>
           )}
           
           {isApplied && (
-            <div className="flex items-center space-x-1 text-green-600">
+            <div className="flex items-center space-x-1 text-accent-success">
               <CheckCircle className="h-4 w-4" />
               <span className="text-sm font-medium">Applied</span>
             </div>

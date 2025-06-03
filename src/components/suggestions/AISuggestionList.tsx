@@ -56,7 +56,7 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center p-6 text-red-600"><AlertCircle className="w-10 h-10 mb-2"/><p className="text-center">Error fetching suggestions: {error}</p></div>
+      <div className="flex flex-col items-center justify-center p-6 text-accent-danger"><AlertCircle className="w-10 h-10 mb-2"/><p className="text-center">Error fetching suggestions: {error}</p></div>
     );
   }
 
@@ -87,7 +87,7 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
               (Duration: {(suggestion.endTime - suggestion.startTime).toFixed(1)}s)
             </div>
             {suggestion.trendingAudioId && (
-              <p className="text-xs text-purple-600">Trending Audio: {suggestion.trendingAudioId}</p>
+              <p className="text-xs text-primary">Trending Audio: {suggestion.trendingAudioId}</p>
             )}
           </CardContent>
           {onSuggestionSelect && (
