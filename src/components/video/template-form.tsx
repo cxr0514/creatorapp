@@ -180,7 +180,7 @@ export function TemplateForm({
                   <Input
                     value={formData.primaryColor}
                     onChange={(e) => setFormData(prev => ({ ...prev, primaryColor: e.target.value }))}
-                    placeholder="#ffffff"
+                    placeholder="#3b82f6"
                   />
                 </div>
               </div>
@@ -198,7 +198,7 @@ export function TemplateForm({
                   <Input
                     value={formData.secondaryColor}
                     onChange={(e) => setFormData(prev => ({ ...prev, secondaryColor: e.target.value }))}
-                    placeholder="#000000"
+                    placeholder="#10b981"
                   />
                 </div>
               </div>

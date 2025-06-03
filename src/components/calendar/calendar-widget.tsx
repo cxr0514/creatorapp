@@ -48,8 +48,8 @@ export function CalendarWidget({
       youtube: 'bg-red-500',
       instagram: 'bg-pink-500',
       tiktok: 'bg-black',
-      twitter: 'bg-blue-500',
-      linkedin: 'bg-blue-700'
+      twitter: 'bg-primary',
+      linkedin: 'bg-primary'
     }
     return colors[platform as keyof typeof colors] || 'bg-muted-foreground'
   }
@@ -130,14 +130,14 @@ export function CalendarWidget({
                 key={date.toISOString()}
                 className={`
                   min-h-[80px] p-2 border rounded-lg cursor-pointer transition-colors
-                  ${isSelected ? 'bg-blue-50 border-blue-500' : 'hover:bg-muted'}
+                  ${isSelected ? 'bg-primary/10 border-primary' : 'hover:bg-muted'}
                   ${!isCurrentMonth ? 'opacity-30' : ''}
-                  ${isTodayDate ? 'border-blue-300 bg-blue-25' : 'border-border'}
+                  ${isTodayDate ? 'border-primary/50 bg-primary/5' : 'border-border'}
                 `}
                 onClick={() => handleDateClick(date)}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className={`text-sm ${isTodayDate ? 'font-bold text-blue-600' : ''}`}>
+                  <span className={`text-sm ${isTodayDate ? 'font-bold text-primary' : ''}`}>
                     {format(date, 'd')}
                   </span>
                   {postsForDay.length === 0 && (

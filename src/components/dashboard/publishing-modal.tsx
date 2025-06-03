@@ -344,7 +344,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                         <Button
                           size="sm"
                           onClick={() => connectPlatform(platform.id)}
-                          className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1"
+                          className="bg-primary hover:bg-primary-hover text-white text-xs px-2 py-1"
                         >
                           Connect
                         </Button>

@@ -348,7 +348,7 @@ export function BatchAIProcessor({
       case 'error':
         return <XCircle className="h-4 w-4 text-red-500" />
       case 'processing':
-        return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+        return <Loader2 className="h-4 w-4 text-primary animate-spin" />
       default:
         return <Clock className="h-4 w-4 text-muted-foreground" />
     }
@@ -358,7 +358,7 @@ export function BatchAIProcessor({
     switch (status) {
       case 'completed': return 'text-green-600'
       case 'error': return 'text-red-600'
-      case 'processing': return 'text-blue-600'
+      case 'processing': return 'text-primary'
       default: return 'text-muted-foreground'
     }
   }
@@ -367,7 +367,7 @@ export function BatchAIProcessor({
     <Card className={`w-full max-w-6xl mx-auto ${className}`}>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-500" />
+          <Sparkles className="h-5 w-5 text-primary" />
           Batch AI Processing
         </CardTitle>
         <CardDescription>

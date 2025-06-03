@@ -188,7 +188,7 @@ export function EditTemplateModal({ isOpen, template, onClose }: EditTemplateMod
                   <Input
                     value={formData.primaryColor}
                     onChange={(e) => handleInputChange('primaryColor', e.target.value)}
-                    placeholder="#FF0000"
+                    placeholder="#3b82f6"
                     className="flex-1"
                   />
                 </div>
@@ -207,7 +207,7 @@ export function EditTemplateModal({ isOpen, template, onClose }: EditTemplateMod
                   <Input
                     value={formData.secondaryColor}
                     onChange={(e) => handleInputChange('secondaryColor', e.target.value)}
-                    placeholder="#00FF00"
+                    placeholder="#10b981"
                     className="flex-1"
                   />
                 </div>
@@ -226,7 +226,7 @@ export function EditTemplateModal({ isOpen, template, onClose }: EditTemplateMod
                   <Input
                     value={formData.backgroundColor}
                     onChange={(e) => handleInputChange('backgroundColor', e.target.value)}
-                    placeholder="#0000FF"
+                    placeholder="#000000"
                     className="flex-1"
                   />
                 </div>

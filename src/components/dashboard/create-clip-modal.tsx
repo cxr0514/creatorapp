@@ -188,19 +188,19 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
             height: 18px;
             width: 18px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            background: var(--primary);
             cursor: pointer;
             border: 3px solid white;
-            box-shadow: 0 4px 8px rgba(147, 51, 234, 0.3);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
           }
           .slider-thumb-purple::-moz-range-thumb {
             height: 18px;
             width: 18px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #9333ea, #7c3aed);
+            background: var(--primary);
             cursor: pointer;
             border: 3px solid white;
-            box-shadow: 0 4px 8px rgba(147, 51, 234, 0.3);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
           }
         `}</style>
         

@@ -159,9 +159,9 @@ export function ModernDashboard() {
 
   const stats = [
     { name: 'Generated', value: '247', change: '+12%', icon: ScissorsIcon, color: 'text-primary' },
-    { name: 'Published', value: '189', change: '+8%', icon: PlayIcon, color: 'text-green-600' },
-    { name: 'Scheduled', value: '23', change: '+15%', icon: ClockIcon, color: 'text-blue-600' },
-    { name: 'Storage', value: '4.2GB', change: '+2%', icon: CircleStackIcon, color: 'text-orange-600' },
+    { name: 'Published', value: '189', change: '+8%', icon: PlayIcon, color: 'text-accent-success' },
+    { name: 'Scheduled', value: '23', change: '+15%', icon: ClockIcon, color: 'text-primary' },
+    { name: 'Storage', value: '4.2GB', change: '+2%', icon: CircleStackIcon, color: 'text-accent-warning' },
   ]
 
   const recentMetrics = [

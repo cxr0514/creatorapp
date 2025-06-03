@@ -20,9 +20,9 @@ const PLATFORM_COLORS: Record<string, string> = {
   youtube: 'text-red-600',
   tiktok: 'text-black',
   instagram: 'text-pink-600', 
-  twitter: 'text-blue-500',
-  linkedin: 'text-blue-700',
-  facebook: 'text-blue-600'
+  twitter: 'text-primary',
+  linkedin: 'text-primary',
+  facebook: 'text-primary'
 }
 
 export function SocialIcon({ platform, size = 24, className }: SocialIconProps) {
