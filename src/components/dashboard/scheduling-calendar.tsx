@@ -79,9 +79,9 @@ export function SchedulingCalendar() {
       pending: 'bg-primary/10 text-primary',
       posted: 'bg-accent-success/10 text-accent-success',
       failed: 'bg-accent-danger/10 text-accent-danger',
-      cancelled: 'bg-gray-100 text-gray-700'
+      cancelled: 'bg-muted text-muted-foreground'
     }
-    return colors[status] || 'bg-gray-100 text-gray-700'
+    return colors[status] || 'bg-muted text-muted-foreground'
   }
 
   const renderCalendarGrid = () => {

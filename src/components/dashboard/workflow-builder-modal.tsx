@@ -726,7 +726,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
+        <div className="p-6 border-t border-border bg-card/50">
           <div className="flex justify-between">
             <div>
               {step !== 'basic' && (

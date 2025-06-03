@@ -30,7 +30,7 @@ export function SocialIcon({ platform, size = 24, className }: SocialIconProps) 
   const colorClass = PLATFORM_COLORS[platform.toLowerCase()] || 'text-gray-600'
   
   if (!iconPath) {
-    return <div className={cn('w-6 h-6 bg-gray-300 rounded', className)} />
+    return <div className={cn('w-6 h-6 bg-muted rounded', className)} />
   }
 
   return (

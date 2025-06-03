@@ -31,8 +31,8 @@ export function TemplateForm({
   const [formData, setFormData] = useState<CreateTemplateData>({
     name: initialData?.name || '',
     fontFamily: initialData?.fontFamily || 'Arial',
-    primaryColor: initialData?.primaryColor || '#ffffff',
-    secondaryColor: initialData?.secondaryColor || '#000000',
+    primaryColor: initialData?.primaryColor || '#3b82f6',
+    secondaryColor: initialData?.secondaryColor || '#ffffff',
     backgroundColor: initialData?.backgroundColor || '#000000',
     lowerThirdText: initialData?.lowerThirdText || '',
     lowerThirdPosition: initialData?.lowerThirdPosition || 'bottom_left',

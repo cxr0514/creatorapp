@@ -101,7 +101,7 @@ export function MetricsOverview({ metrics, isLoading = false }: MetricsOverviewP
       title: 'Avg Watch Time',
       value: metrics.avgWatchTime,
       change: metrics.watchTimeChange,
-      icon: <Clock className="h-4 w-4 text-orange-600" />,
+      icon: <Clock className="h-4 w-4 text-accent-warning" />,
       formatter: (value: number) => `${Math.floor(value / 60)}:${(value % 60).toString().padStart(2, '0')}`
     }
   ]

@@ -56,9 +56,9 @@ export function CalendarWidget({
 
   const getStatusColor = (status: string) => {
     const colors = {
-      pending: 'border-yellow-500',
-      published: 'border-green-500',
-      failed: 'border-red-500'
+      pending: 'border-accent-warning',
+      published: 'border-accent-success',
+      failed: 'border-accent-danger'
     }
     return colors[status as keyof typeof colors] || 'border-muted-foreground'
   }

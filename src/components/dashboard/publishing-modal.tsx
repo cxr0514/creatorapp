@@ -375,7 +375,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                   type="text"
                   value={postContent.title}
                   onChange={(e) => handleContentChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-primary"
                   placeholder="Enter post title..."
                 />
               </div>
@@ -387,7 +387,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                   value={postContent.description}
                   onChange={(e) => handleContentChange('description', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-primary"
                   placeholder="Enter post description..."
                 />
               </div>
@@ -399,7 +399,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                   type="text"
                   value={postContent.hashtags?.join(', ') || ''}
                   onChange={(e) => handleHashtagsChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-primary"
                   placeholder="trending, viral, content (comma separated)"
                 />
               </div>
@@ -494,7 +494,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                     value={scheduleOptions.scheduledTime?.toISOString().slice(0, 16) || ''}
                     onChange={(e) => setScheduleOptions(prev => ({ ...prev, scheduledTime: new Date(e.target.value) }))}
                     min={new Date().toISOString().slice(0, 16)}
-                    className="px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
+                    className="px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-primary"
                   />
                 </div>
               )}

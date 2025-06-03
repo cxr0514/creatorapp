@@ -101,18 +101,18 @@ const AGE_COLORS = [
 ]
 
 const LOCATION_COLORS = [
-  'bg-indigo-500',
-  'bg-accent-warning',
-  'bg-teal-500',
-  'bg-orange-500',
-  'bg-cyan-500',
-  'bg-gray-500'
+  'bg-primary',
+  'bg-accent-warning', 
+  'bg-accent-success',
+  'bg-primary/80',
+  'bg-accent-warning/80',
+  'bg-accent-success/80'
 ]
 
 const DEVICE_COLORS = [
-  'bg-emerald-500',
-  'bg-violet-500',
-  'bg-amber-500'
+  'bg-accent-success',
+  'bg-primary',
+  'bg-accent-warning'
 ]
 
 export function AudienceInsights({ insights, isLoading = false }: AudienceInsightsProps) {
@@ -209,7 +209,7 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
+        <Card className="bg-gradient-to-r from-accent-success/10 to-accent-success/20 border-accent-success/30">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
               <div className="p-2 bg-accent-success/10 rounded-lg">

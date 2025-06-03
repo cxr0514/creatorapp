@@ -473,15 +473,15 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </div>
 
         {selectedTriggerType && (
-          <div className="p-4 bg-purple-50 rounded-lg">
+          <div className="p-4 bg-card/50 rounded-lg border border-border">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-purple-900">
+              <h4 className="font-medium text-foreground">
                 Configure {TRIGGER_TYPES.find(t => t.id === selectedTriggerType)?.name}
               </h4>
               <Button
                 size="sm"
                 onClick={() => addTrigger(selectedTriggerType)}
-                className="bg-primary hover:bg-purple-700"
+                className="bg-primary hover:bg-primary/80"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add
@@ -607,7 +607,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                     size="sm"
                     variant="ghost"
                     onClick={() => removeAction(action.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-accent-danger hover:text-accent-danger/80 hover:bg-accent-danger/10"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </Button>
@@ -632,7 +632,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircleIcon className="h-5 w-5 text-green-600" />
+            <CheckCircleIcon className="h-5 w-5 text-accent-success" />
             {workflow.name}
           </CardTitle>
           <CardDescription>{workflow.description}</CardDescription>
@@ -645,7 +645,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = triggerType?.icon || ClockIcon
               return (
                 <div key={trigger.id} className="flex items-center gap-2 text-sm">
-                  <Icon className="h-4 w-4 text-blue-600" />
+                  <Icon className="h-4 w-4 text-primary" />
                   <span>{triggerType?.name}: {getTriggerDescription(trigger)}</span>
                 </div>
               )
