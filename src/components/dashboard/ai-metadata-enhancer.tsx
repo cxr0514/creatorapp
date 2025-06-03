@@ -250,8 +250,8 @@ export function AIMetadataEnhancer({
       
       <CardContent className="space-y-6">
         {/* AI Options */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 gap-y-8">
+          <div className="relative">
             <label className="text-sm font-medium mb-2 block">Content Type</label>
             <Select 
               value={aiOptions.contentType} 
@@ -260,7 +260,7 @@ export function AIMetadataEnhancer({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50">
                 <SelectItem value="educational">Educational</SelectItem>
                 <SelectItem value="entertainment">Entertainment</SelectItem>
                 <SelectItem value="business">Business</SelectItem>
@@ -271,7 +271,7 @@ export function AIMetadataEnhancer({
             </Select>
           </div>
 
-          <div>
+          <div className="relative">
             <label className="text-sm font-medium mb-2 block">Target Audience</label>
             <Select 
               value={aiOptions.targetAudience} 
@@ -280,7 +280,7 @@ export function AIMetadataEnhancer({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50">
                 <SelectItem value="general">General</SelectItem>
                 <SelectItem value="professional">Professional</SelectItem>
                 <SelectItem value="youth">Youth</SelectItem>
@@ -290,7 +290,7 @@ export function AIMetadataEnhancer({
             </Select>
           </div>
 
-          <div>
+          <div className="relative">
             <label className="text-sm font-medium mb-2 block">Platform</label>
             <Select 
               value={aiOptions.platform} 
@@ -299,7 +299,7 @@ export function AIMetadataEnhancer({
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50">
                 <SelectItem value="all">All Platforms</SelectItem>
                 <SelectItem value="youtube">YouTube</SelectItem>
                 <SelectItem value="tiktok">TikTok</SelectItem>

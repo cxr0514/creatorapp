@@ -38,7 +38,8 @@ export const captionWorker = new Worker<CaptionJob>('captions', async (job: Job<
 }, {
   connection: {
     host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379')
+    port: parseInt(process.env.REDIS_PORT || '6379'),
+    maxRetriesPerRequest: null
   },
   concurrency: 2
 })

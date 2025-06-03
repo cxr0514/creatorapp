@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,8 @@ import { VideoList } from './video-list'
 import { ClipList } from './clip-list'
 import { EnhancedCreateClipModal } from './enhanced-create-clip-modal'
 import { SocialConnections } from './social-connections'
-import { SchedulingCalendar } from './scheduling-calendar'
+import { CalendarWidget } from '../calendar/calendar-widget'
+import { SchedulingModal } from '../calendar/scheduling-modal'
 import { WorkflowBuilder } from './workflow-builder'
 import { AnalyticsDashboard } from './analytics-dashboard-refactored'
 import { AIMetadataEnhancer } from './ai-metadata-enhancer'
@@ -49,6 +50,20 @@ export function ModernDashboard() {
   const [clipRefreshKey, setClipRefreshKey] = useState(0)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [profileTab, setProfileTab] = useState('settings')
+  const [showSchedulingModal, setShowSchedulingModal] = useState(false)
+  const [selectedScheduleDate, setSelectedScheduleDate] = useState<Date>()
+  const [scheduledPosts, setScheduledPosts] = useState([])
+  const [platforms] = useState([
+    { id: 'youtube', name: 'YouTube', connected: true, icon: '🎥', optimalTimes: ['14:00', '16:00', '20:00'], audience: 125000 },
+    { id: 'tiktok', name: 'TikTok', connected: true, icon: '🎵', optimalTimes: ['18:00', '20:00', '22:00'], audience: 85000 },
+    { id: 'instagram', name: 'Instagram', connected: false, icon: '📸', optimalTimes: ['11:00', '14:00', '17:00'], audience: 0 },
+    { id: 'twitter', name: 'Twitter', connected: false, icon: '🐦', optimalTimes: ['09:00', '12:00', '17:00'], audience: 0 }
+  ])
+
+  // Fetch scheduled posts on component mount
+  useEffect(() => {
+    fetchScheduledPosts()
+  }, [])
 
   const handleUploadComplete = () => {
     setShowVideoUpload(false)
@@ -68,6 +83,63 @@ export function ModernDashboard() {
     setShowCreateClipModal(false)
     setActiveTab('clips')
     setClipRefreshKey(prev => prev + 1)
+  }
+
+  const handleScheduleNew = (date: Date) => {
+    setSelectedScheduleDate(date)
+    setShowSchedulingModal(true)
+  }
+
+  const handlePostSelect = (post: {
+    id: string
+    clipId: number
+    platform: string
+    scheduledTime: Date
+    status: 'pending' | 'published' | 'failed'
+    title: string
+    thumbnailUrl?: string
+  }) => {
+    console.log('Selected post:', post)
+    // Could open a detail modal here
+  }
+
+  const handleSchedule = async (scheduleData: {
+    clipId: number
+    platforms: string[]
+    scheduledTime: Date
+    title: string
+    description: string
+    hashtags: string[]
+    customizations: Record<string, unknown>
+  }) => {
+    try {
+      // Call API to schedule the post
+      const response = await fetch('/api/social/schedule', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(scheduleData)
+      })
+
+      if (response.ok) {
+        // Refresh scheduled posts
+        fetchScheduledPosts()
+        setShowSchedulingModal(false)
+      }
+    } catch (error) {
+      console.error('Error scheduling post:', error)
+    }
+  }
+
+  const fetchScheduledPosts = async () => {
+    try {
+      const response = await fetch('/api/social/posts')
+      if (response.ok) {
+        const data = await response.json()
+        setScheduledPosts(data.posts || [])
+      }
+    } catch (error) {
+      console.error('Error fetching scheduled posts:', error)
+    }
   }
 
   const sidebarNavigation = [
@@ -599,7 +671,21 @@ export function ModernDashboard() {
               )}
 
               {activeTab === 'calendar' && (
-                <SchedulingCalendar />
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-gray-900">Publishing Calendar</h1>
+                    <p className="mt-1 text-sm text-gray-600">
+                      Schedule and manage your content across all platforms
+                    </p>
+                  </div>
+                  
+                  <CalendarWidget
+                    scheduledPosts={scheduledPosts}
+                    onDateSelect={setSelectedScheduleDate}
+                    onPostSelect={handlePostSelect}
+                    onScheduleNew={handleScheduleNew}
+                  />
+                </div>
               )}
 
               {activeTab === 'analytics' && (
@@ -766,6 +852,14 @@ export function ModernDashboard() {
         onClose={() => setShowCreateClipModal(false)}
         video={selectedVideo}
         onClipsCreated={handleClipCreated}
+      />
+
+      <SchedulingModal
+        open={showSchedulingModal}
+        onClose={() => setShowSchedulingModal(false)}
+        selectedDate={selectedScheduleDate}
+        platforms={platforms}
+        onSchedule={handleSchedule}
       />
     </div>
   )
