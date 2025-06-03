@@ -161,8 +161,8 @@ export function SocialConnections() {
                       {isConnected ? account?.accountName : `Connect your ${platform.displayName} account`}
                     </p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-muted'}`}></div>
-                      <span className={`text-xs font-medium ${isConnected ? 'text-green-600' : 'text-muted-foreground'}`}>
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-accent-success' : 'bg-muted'}`}></div>
+                      <span className={`text-xs font-medium ${isConnected ? 'text-accent-success' : 'text-muted-foreground'}`}>
                         {isConnected ? 'Connected' : 'Not connected'}
                       </span>
                     </div>
@@ -232,7 +232,7 @@ export function SocialConnections() {
                       <span className="text-muted-foreground">Scheduling:</span>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         platform.supportsScheduling 
-                          ? 'bg-green-100 text-green-700' 
+                          ? 'bg-accent-success/20 text-accent-success' 
                           : 'bg-accent text-accent-foreground'
                       }`}>
                         {platform.supportsScheduling ? 'Supported' : 'Not available'}
@@ -256,7 +256,7 @@ export function SocialConnections() {
             </p>
           </div>
           <div className="text-right">
-            <div className="text-2xl font-bold text-purple-600">
+            <div className="text-2xl font-bold text-primary">
               {Math.round((connectedAccounts.filter(acc => acc.isConnected).length / SOCIAL_PLATFORMS.length) * 100)}%
             </div>
             <div className="text-sm text-muted-foreground">Connected</div>
