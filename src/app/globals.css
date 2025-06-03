@@ -1,21 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  /* Basecom Dark-Violet Theme Colors */
-  --background: #0a0a0f;
-  --foreground: #e6e6ff;
-  --surface: #1a1a2e;
-  --surface-secondary: #2d2d44;
-  --primary: #6b46c1;
-  --primary-hover: #7c3aed;
-  --accent: #8b5cf6;
-  --accent-light: #a78bfa;
-  --text-primary: #e6e6ff;
-  --text-secondary: #b3b3d9;
-  --text-muted: #8080b3;
-  --border: #404066;
-  --hero-gradient-from: #1e1b4b;
-  --hero-gradient-to: #312e81;
+  /* Basecom Dark Theme - Matching Reference Design */
+  --background: #0a0a0a;
+  --foreground: #ffffff;
+  --surface: #141414;
+  --surface-secondary: #1f1f1f;
+  --primary: #8b5cf6;
+  --primary-hover: #a855f7;
+  --accent: #c084fc;
+  --accent-light: #ddd6fe;
+  --text-primary: #ffffff;
+  --text-secondary: #d1d5db;
+  --text-muted: #9ca3af;
+  --border: #2d2d2d;
+  --hero-gradient-from: #000000;
+  --hero-gradient-to: #1a0d2e;
 }
 
 @theme inline {
@@ -39,9 +39,9 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Keep the same dark-violet theme in dark mode */
-    --background: #0a0a0f;
-    --foreground: #e6e6ff;
+    /* Maintain consistent dark theme */
+    --background: #0a0a0a;
+    --foreground: #ffffff;
   }
 }
 
