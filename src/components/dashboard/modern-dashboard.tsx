@@ -176,7 +176,7 @@ export function ModernDashboard() {
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
           <div className="fixed inset-0 bg-black bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-primary to-primary-hover">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-black">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 type="button"
@@ -191,12 +191,12 @@ export function ModernDashboard() {
               <div className="flex-shrink-0 flex items-center px-4">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="h-8 w-8 bg-foreground rounded-lg flex items-center justify-center">
-                      <span className="text-primary font-bold text-lg">C</span>
+                    <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
+                      <span className="text-black font-bold text-lg">C</span>
                     </div>
                   </div>
                   <div className="ml-3">
-                    <h1 className="text-xl font-bold text-foreground">ContentWizard</h1>
+                    <h1 className="text-xl font-bold text-white">ContentWizard</h1>
                   </div>
                 </div>
               </div>
@@ -212,13 +212,13 @@ export function ModernDashboard() {
                       }}
                       className={`${
                         isActive
-                          ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
-                          : 'text-muted hover:bg-primary-hover hover:text-foreground'
-                      } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
+                          ? 'bg-gray-800 border-r-2 border-white text-white'
+                          : 'text-white hover:bg-gray-800 hover:text-white'
+                      } group flex items-center px-2 py-2 text-sm font-bold rounded-md w-full text-left transition-colors duration-200`}
                     >
                       <item.icon
                         className={`${
-                          isActive ? 'text-primary-light' : 'text-muted'
+                          isActive ? 'text-white' : 'text-white'
                         } mr-3 flex-shrink-0 h-5 w-5`}
                         aria-hidden="true"
                       />
@@ -227,7 +227,7 @@ export function ModernDashboard() {
                   )
                 })}
               </nav>
-              <div className="mt-6 pt-6 border-t border-primary-dark">
+              <div className="mt-6 pt-6 border-t border-gray-700">
                 <nav className="px-2 space-y-1">
                   {bottomNavigation.map((item) => {
                     const isActive = activeTab === item.href
@@ -240,13 +240,13 @@ export function ModernDashboard() {
                         }}
                         className={`${
                           isActive
-                            ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
-                            : 'text-muted hover:bg-primary-hover hover:text-foreground'
-                        } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
+                            ? 'bg-gray-800 border-r-2 border-white text-white'
+                            : 'text-white hover:bg-gray-800 hover:text-white'
+                        } group flex items-center px-2 py-2 text-sm font-bold rounded-md w-full text-left transition-colors duration-200`}
                       >
                         <item.icon
                           className={`${
-                            isActive ? 'text-primary-light' : 'text-muted'
+                            isActive ? 'text-white' : 'text-white'
                           } mr-3 flex-shrink-0 h-5 w-5`}
                           aria-hidden="true"
                         />
@@ -263,16 +263,16 @@ export function ModernDashboard() {
 
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-grow pt-5 bg-gradient-to-b from-primary to-primary-hover overflow-y-auto">
+        <div className="flex flex-col flex-grow pt-5 bg-black overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-4">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="h-8 w-8 bg-foreground rounded-lg flex items-center justify-center">
-                  <span className="text-primary font-bold text-lg">C</span>
+                <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
+                  <span className="text-black font-bold text-lg">C</span>
                 </div>
               </div>
               <div className="ml-3">
-                <h1 className="text-xl font-bold text-foreground">ContentWizard</h1>
+                <h1 className="text-xl font-bold text-white">ContentWizard</h1>
               </div>
             </div>
           </div>
@@ -286,13 +286,13 @@ export function ModernDashboard() {
                     onClick={() => setActiveTab(item.href)}
                     className={`${
                       isActive
-                        ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
-                        : 'text-muted hover:bg-primary-hover hover:text-foreground'
-                    } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
+                        ? 'bg-gray-800 border-r-2 border-white text-white'
+                        : 'text-white hover:bg-gray-800 hover:text-white'
+                    } group flex items-center px-2 py-2 text-sm font-bold rounded-md w-full text-left transition-colors duration-200`}
                   >
                     <item.icon
                       className={`${
-                        isActive ? 'text-primary-light' : 'text-muted'
+                        isActive ? 'text-white' : 'text-white'
                       } mr-3 flex-shrink-0 h-5 w-5`}
                       aria-hidden="true"
                     />
@@ -302,7 +302,7 @@ export function ModernDashboard() {
               })}
             </nav>
             <div className="px-2 space-y-1 pb-4">
-              <div className="border-t border-primary-dark pt-4">
+              <div className="border-t border-gray-700 pt-4">
                 {bottomNavigation.map((item) => {
                   const isActive = activeTab === item.href
                   return (
@@ -311,13 +311,13 @@ export function ModernDashboard() {
                       onClick={() => setActiveTab(item.href)}
                       className={`${
                         isActive
-                          ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
-                          : 'text-muted hover:bg-primary-hover hover:text-foreground'
-                      } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
+                          ? 'bg-gray-800 border-r-2 border-white text-white'
+                          : 'text-white hover:bg-gray-800 hover:text-white'
+                      } group flex items-center px-2 py-2 text-sm font-bold rounded-md w-full text-left transition-colors duration-200`}
                     >
                       <item.icon
                         className={`${
-                          isActive ? 'text-primary-light' : 'text-muted'
+                          isActive ? 'text-white' : 'text-white'
                         } mr-3 flex-shrink-0 h-5 w-5`}
                         aria-hidden="true"
                       />
