@@ -240,12 +240,12 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-surface border border-border rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h2 className="text-xl font-semibold">Batch Export</h2>
-            <p className="text-sm text-gray-500">
+            <h2 className="text-xl font-semibold text-foreground">Batch Export</h2>
+            <p className="text-sm text-muted-foreground">
               Export multiple clips to different formats and platforms
             </p>
           </div>
@@ -259,7 +259,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
             {/* Clip Selection */}
             <div>
               <div className="flex justify-between items-center mb-3">
-                <h3 className="text-lg font-medium">Select Clips ({selectedClips.size}/{clips.length})</h3>
+                <h3 className="text-lg font-medium text-foreground">Select Clips ({selectedClips.size}/{clips.length})</h3>
                 <Button
                   variant="outline"
                   size="sm"
@@ -275,12 +275,12 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                     onClick={() => toggleClip(clip.id)}
                     className={`p-3 rounded-lg border text-left transition-colors ${
                       selectedClips.has(clip.id)
-                        ? 'bg-blue-50 border-blue-200 text-blue-800'
-                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                        ? 'bg-primary/10 border-primary/50 text-primary'
+                        : 'bg-surface border-border text-foreground hover:bg-muted'
                     }`}
                   >
                     <div className="font-medium truncate">{clip.title}</div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       {clip.aspectRatio} • {clip.duration || 0}s
                     </div>
                   </button>
@@ -290,7 +290,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
 
             {/* Format Selection */}
             <div>
-              <h3 className="text-lg font-medium mb-3">Select Formats ({selectedFormats.size})</h3>
+              <h3 className="text-lg font-medium text-foreground mb-3">Select Formats ({selectedFormats.size})</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {EXPORT_FORMATS.map((format: ExportFormat) => (
                   <button
@@ -298,13 +298,13 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                     onClick={() => toggleFormat(format.format)}
                     className={`p-4 rounded-lg border text-left transition-colors ${
                       selectedFormats.has(format.format)
-                        ? 'bg-blue-50 border-blue-200 text-blue-800'
-                        : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                        ? 'bg-primary/10 border-primary/50 text-primary'
+                        : 'bg-surface border-border text-foreground hover:bg-muted'
                     }`}
                   >
                     <div className="font-medium">{format.displayName}</div>
-                    <div className="text-sm text-gray-600">{format.description}</div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-sm text-muted-foreground">{format.description}</div>
+                    <div className="text-xs text-muted-foreground mt-1">
                       {format.width} × {format.height} • {format.platforms.length} platforms
                     </div>
                   </button>
@@ -315,7 +315,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
             {/* Platform Selection */}
             {selectedFormats.size > 0 && (
               <div>
-                <h3 className="text-lg font-medium mb-3">Select Platforms ({selectedPlatforms.size})</h3>
+                <h3 className="text-lg font-medium text-foreground mb-3">Select Platforms ({selectedPlatforms.size})</h3>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
                   {getAllPlatforms().map((platform) => (
                     <button
@@ -323,8 +323,8 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                       onClick={() => togglePlatform(platform)}
                       className={`p-3 rounded-lg border text-sm transition-colors ${
                         selectedPlatforms.has(platform)
-                          ? 'bg-blue-50 border-blue-200 text-blue-800'
-                          : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-gray-100'
+                          ? 'bg-primary/10 border-primary/50 text-primary'
+                          : 'bg-surface border-border text-foreground hover:bg-muted'
                       }`}
                     >
                       <div className="font-medium capitalize">
@@ -340,11 +340,11 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Cropping Strategy */}
               <div>
-                <h4 className="font-medium mb-2">Cropping Strategy</h4>
+                <h4 className="font-medium text-foreground mb-2">Cropping Strategy</h4>
                 <select
                   value={croppingStrategy}
                   onChange={(e) => setCroppingStrategy(e.target.value)}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border border-border rounded-lg bg-surface text-foreground"
                 >
                   {CROPPING_STRATEGIES.map((strategy: CroppingStrategyInfo) => (
                     <option key={strategy.type} value={strategy.type}>
@@ -352,30 +352,30 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                     </option>
                   ))}
                 </select>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   {CROPPING_STRATEGIES.find((s: CroppingStrategyInfo) => s.type === croppingStrategy)?.description}
                 </p>
               </div>
 
               {/* Priority */}
               <div>
-                <h4 className="font-medium mb-2">Processing Priority</h4>
+                <h4 className="font-medium text-foreground mb-2">Processing Priority</h4>
                 <select
                   value={priority}
                   onChange={(e) => setPriority(e.target.value as 'low' | 'normal' | 'high')}
-                  className="w-full p-2 border rounded-lg"
+                  className="w-full p-2 border border-border rounded-lg bg-surface text-foreground"
                 >
                   <option value="low">Low Priority</option>
                   <option value="normal">Normal Priority</option>
                   <option value="high">High Priority</option>
                 </select>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-xs text-muted-foreground mt-1">
                   Higher priority jobs are processed first
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-border">
               <Button variant="outline" onClick={onClose}>
                 Cancel
               </Button>
@@ -391,11 +391,11 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
           <div className="space-y-4">
             {/* Queue Overview */}
             <div className="mb-4">
-              <h3 className="text-lg font-medium mb-2">Export Queue ({exportQueue.length} items)</h3>
+              <h3 className="text-lg font-medium text-foreground mb-2">Export Queue ({exportQueue.length} items)</h3>
               {(() => {
                 const estimates = getEstimates()
                 return estimates ? (
-                  <div className="grid grid-cols-3 gap-4 text-sm text-gray-600">
+                  <div className="grid grid-cols-3 gap-4 text-sm text-muted-foreground">
                     <div>Total items: {estimates.itemCount}</div>
                     <div>Estimated time: {Math.round(estimates.totalTime / 60)}m</div>
                     <div>Avg per item: {Math.round(estimates.averagePerItem)}s</div>
@@ -409,32 +409,32 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
               {exportQueue.map((item) => {
                 const clip = clips.find(c => c.id === item.clipId)
                 return (
-                  <div key={item.id} className="border rounded-lg p-3">
+                  <div key={item.id} className="border border-border rounded-lg p-3 bg-surface">
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="font-medium text-sm">
+                        <div className="font-medium text-sm text-foreground">
                           {clip?.title} → {item.format} ({item.platform})
                         </div>
-                        <div className="text-xs text-gray-500">
+                        <div className="text-xs text-muted-foreground">
                           {item.croppingType} • ~{item.estimatedTime}s
                         </div>
                       </div>
                       <div className="flex items-center space-x-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           item.status === 'completed' 
-                            ? 'bg-green-100 text-green-800'
+                            ? 'bg-green-500/20 text-green-400'
                             : item.status === 'processing'
-                            ? 'bg-blue-100 text-blue-800'
+                            ? 'bg-primary/20 text-primary'
                             : item.status === 'failed'
-                            ? 'bg-red-100 text-red-800'
-                            : 'bg-gray-100 text-gray-800'
+                            ? 'bg-destructive/20 text-destructive'
+                            : 'bg-muted text-muted-foreground'
                         }`}>
                           {item.status} {item.retryCount && item.retryCount > 0 ? `(Retry ${item.retryCount})` : ''}
                         </span>
                         {item.status === 'processing' && (
-                          <div className="w-12 h-2 bg-gray-200 rounded-full">
+                          <div className="w-12 h-2 bg-muted rounded-full">
                             <div 
-                              className="h-2 bg-blue-500 rounded-full transition-all duration-300"
+                              className="h-2 bg-primary rounded-full transition-all duration-300"
                               style={{ width: `${item.progress}%` }}
                             />
                           </div>
@@ -452,14 +452,14 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                       </div>
                     </div>
                     {item.error && (
-                      <div className="text-xs text-red-600 mt-1">{item.error}</div>
+                      <div className="text-xs text-destructive mt-1">{item.error}</div>
                     )}
                   </div>
                 )
               })}
             </div>
 
-            <div className="flex justify-end space-x-3 pt-4 border-t">
+            <div className="flex justify-end space-x-3 pt-4 border-t border-border">
               <Button variant="outline" onClick={() => setShowQueue(false)}>
                 Back to Setup
               </Button>

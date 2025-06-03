@@ -284,9 +284,9 @@ export function CreateTemplateModal({ isOpen, onClose }: CreateTemplateModalProp
           </div>
 
           {/* Note about assets */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <h4 className="font-medium text-blue-900 mb-2">Note: Media Assets</h4>
-            <p className="text-sm text-blue-800">
+          <div className="bg-primary/10 border border-primary/50 rounded-lg p-4">
+            <h4 className="font-medium text-primary mb-2">Note: Media Assets</h4>
+            <p className="text-sm text-muted-foreground">
               Logo, intro, and outro video/image uploads will be added in a future version. 
               For now, you can create templates with colors, fonts, and text overlays.
             </p>

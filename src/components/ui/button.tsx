@@ -8,9 +8,9 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const buttonVariantStyles = {
   variant: {
-    default: 'bg-blue-600 text-white hover:bg-blue-700',
-    outline: 'border border-input bg-background hover:bg-accent hover:text-accent-foreground',
-    ghost: 'hover:bg-accent hover:text-accent-foreground',
+    default: 'bg-primary text-white hover:bg-primary-hover',
+    outline: 'border border-border bg-background hover:bg-surface hover:text-foreground',
+    ghost: 'hover:bg-surface hover:text-foreground',
   },
   size: {
     sm: 'h-9 px-3 text-sm',

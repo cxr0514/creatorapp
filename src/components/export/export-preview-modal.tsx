@@ -177,22 +177,22 @@ export function ExportPreviewModal({
                     onClick={() => setSelectedPreview(index)}
                     className={`w-full p-3 rounded-lg border text-left transition-colors ${
                       selectedPreview === index
-                        ? 'bg-blue-50 border-blue-200 text-blue-800'
-                        : 'bg-gray-50 border-gray-200 hover:bg-gray-100'
+                        ? 'bg-primary/10 border-primary/50 text-primary'
+                        : 'bg-surface border-border hover:bg-primary/5'
                     }`}
                   >
                     <div className="flex items-center justify-between mb-1">
                       <div className="font-medium">{preview.format.displayName}</div>
                       {preview.isLoading ? (
-                        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+                        <div className="w-2 h-2 bg-primary rounded-full animate-pulse" />
                       ) : (
-                        <Eye className="w-4 h-4 text-gray-400" />
+                        <Eye className="w-4 h-4 text-muted-foreground" />
                       )}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-muted-foreground">
                       {preview.format.width} × {preview.format.height}
                     </div>
-                    <div className="text-xs text-gray-500 mt-1">
+                    <div className="text-xs text-muted-foreground mt-1">
                       {preview.format.platforms.join(', ')}
                     </div>
                     {preview.smartCropAnalysis && (
@@ -200,7 +200,7 @@ export function ExportPreviewModal({
                         <Badge variant="secondary" className="text-xs">
                           {preview.smartCropAnalysis.strategy}
                         </Badge>
-                        <div className="text-xs text-gray-500 mt-1">
+                        <div className="text-xs text-muted-foreground mt-1">
                           Confidence: {Math.round(preview.smartCropAnalysis.confidence * 100)}%
                         </div>
                       </div>
@@ -248,7 +248,7 @@ export function ExportPreviewModal({
                 </div>
 
                 {currentPreview?.smartCropAnalysis && (
-                  <div className="text-xs text-gray-600 p-2 bg-gray-50 rounded">
+                  <div className="text-xs text-foreground p-2 bg-primary/10 border border-primary/20 rounded">
                     <strong>Strategy:</strong> {currentPreview.smartCropAnalysis.strategy}<br />
                     <strong>Reasoning:</strong> {currentPreview.smartCropAnalysis.reasoning}
                   </div>
@@ -284,10 +284,10 @@ export function ExportPreviewModal({
                     <TabsContent value="preview" className="mt-4">
                       <div className="relative">
                         {currentPreview.isLoading ? (
-                          <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
+                          <div className="aspect-video bg-surface border border-border rounded-lg flex items-center justify-center">
                             <div className="text-center">
-                              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-                              <div className="text-sm text-gray-600">Generating preview...</div>
+                              <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+                              <div className="text-sm text-muted-foreground">Generating preview...</div>
                             </div>
                           </div>
                         ) : currentPreview.previewUrl ? (
@@ -304,8 +304,8 @@ export function ExportPreviewModal({
                             <source src={currentPreview.previewUrl} type="video/mp4" />
                           </video>
                         ) : (
-                          <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                            <div className="text-center text-gray-500">
+                          <div className="aspect-video bg-surface border border-border rounded-lg flex items-center justify-center">
+                            <div className="text-center text-muted-foreground">
                               Preview not available
                             </div>
                           </div>
@@ -350,8 +350,8 @@ export function ExportPreviewModal({
                     </TabsContent>
                   </Tabs>
                 ) : (
-                  <div className="aspect-video bg-gray-100 rounded-lg flex items-center justify-center">
-                    <div className="text-center text-gray-500">
+                  <div className="aspect-video bg-surface border border-border rounded-lg flex items-center justify-center">
+                    <div className="text-center text-muted-foreground">
                       Select a format to preview
                     </div>
                   </div>
@@ -369,11 +369,11 @@ export function ExportPreviewModal({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                     <div>
                       <h4 className="font-medium mb-2">Face Detection</h4>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Detected: {currentPreview.contentAnalysis.faceDetection.detected ? 'Yes' : 'No'}
                       </p>
                       {currentPreview.contentAnalysis.faceDetection.detected && (
-                        <p className="text-gray-600">
+                        <p className="text-muted-foreground">
                           Count: {currentPreview.contentAnalysis.faceDetection.count}
                         </p>
                       )}
@@ -381,17 +381,17 @@ export function ExportPreviewModal({
 
                     <div>
                       <h4 className="font-medium mb-2">Motion Analysis</h4>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Significant Motion: {currentPreview.contentAnalysis.motionAnalysis.hasSignificantMotion ? 'Yes' : 'No'}
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Direction: {currentPreview.contentAnalysis.motionAnalysis.dominantDirection}
                       </p>
                     </div>
 
                     <div>
                       <h4 className="font-medium mb-2">Scene Analysis</h4>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Brightness: {Math.round(currentPreview.contentAnalysis.sceneAnalysis.brightness * 100)}%
                       </p>
                       <p className="text-gray-600">

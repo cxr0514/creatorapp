@@ -412,7 +412,7 @@ export function EnhancedCreateClipModal({
               {selectedVideo ? `Create Clips from "${selectedVideo.title}"` : 'Create Clips'}
             </div>
             {isDirty && (
-              <span className="text-xs text-gray-500">
+              <span className="text-xs text-muted-foreground">
                 {lastSaveTime ? `Last saved ${lastSaveTime.toLocaleTimeString()}` : 'Saving...'}
               </span>
             )}
@@ -422,8 +422,8 @@ export function EnhancedCreateClipModal({
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
-            <h4 className="text-sm font-semibold text-red-800 mb-2">Please fix these issues:</h4>
-            <ul className="list-disc list-inside text-sm text-red-700">
+            <h4 className="text-sm font-semibold text-destructive mb-2">Please fix these issues:</h4>
+            <ul className="list-disc list-inside text-sm text-destructive">
               {validationErrors.map((error, index) => (
                 <li key={index}>{error}</li>
               ))}
@@ -469,7 +469,7 @@ export function EnhancedCreateClipModal({
                           )}
                           <div>
                             <div className="font-medium">{video.title}</div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-muted-foreground">
                               {formatTime(video.duration)}
                             </div>
                           </div>
@@ -540,18 +540,18 @@ export function EnhancedCreateClipModal({
               <CardContent className="space-y-4">
                 {/* Timeline Bar */}
                 <div
-                  className="relative h-12 bg-gray-200 rounded-lg cursor-crosshair overflow-hidden"
+                  className="relative h-12 bg-surface border border-border rounded-lg cursor-crosshair overflow-hidden"
                   onClick={handleTimelineClick}
                 >
                   {/* Progress Bar */}
                   <div
-                    className="absolute top-0 left-0 h-full bg-blue-500/30"
+                    className="absolute top-0 left-0 h-full bg-primary/30"
                     style={{ width: `${(currentTime / duration) * 100}%` }}
                   />
                   
                   {/* Current Time Indicator */}
                   <div
-                    className="absolute top-0 w-0.5 h-full bg-blue-600"
+                    className="absolute top-0 w-0.5 h-full bg-primary"
                     style={{ left: `${(currentTime / duration) * 100}%` }}
                   />
                   
@@ -572,7 +572,7 @@ export function EnhancedCreateClipModal({
                   {clips.map((clip) => (
                     <div
                       key={clip.id}
-                      className="absolute top-0 h-full border-2 border-purple-500 bg-purple-500/20"
+                      className="absolute top-0 h-full border-2 border-primary bg-primary/20"
                       style={{
                         left: `${(clip.startTime / duration) * 100}%`,
                         width: `${((clip.endTime - clip.startTime) / duration) * 100}%`
@@ -657,7 +657,7 @@ export function EnhancedCreateClipModal({
                   <div
                     key={clip.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                      selectedClipId === clip.id ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                      selectedClipId === clip.id ? 'border-primary/50 bg-primary/10' : 'border-border'
                     }`}
                     onClick={() => setSelectedClipId(clip.id)}
                   >
@@ -675,7 +675,7 @@ export function EnhancedCreateClipModal({
                           e.stopPropagation()
                           deleteClip(clip.id)
                         }}
-                        className="text-red-500 hover:text-red-700 h-8 w-8 p-0"
+                        className="text-destructive hover:text-destructive/80 h-8 w-8 p-0"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
@@ -696,7 +696,7 @@ export function EnhancedCreateClipModal({
                       <div className="flex items-center gap-2 text-xs">
                         <Clock className="w-3 h-3" />
                         <span>{formatTime(clip.startTime)} - {formatTime(clip.endTime)}</span>
-                        <span className="text-gray-500">
+                        <span className="text-muted-foreground">
                           ({formatTime(clip.endTime - clip.startTime)})
                         </span>
                       </div>
@@ -712,9 +712,9 @@ export function EnhancedCreateClipModal({
                           {ASPECT_RATIOS.map((ratio) => (
                             <SelectItem key={ratio.value} value={ratio.value}>
                               <div className="flex items-center gap-3">
-                                <div className="relative w-12 h-8 bg-purple-100 rounded overflow-hidden">
+                                <div className="relative w-12 h-8 bg-primary/10 rounded overflow-hidden">
                                   <div
-                                    className="absolute inset-0 border-2 border-purple-500"
+                                    className="absolute inset-0 border-2 border-primary"
                                     style={{
                                       aspectRatio: ratio.value,
                                       margin: 'auto',
@@ -728,7 +728,7 @@ export function EnhancedCreateClipModal({
                                 </div>
                                 <div>
                                   <div className="font-medium">{ratio.label}</div>
-                                  <div className="text-xs text-gray-500">
+                                  <div className="text-xs text-muted-foreground">
                                     {ratio.platforms.join(', ')}
                                   </div>
                                 </div>

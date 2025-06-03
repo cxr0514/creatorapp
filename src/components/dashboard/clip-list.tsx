@@ -244,13 +244,13 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready':
-        return 'bg-green-100 text-green-700 border border-green-200'
+        return 'bg-green-100/20 text-green-400 border border-green-400/30'
       case 'processing':
-        return 'bg-purple-100 text-purple-700 border border-purple-200'
+        return 'bg-primary/20 text-primary border border-primary/30'
       case 'failed':
-        return 'bg-red-100 text-red-700 border border-red-200'
+        return 'bg-destructive/20 text-destructive border border-destructive/30'
       default:
-        return 'bg-gray-100 text-gray-700 border border-gray-200'
+        return 'bg-muted/20 text-muted-foreground border border-muted/30'
     }
   }
 
@@ -271,15 +271,15 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
         {[...Array(8)].map((_, i) => (
-          <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-100 animate-pulse overflow-hidden">
-            <div className="aspect-video bg-gradient-to-br from-purple-100 to-purple-200 rounded-t-xl"></div>
+          <div key={i} className="bg-surface rounded-xl shadow-sm border border-border animate-pulse overflow-hidden">
+            <div className="aspect-video bg-gradient-to-br from-primary/10 to-primary/20 rounded-t-xl"></div>
             <div className="p-6">
-              <div className="h-5 bg-gradient-to-r from-purple-200 to-purple-300 rounded-lg mb-3"></div>
-              <div className="h-4 bg-gray-200 rounded-lg w-2/3 mb-2"></div>
-              <div className="h-3 bg-gray-100 rounded-lg w-1/2 mb-4"></div>
+              <div className="h-5 bg-gradient-to-r from-primary/20 to-primary/30 rounded-lg mb-3"></div>
+              <div className="h-4 bg-muted/30 rounded-lg w-2/3 mb-2"></div>
+              <div className="h-3 bg-muted/20 rounded-lg w-1/2 mb-4"></div>
               <div className="flex space-x-2">
-                <div className="h-8 bg-gray-200 rounded-lg flex-1"></div>
-                <div className="h-8 bg-gray-200 rounded-lg w-12"></div>
+                <div className="h-8 bg-muted/30 rounded-lg flex-1"></div>
+                <div className="h-8 bg-muted/30 rounded-lg w-12"></div>
               </div>
             </div>
           </div>
@@ -292,18 +292,18 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
     return (
       <div className="text-center py-16">
         <div className="mb-6">
-          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
-            <svg className="h-10 w-10 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="mx-auto h-20 w-20 bg-gradient-to-br from-primary/10 to-primary/20 rounded-full flex items-center justify-center">
+            <svg className="h-10 w-10 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
             </svg>
           </div>
         </div>
-        <h3 className="text-xl font-semibold text-gray-900 mb-3">No clips created yet</h3>
-        <p className="text-gray-500 text-lg mb-6">Upload videos and create your first clips to get started</p>
+        <h3 className="text-xl font-semibold text-foreground mb-3">No clips created yet</h3>
+        <p className="text-muted-foreground text-lg mb-6">Upload videos and create your first clips to get started</p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
           <Button 
             onClick={onCreateClip}
-            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary/90 text-white px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             Create Your First Clip
           </Button>
@@ -311,11 +311,11 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
             onClick={syncClips}
             disabled={syncing}
             variant="outline"
-            className="border-purple-200 text-purple-700 hover:bg-purple-50 px-6 py-3 rounded-lg font-medium transition-all duration-200"
+            className="border-border text-foreground hover:bg-surface px-6 py-3 rounded-lg font-medium transition-all duration-200"
           >
             {syncing ? (
               <>
-                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
@@ -346,7 +346,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
               onClick={toggleSelectionMode}
               variant="outline"
               size="sm"
-              className="border-purple-200 text-purple-700 hover:bg-purple-50"
+              className="border-border text-foreground hover:bg-surface"
             >
               <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
@@ -355,14 +355,14 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
             </Button>
           ) : (
             <div className="flex items-center gap-2">
-              <span className="text-sm font-medium text-gray-700">
+              <span className="text-sm font-medium text-foreground">
                 {selectedClips.size} of {clips.filter(c => c.status === 'ready').length} selected
               </span>
               <Button 
                 onClick={selectAllClips}
                 variant="outline"
                 size="sm"
-                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+                className="border-border text-foreground hover:bg-surface"
               >
                 Select All
               </Button>
@@ -370,7 +370,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 onClick={clearSelection}
                 variant="outline"
                 size="sm"
-                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+                className="border-border text-foreground hover:bg-surface"
               >
                 Clear
               </Button>
@@ -378,7 +378,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 onClick={openBatchExportModal}
                 disabled={selectedClips.size === 0}
                 size="sm"
-                className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary/90 text-white disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -389,7 +389,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 onClick={toggleSelectionMode}
                 variant="outline"
                 size="sm"
-                className="border-gray-200 text-gray-700 hover:bg-gray-50"
+                className="border-border text-foreground hover:bg-surface"
               >
                 Cancel
               </Button>
@@ -402,11 +402,11 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
           disabled={syncing}
           variant="outline"
           size="sm"
-          className="border-purple-200 text-purple-700 hover:bg-purple-50"
+          className="border-border text-foreground hover:bg-surface"
         >
           {syncing ? (
             <>
-              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-foreground" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
@@ -425,12 +425,12 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {clips.map((clip) => (
-        <div key={clip.id} className={`group bg-white rounded-xl shadow-sm border transition-all duration-300 overflow-hidden ${
+        <div key={clip.id} className={`group bg-surface rounded-xl shadow-sm border transition-all duration-300 overflow-hidden ${
           selectionMode && selectedClips.has(clip.id) 
-            ? 'border-purple-300 shadow-lg ring-2 ring-purple-200' 
+            ? 'border-primary/50 shadow-lg ring-2 ring-primary/20' 
             : selectionMode 
-              ? 'border-gray-200 hover:border-purple-200' 
-              : 'border-gray-100 hover:shadow-lg hover:border-purple-200'
+              ? 'border-border hover:border-primary/30' 
+              : 'border-border hover:shadow-lg hover:border-primary/50'
         }`}>
           {/* Selection Checkbox */}
           {selectionMode && clip.status === 'ready' && (
@@ -439,12 +439,12 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 type="checkbox"
                 checked={selectedClips.has(clip.id)}
                 onChange={() => toggleClipSelection(clip.id)}
-                className="w-5 h-5 text-purple-600 bg-white border-2 border-gray-300 rounded focus:ring-purple-500 focus:ring-2"
+                className="w-5 h-5 text-primary bg-background border-2 border-border rounded focus:ring-primary focus:ring-2"
               />
             </div>
           )}
           
-          <div className="aspect-video bg-gradient-to-br from-gray-50 to-gray-100 relative overflow-hidden">
+          <div className="aspect-video bg-gradient-to-br from-muted/10 to-muted/20 relative overflow-hidden">
             {clip.thumbnailUrl ? (
               <Image
                 src={clip.thumbnailUrl}
@@ -464,8 +464,8 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
               className={`w-full h-full flex items-center justify-center ${clip.thumbnailUrl ? 'hidden' : 'flex'}`}
               style={{ display: clip.thumbnailUrl ? 'none' : 'flex' }}
             >
-              <div className="bg-gradient-to-br from-purple-100 to-purple-200 rounded-full p-4">
-                <svg className="h-8 w-8 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-full p-4">
+                <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
                 </svg>
               </div>
@@ -478,22 +478,22 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
             <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-sm text-white text-xs px-2.5 py-1 rounded-full font-medium">
               {formatTime(clip.endTime - clip.startTime)}
             </div>
-            <div className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm text-purple-700 text-xs px-2.5 py-1 rounded-full font-semibold">
+            <div className="absolute bottom-3 left-3 bg-surface/90 backdrop-blur-sm text-primary text-xs px-2.5 py-1 rounded-full font-semibold">
               {clip.aspectRatio || '16:9'}
             </div>
           </div>
           
           <div className="p-5">
-            <h3 className="font-semibold text-gray-900 mb-2 truncate text-lg group-hover:text-purple-700 transition-colors">{clip.title}</h3>
-            <p className="text-sm text-gray-600 mb-1 truncate">From: {clip.video.title}</p>
-            <p className="text-xs text-gray-500 mb-1 flex items-center">
-              <svg className="h-3 w-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <h3 className="font-semibold text-foreground mb-2 truncate text-lg group-hover:text-primary transition-colors">{clip.title}</h3>
+            <p className="text-sm text-muted-foreground mb-1 truncate">From: {clip.video.title}</p>
+            <p className="text-xs text-muted mb-1 flex items-center">
+              <svg className="h-3 w-3 mr-1.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {formatTime(clip.startTime)} - {formatTime(clip.endTime)}
             </p>
-            <p className="text-xs text-gray-500 mb-3 flex items-center">
-              <svg className="h-3 w-3 mr-1.5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <p className="text-xs text-muted mb-3 flex items-center">
+              <svg className="h-3 w-3 mr-1.5 text-muted" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {formatDate(clip.createdAt)}
@@ -502,7 +502,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
             {/* Description */}
             {clip.description && (
               <div className="mb-3">
-                <p className="text-sm text-gray-700 overflow-hidden" 
+                <p className="text-sm text-muted-foreground overflow-hidden" 
                    style={{
                      display: '-webkit-box',
                      WebkitLineClamp: 2,
@@ -521,17 +521,17 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                   {clip.hashtags.slice(0, 3).map((hashtag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200"
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-400/30"
                       title="AI-generated hashtag"
                     >
-                      <svg className="w-3 h-3 mr-1 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3 h-3 mr-1 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                       </svg>
                       #{hashtag}
                     </span>
                   ))}
                   {clip.hashtags.length > 3 && (
-                    <span className="text-xs text-gray-500 px-2 py-1">
+                    <span className="text-xs text-muted px-2 py-1">
                       +{clip.hashtags.length - 3} more
                     </span>
                   )}
@@ -546,17 +546,17 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                   {clip.tags.slice(0, 3).map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200"
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-400/30"
                       title="AI-generated tag"
                     >
-                      <svg className="w-3 h-3 mr-1 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3 h-3 mr-1 text-green-400" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                       </svg>
                       {tag}
                     </span>
                   ))}
                   {clip.tags.length > 3 && (
-                    <span className="text-xs text-gray-500 px-2 py-1">
+                    <span className="text-xs text-muted px-2 py-1">
                       +{clip.tags.length - 3} more
                     </span>
                   )}
@@ -573,7 +573,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                       size="sm"
                       onClick={() => downloadClip(clip.id, clip.title)}
                       disabled={selectionMode}
-                      className="flex-1 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-gradient-to-r from-primary to-primary-hover hover:from-primary-hover hover:to-primary/90 text-white font-medium rounded-lg transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -585,7 +585,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                       variant="outline"
                       onClick={() => openExportModal(clip)}
                       disabled={selectionMode}
-                      className="flex-1 border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-border text-foreground hover:bg-surface hover:border-primary/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
@@ -601,7 +601,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                       variant="outline"
                       onClick={() => openPublishModal(clip)}
                       disabled={selectionMode}
-                      className="flex-1 border-green-200 text-green-700 hover:bg-green-50 hover:border-green-300 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-green-400/30 text-green-400 hover:bg-green-500/10 hover:border-green-400/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m5 0H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zM9 12l2 2 4-4" />
@@ -613,7 +613,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                       variant="outline"
                       onClick={() => openWorkflowModal(clip)}
                       disabled={selectionMode}
-                      className="flex-1 border-blue-200 text-blue-700 hover:bg-blue-50 hover:border-blue-300 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-blue-400/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5M14.25 3.104c.251.023.501.05.75.082M19.8 14.5l-2.407 2.407A2.25 2.25 0 0116.001 17.5H8.001a2.25 2.25 0 01-1.392-.493L4.2 14.5" />
@@ -624,8 +624,8 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 </>
               )}
               {clip.status === 'processing' && (
-                <Button size="sm" disabled className="flex-1 bg-purple-100 text-purple-600 rounded-lg">
-                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-purple-600" fill="none" viewBox="0 0 24 24">
+                <Button size="sm" disabled className="flex-1 bg-primary/20 text-primary rounded-lg">
+                  <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-primary" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
@@ -633,7 +633,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 </Button>
               )}
               {clip.status === 'failed' && (
-                <Button size="sm" variant="outline" className="flex-1 border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300 rounded-lg">
+                <Button size="sm" variant="outline" className="flex-1 border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 rounded-lg">
                   <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
@@ -644,7 +644,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                 size="sm"
                 variant="outline"
                 onClick={() => deleteClip(clip.id)}
-                className="px-3 border-gray-200 hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-all duration-200 rounded-lg"
+                className="px-3 border-border hover:border-destructive hover:bg-destructive/10 hover:text-destructive transition-all duration-200 rounded-lg"
               >
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />

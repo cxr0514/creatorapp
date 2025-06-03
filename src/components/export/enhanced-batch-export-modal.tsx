@@ -385,15 +385,15 @@ export function EnhancedBatchExportModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
-          <div className="flex justify-between items-center p-6 border-b">
+      <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+        <div className="bg-surface border border-border rounded-lg w-full max-w-7xl max-h-[90vh] overflow-hidden flex flex-col">
+          <div className="flex justify-between items-center p-6 border-b border-border">
             <div>
-              <h2 className="text-2xl font-semibold flex items-center gap-2">
-                <Sparkles className="h-6 w-6 text-blue-500" />
+              <h2 className="text-2xl font-semibold text-foreground flex items-center gap-2">
+                <Sparkles className="h-6 w-6 text-primary" />
                 Smart Batch Export
               </h2>
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 Export multiple clips with AI-powered smart cropping
               </p>
             </div>
@@ -436,7 +436,7 @@ export function EnhancedBatchExportModal({
                         <div 
                           key={clip.id}
                           className={`relative border rounded-lg p-4 cursor-pointer transition-colors ${
-                            selectedClips.has(clip.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                            selectedClips.has(clip.id) ? 'border-primary/50 bg-primary/10' : 'border-border'
                           }`}
                           onClick={() => toggleClip(clip.id)}
                         >
@@ -453,8 +453,8 @@ export function EnhancedBatchExportModal({
                               className="w-full h-24 object-cover rounded mb-2"
                             />
                           )}
-                          <h4 className="font-medium text-sm">{clip.title}</h4>
-                          <p className="text-xs text-gray-500">
+                          <h4 className="font-medium text-sm text-foreground">{clip.title}</h4>
+                          <p className="text-xs text-muted-foreground">
                             {clip.aspectRatio} • {clip.duration}s
                           </p>
                           <Button
@@ -486,7 +486,7 @@ export function EnhancedBatchExportModal({
                         <div
                           key={format.format}
                           className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                            selectedFormats.has(format.format) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                            selectedFormats.has(format.format) ? 'border-primary/50 bg-primary/10' : 'border-border'
                           }`}
                           onClick={() => toggleFormat(format.format)}
                         >
@@ -494,8 +494,8 @@ export function EnhancedBatchExportModal({
                             checked={selectedFormats.has(format.format)}
                             className="mb-2"
                           />
-                          <h4 className="font-medium">{format.format}</h4>
-                          <p className="text-sm text-gray-500">{format.description}</p>
+                          <h4 className="font-medium text-foreground">{format.format}</h4>
+                          <p className="text-sm text-muted-foreground">{format.description}</p>
                           <div className="mt-2">
                             {format.platforms.slice(0, 2).map((platform) => (
                               <Badge key={platform} variant="secondary" className="mr-1 text-xs">
@@ -526,7 +526,7 @@ export function EnhancedBatchExportModal({
                           <div
                             key={platform}
                             className={`border rounded-lg p-4 cursor-pointer transition-colors ${
-                              selectedPlatforms.has(platform) ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                              selectedPlatforms.has(platform) ? 'border-primary/50 bg-primary/10' : 'border-border'
                             }`}
                             onClick={() => togglePlatform(platform)}
                           >
@@ -534,7 +534,7 @@ export function EnhancedBatchExportModal({
                               checked={selectedPlatforms.has(platform)}
                               className="mb-2"
                             />
-                            <h4 className="font-medium">{platform}</h4>
+                            <h4 className="font-medium text-foreground">{platform}</h4>
                           </div>
                         ))}
                       </div>
@@ -550,7 +550,7 @@ export function EnhancedBatchExportModal({
                   <CardContent className="space-y-4">
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Cropping Strategy</label>
+                        <label className="text-sm font-medium mb-2 block text-foreground">Cropping Strategy</label>
                         <Select value={croppingStrategy} onValueChange={setCroppingStrategy}>
                           <SelectTrigger>
                             <SelectValue />
@@ -566,7 +566,7 @@ export function EnhancedBatchExportModal({
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Quality Level</label>
+                        <label className="text-sm font-medium mb-2 block text-foreground">Quality Level</label>
                         <Select value={qualityLevel} onValueChange={(value) => setQualityLevel(value as 'standard' | 'high' | 'ultra')}>
                           <SelectTrigger>
                             <SelectValue />
@@ -580,7 +580,7 @@ export function EnhancedBatchExportModal({
                       </div>
 
                       <div>
-                        <label className="text-sm font-medium mb-2 block">Priority</label>
+                        <label className="text-sm font-medium mb-2 block text-foreground">Priority</label>
                         <Select value={priority} onValueChange={(value) => setPriority(value as 'low' | 'normal' | 'high')}>
                           <SelectTrigger>
                             <SelectValue />
@@ -600,7 +600,7 @@ export function EnhancedBatchExportModal({
                         checked={useSmartCropping}
                         onCheckedChange={(checked) => setUseSmartCropping(checked === true)}
                       />
-                      <label htmlFor="smart-cropping" className="text-sm font-medium">
+                      <label htmlFor="smart-cropping" className="text-sm font-medium text-foreground">
                         Enable AI-powered smart cropping
                       </label>
                     </div>
@@ -630,8 +630,8 @@ export function EnhancedBatchExportModal({
                 {exportQueue.length === 0 ? (
                   <Card>
                     <CardContent className="text-center py-12">
-                      <Video className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                      <p className="text-gray-500">No export queue generated yet</p>
+                      <Video className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground">No export queue generated yet</p>
                       <Button variant="outline" onClick={() => setCurrentTab('setup')} className="mt-4">
                         Go to Setup
                       </Button>
@@ -677,24 +677,24 @@ export function EnhancedBatchExportModal({
                       <CardContent>
                         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-4">
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-gray-500">{stats.pending}</div>
-                            <div className="text-sm text-gray-500">Pending</div>
+                            <div className="text-2xl font-bold text-muted-foreground">{stats.pending}</div>
+                            <div className="text-sm text-muted-foreground">Pending</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-blue-500">{stats.processing}</div>
-                            <div className="text-sm text-gray-500">Processing</div>
+                            <div className="text-2xl font-bold text-primary">{stats.processing}</div>
+                            <div className="text-sm text-muted-foreground">Processing</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-500">{stats.completed}</div>
-                            <div className="text-sm text-gray-500">Completed</div>
+                            <div className="text-2xl font-bold text-green-400">{stats.completed}</div>
+                            <div className="text-sm text-muted-foreground">Completed</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-red-500">{stats.failed}</div>
-                            <div className="text-sm text-gray-500">Failed</div>
+                            <div className="text-2xl font-bold text-destructive">{stats.failed}</div>
+                            <div className="text-sm text-muted-foreground">Failed</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold">{stats.total}</div>
-                            <div className="text-sm text-gray-500">Total</div>
+                            <div className="text-2xl font-bold text-foreground">{stats.total}</div>
+                            <div className="text-sm text-muted-foreground">Total</div>
                           </div>
                         </div>
                         
@@ -706,7 +706,7 @@ export function EnhancedBatchExportModal({
                         )}
 
                         {estimates && (
-                          <div className="mt-4 text-sm text-gray-500 flex items-center gap-4">
+                          <div className="mt-4 text-sm text-muted-foreground flex items-center gap-4">
                             <span className="flex items-center gap-1">
                               <Clock className="h-4 w-4" />
                               Est. {Math.ceil(estimates.totalTime)} min
@@ -726,22 +726,22 @@ export function EnhancedBatchExportModal({
                             <CardContent className="p-4">
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                  <div className="w-12 h-12 bg-gray-100 rounded flex items-center justify-center">
-                                    {item.status === 'completed' && <CheckCircle className="h-6 w-6 text-green-500" />}
-                                    {item.status === 'failed' && <XCircle className="h-6 w-6 text-red-500" />}
+                                  <div className="w-12 h-12 bg-surface border border-border rounded flex items-center justify-center">
+                                    {item.status === 'completed' && <CheckCircle className="h-6 w-6 text-green-400" />}
+                                    {item.status === 'failed' && <XCircle className="h-6 w-6 text-destructive" />}
                                     {item.status === 'processing' && (
-                                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-blue-500 border-t-transparent" />
+                                      <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
                                     )}
-                                    {item.status === 'pending' && <Clock className="h-6 w-6 text-gray-400" />}
+                                    {item.status === 'pending' && <Clock className="h-6 w-6 text-muted-foreground" />}
                                   </div>
                                   
                                   <div>
-                                    <h4 className="font-medium">{clip?.title}</h4>
-                                    <p className="text-sm text-gray-500">
+                                    <h4 className="font-medium text-foreground">{clip?.title}</h4>
+                                    <p className="text-sm text-muted-foreground">
                                       {item.format} • {item.platform}
                                     </p>
                                     {item.smartCropAnalysis && (
-                                      <p className="text-xs text-blue-600">
+                                      <p className="text-xs text-primary">
                                         Smart crop: {item.smartCropAnalysis.strategy} 
                                         ({Math.round(item.smartCropAnalysis.confidence * 100)}% confidence)
                                       </p>
@@ -758,10 +758,10 @@ export function EnhancedBatchExportModal({
                                     {item.status}
                                   </Badge>
                                   {item.error && (
-                                    <p className="text-xs text-red-500 mt-1">{item.error}</p>
+                                    <p className="text-xs text-destructive mt-1">{item.error}</p>
                                   )}
                                   {(item.retryCount || 0) > 0 && (
-                                    <p className="text-xs text-yellow-600 mt-1">
+                                    <p className="text-xs text-yellow-400 mt-1">
                                       Retry #{item.retryCount || 0}
                                     </p>
                                   )}
@@ -797,8 +797,8 @@ export function EnhancedBatchExportModal({
                     <CardContent>
                       {stats.completed === 0 ? (
                         <div className="text-center py-12">
-                          <CheckCircle className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                          <p className="text-gray-500">No completed exports yet</p>
+                          <CheckCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                          <p className="text-muted-foreground">No completed exports yet</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -811,8 +811,8 @@ export function EnhancedBatchExportModal({
                                   <CardContent className="p-4">
                                     <div className="space-y-3">
                                       <div>
-                                        <h4 className="font-medium">{clip?.title}</h4>
-                                        <p className="text-sm text-gray-500">
+                                        <h4 className="font-medium text-foreground">{clip?.title}</h4>
+                                        <p className="text-sm text-muted-foreground">
                                           {item.format} • {item.platform}
                                         </p>
                                       </div>
@@ -820,13 +820,13 @@ export function EnhancedBatchExportModal({
                                       {item.result?.url && (
                                         <video 
                                           src={item.result.url}
-                                          className="w-full h-32 object-cover rounded bg-gray-100"
+                                          className="w-full h-32 object-cover rounded bg-surface border border-border"
                                           controls
                                         />
                                       )}
 
                                       {item.smartCropAnalysis && (
-                                        <div className="text-xs bg-blue-50 p-2 rounded">
+                                        <div className="text-xs bg-primary/10 border border-primary/20 p-2 rounded text-foreground">
                                           <strong>Smart Crop Applied:</strong><br />
                                           Strategy: {item.smartCropAnalysis.strategy}<br />
                                           Confidence: {Math.round(item.smartCropAnalysis.confidence * 100)}%<br />

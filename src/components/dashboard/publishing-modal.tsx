@@ -293,29 +293,29 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6 border-b border-gray-200">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface border border-border rounded-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="p-6 border-b border-border">
           <div className="flex justify-between items-center">
-            <h2 className="text-2xl font-bold text-gray-900">Publish to Social Media</h2>
+            <h2 className="text-2xl font-bold text-foreground">Publish to Social Media</h2>
             <Button 
               onClick={onClose}
               variant="outline"
               size="sm"
-              className="text-gray-500 hover:text-gray-700"
+              className="text-muted-foreground hover:text-foreground"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </Button>
           </div>
-          <p className="text-gray-600 mt-2">Publishing: {clip.title}</p>
+          <p className="text-muted-foreground mt-2">Publishing: {clip.title}</p>
         </div>
 
         <div className="p-6 space-y-6">
           {/* Platform Selection */}
           <div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Select Platforms</h3>
+            <h3 className="text-lg font-semibold text-foreground mb-4">Select Platforms</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {SOCIAL_PLATFORMS.map((platform) => {
                 const account = connectedAccounts.find(acc => acc.platform === platform.id)
@@ -324,21 +324,21 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
 
                 return (
                   <div key={platform.id} className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                    isSelected ? 'border-purple-300 bg-purple-50 ring-2 ring-purple-200' : 'border-gray-200 hover:border-gray-300'
+                    isSelected ? 'border-primary/50 bg-primary/10 ring-2 ring-primary/50' : 'border-border hover:border-border/80'
                   }`}>
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center">
                           <span className="text-sm font-medium">{platform.name[0].toUpperCase()}</span>
                         </div>
-                        <span className="font-medium text-gray-900">{platform.displayName}</span>
+                        <span className="font-medium text-foreground">{platform.displayName}</span>
                       </div>
                       {isConnected ? (
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={() => togglePlatform(platform.id)}
-                          className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                          className="w-5 h-5 text-primary border-border rounded focus:ring-primary"
                         />
                       ) : (
                         <Button
@@ -350,7 +350,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                         </Button>
                       )}
                     </div>
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       <p>Max: {platform.maxFileSize}MB, {Math.floor(platform.maxDuration / 60)}min</p>
                       <p>Formats: {platform.supportedFormats.join(', ')}</p>
                       {!isConnected && (
@@ -366,40 +366,40 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
           {/* Content Configuration */}
           {selectedPlatforms.size > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Content Settings</h3>
+              <h3 className="text-lg font-semibold text-foreground">Content Settings</h3>
               
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Title</label>
                 <input
                   type="text"
                   value={postContent.title}
                   onChange={(e) => handleContentChange('title', e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
                   placeholder="Enter post title..."
                 />
               </div>
 
               {/* Description */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Description</label>
                 <textarea
                   value={postContent.description}
                   onChange={(e) => handleContentChange('description', e.target.value)}
                   rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
                   placeholder="Enter post description..."
                 />
               </div>
 
               {/* Hashtags */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Hashtags</label>
+                <label className="block text-sm font-medium text-foreground mb-2">Hashtags</label>
                 <input
                   type="text"
                   value={postContent.hashtags?.join(', ') || ''}
                   onChange={(e) => handleHashtagsChange(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                  className="w-full px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
                   placeholder="trending, viral, content (comma separated)"
                 />
               </div>
@@ -448,7 +448,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
           {/* Scheduling */}
           {selectedPlatforms.size > 0 && (
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-gray-900">Scheduling</h3>
+              <h3 className="text-lg font-semibold text-foreground">Scheduling</h3>
               
               <div className="flex space-x-4">
                 <label className="flex items-center space-x-2">
@@ -458,9 +458,9 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                     value="immediate"
                     checked={publishMode === 'immediate'}
                     onChange={(e) => setPublishMode(e.target.value as 'immediate')}
-                    className="text-purple-600 focus:ring-purple-500"
+                    className="text-primary focus:ring-primary"
                   />
-                  <span className="text-sm font-medium text-gray-700">Publish Now</span>
+                  <span className="text-sm font-medium text-foreground">Publish Now</span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input
@@ -469,9 +469,9 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                     value="schedule"
                     checked={publishMode === 'schedule'}
                     onChange={(e) => setPublishMode(e.target.value as 'schedule')}
-                    className="text-purple-600 focus:ring-purple-500"
+                    className="text-primary focus:ring-primary"
                   />
-                  <span className="text-sm font-medium text-gray-700">Schedule for Later</span>
+                  <span className="text-sm font-medium text-foreground">Schedule for Later</span>
                 </label>
                 <label className="flex items-center space-x-2">
                   <input
@@ -480,28 +480,28 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                     value="smart"
                     checked={publishMode === 'smart'}
                     onChange={(e) => setPublishMode(e.target.value as 'smart')}
-                    className="text-purple-600 focus:ring-purple-500"
+                    className="text-primary focus:ring-primary"
                   />
-                  <span className="text-sm font-medium text-gray-700">Smart Scheduling</span>
+                  <span className="text-sm font-medium text-foreground">Smart Scheduling</span>
                 </label>
               </div>
 
               {publishMode === 'schedule' && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Schedule Time</label>
+                  <label className="block text-sm font-medium text-foreground mb-2">Schedule Time</label>
                   <input
                     type="datetime-local"
                     value={scheduleOptions.scheduledTime?.toISOString().slice(0, 16) || ''}
                     onChange={(e) => setScheduleOptions(prev => ({ ...prev, scheduledTime: new Date(e.target.value) }))}
                     min={new Date().toISOString().slice(0, 16)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-purple-500 focus:border-purple-500"
+                    className="px-3 py-2 border border-border rounded-lg focus:ring-primary focus:border-purple-500"
                   />
                 </div>
               )}
 
               {publishMode === 'smart' && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Recommended Times:</p>
+                  <p className="text-sm text-muted-foreground mb-2">Recommended Times:</p>
                   <ul className="text-sm text-gray-800 space-y-1">
                     {smartRecommendations.length === 0 ? (
                       <li>No recommendations available. Adjust your settings or try again later.</li>
@@ -518,7 +518,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                       onClick={fetchSmartRecommendations}
                       variant="outline"
                       size="sm"
-                      className="text-gray-500 hover:text-gray-700"
+                      className="text-muted-foreground hover:text-foreground"
                     >
                       Refresh Recommendations
                     </Button>
@@ -536,9 +536,9 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50 rounded-b-xl">
+        <div className="p-6 border-t border-border bg-gray-50 rounded-b-xl">
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-muted-foreground">
               {selectedPlatforms.size > 0 && (
                 <span>Publishing to {selectedPlatforms.size} platform{selectedPlatforms.size !== 1 ? 's' : ''}</span>
               )}

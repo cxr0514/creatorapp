@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
+import { SocialIcon } from '@/components/ui/social-icon'
 import { 
   SOCIAL_PLATFORMS, 
   type SocialAccount 
@@ -82,23 +83,6 @@ export function SocialConnections() {
     }
   }
 
-  const getPlatformIcon = (platformId: string) => {
-    switch (platformId) {
-      case 'youtube':
-        return '🎥'
-      case 'tiktok':
-        return '🎵'
-      case 'instagram':
-        return '📸'
-      case 'twitter':
-        return '🐦'
-      case 'linkedin':
-        return '💼'
-      default:
-        return '🔗'
-    }
-  }
-
   const getPlatformColor = (platformId: string) => {
     switch (platformId) {
       case 'youtube':
@@ -168,8 +152,8 @@ export function SocialConnections() {
             <div key={platform.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
-                  <div className={`w-12 h-12 bg-gradient-to-r ${getPlatformColor(platform.id)} rounded-full flex items-center justify-center text-white text-xl`}>
-                    {getPlatformIcon(platform.id)}
+                  <div className={`w-12 h-12 bg-gradient-to-r ${getPlatformColor(platform.id)} rounded-full flex items-center justify-center text-white p-2`}>
+                    <SocialIcon platform={platform.id} size={24} className="text-white" />
                   </div>
                   <div>
                     <h3 className="font-semibold text-gray-900">{platform.displayName}</h3>

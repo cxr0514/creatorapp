@@ -306,9 +306,9 @@ export function EditTemplateModal({ isOpen, template, onClose }: EditTemplateMod
           </div>
 
           {/* Template Info */}
-          <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <h4 className="font-medium text-gray-900 mb-2">Template Information</h4>
-            <div className="text-sm text-gray-600 space-y-1">
+          <div className="bg-surface border border-border rounded-lg p-4">
+            <h4 className="font-medium text-foreground mb-2">Template Information</h4>
+            <div className="text-sm text-muted-foreground space-y-1">
               <p>Created: {new Date(template.createdAt).toLocaleDateString()}</p>
               <p>Last Updated: {new Date(template.updatedAt).toLocaleDateString()}</p>
               <p>Template ID: {template.id}</p>

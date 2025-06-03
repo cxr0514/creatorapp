@@ -155,12 +155,12 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="bg-surface border border-border rounded-lg p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto">
         <div className="flex justify-between items-center mb-6">
           <div>
             <h2 className="text-xl font-semibold">Export Clip: {clip.title}</h2>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-muted-foreground">
               Current format: {clip.aspectRatio} • Duration: {getDuration()}s
             </p>
           </div>
@@ -180,13 +180,13 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
             <TabsContent value="formats" className="space-y-6">
               <div className="mb-4">
                 <h3 className="text-lg font-medium mb-2">Select Export Formats & Platforms</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Choose the formats and platforms you want to export to. Smart cropping will be applied automatically.
                 </p>
               </div>
 
               {/* Advanced Cropping Options */}
-              <div className="mb-6 border rounded-lg p-4 bg-gray-50">
+              <div className="mb-6 border rounded-lg p-4 bg-muted/20">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="font-medium">Smart Cropping Options</h4>
                   <Button
@@ -216,7 +216,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                   
                   <div className="flex items-center">
                     <div className="flex-1">
-                      <p className="text-sm text-gray-600">
+                      <p className="text-sm text-muted-foreground">
                         {getCroppingStrategyInfo(croppingStrategy)?.description}
                       </p>
                     </div>
@@ -225,11 +225,11 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
 
                 {showAdvanced && (
                   <div className="mt-4 pt-4 border-t">
-                    <div className="text-sm text-gray-600">
+                    <div className="text-sm text-muted-foreground">
                       <h5 className="font-medium mb-2">Best For:</h5>
                       <div className="flex flex-wrap gap-1 mb-3">
                         {getCroppingStrategyInfo(croppingStrategy)?.bestFor.map((use: string, index: number) => (
-                          <span key={index} className="px-2 py-1 bg-blue-100 text-blue-800 rounded-full text-xs">
+                          <span key={index} className="px-2 py-1 bg-primary/10 text-primary rounded-full text-xs">
                             {use}
                           </span>
                         ))}
@@ -241,7 +241,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                           const recommended = getRecommendedCroppingStrategy('general', format, true)
                           const isOptimal = recommended === croppingStrategy
                           return (
-                            <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-green-100 text-green-800' : 'bg-gray-100'}`}>
+                            <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-green-500/10 text-green-400' : 'bg-muted'}`}>
                               <span className="font-medium">{format.displayName}:</span> {recommended}
                               {isOptimal && <span className="ml-1">✓</span>}
                             </div>
@@ -260,10 +260,10 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                     <div className="flex items-center justify-between mb-2">
                       <div>
                         <h4 className="font-medium">{format.displayName}</h4>
-                        <p className="text-sm text-gray-600">{format.description}</p>
+                        <p className="text-sm text-muted-foreground">{format.description}</p>
                       </div>
                       {isCurrentFormat(format.format) && (
-                        <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                        <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded">
                           Current Format
                         </span>
                       )}
@@ -276,8 +276,8 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                           onClick={() => togglePlatform(format.format, platform)}
                           className={`p-2 text-sm rounded-md border ${
                             selectedFormats[format.format]?.has(platform)
-                              ? 'bg-blue-50 border-blue-200 text-blue-700'
-                              : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                              ? 'bg-primary/10 border-primary/50 text-primary'
+                              : 'bg-surface border border-border border-border text-foreground hover:bg-muted/20'
                           }`}
                         >
                           {platform}
@@ -292,17 +292,17 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
             <TabsContent value="templates" className="space-y-6">
               <div className="mb-4">
                 <h3 className="text-lg font-medium mb-2">Choose a Style Template</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Apply consistent branding and styling to your exported videos.
                 </p>
               </div>
 
               {selectedTemplate && (
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="mb-4 p-4 bg-primary/10 border border-primary/50 rounded-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="font-medium text-blue-900">Selected Template: {selectedTemplate.name}</h4>
-                      <p className="text-sm text-blue-700">This template will be applied to all exported videos</p>
+                      <h4 className="font-medium text-primary">Selected Template: {selectedTemplate.name}</h4>
+                      <p className="text-sm text-primary">This template will be applied to all exported videos</p>
                     </div>
                     <Button
                       variant="outline"
@@ -325,7 +325,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
             <TabsContent value="preview" className="space-y-6">
               <div className="mb-4">
                 <h3 className="text-lg font-medium mb-2">Export Preview</h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-muted-foreground">
                   Preview how your clip will look with the selected template and formats.
                 </p>
               </div>
@@ -342,7 +342,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                   </div>
                 ) : (
                   <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
-                    <p className="text-gray-500 mb-2">No template selected</p>
+                    <p className="text-muted-foreground mb-2">No template selected</p>
                     <p className="text-sm text-gray-400">Go to the Templates tab to choose a style template</p>
                   </div>
                 )}
@@ -350,34 +350,34 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                 {/* Export Summary */}
                 <div>
                   <h4 className="font-medium mb-3">Export Summary</h4>
-                  <div className="space-y-3 p-4 bg-gray-50 rounded-lg">
+                  <div className="space-y-3 p-4 bg-muted/20 rounded-lg">
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Clip:</span>
+                      <span className="text-sm text-muted-foreground">Clip:</span>
                       <span className="text-sm font-medium">{clip.title}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Duration:</span>
+                      <span className="text-sm text-muted-foreground">Duration:</span>
                       <span className="text-sm font-medium">{getDuration()}s</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Template:</span>
+                      <span className="text-sm text-muted-foreground">Template:</span>
                       <span className="text-sm font-medium">
                         {selectedTemplate?.name || 'No template'}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-sm text-gray-600">Formats:</span>
+                      <span className="text-sm text-muted-foreground">Formats:</span>
                       <span className="text-sm font-medium">
                         {getSelectedExports().length} selected
                       </span>
                     </div>
                     
                     {getSelectedExports().length > 0 && (
-                      <div className="mt-3 pt-3 border-t border-gray-200">
-                        <p className="text-xs text-gray-500 mb-2">Selected exports:</p>
+                      <div className="mt-3 pt-3 border-t border-border">
+                        <p className="text-xs text-muted-foreground mb-2">Selected exports:</p>
                         <div className="space-y-1">
                           {getSelectedExports().map((exp, idx) => (
-                            <div key={idx} className="text-xs bg-white px-2 py-1 rounded">
+                            <div key={idx} className="text-xs bg-surface border border-border px-2 py-1 rounded">
                               {exp.format} → {exp.platform}
                             </div>
                           ))}

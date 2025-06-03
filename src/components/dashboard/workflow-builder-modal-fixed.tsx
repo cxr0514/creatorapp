@@ -105,11 +105,11 @@ const ACTION_TYPES = [
 ]
 
 const PLATFORM_OPTIONS = [
-  { id: 'youtube', name: 'YouTube', emoji: '📺', color: 'red' },
-  { id: 'tiktok', name: 'TikTok', emoji: '🎵', color: 'pink' },
-  { id: 'instagram', name: 'Instagram', emoji: '📸', color: 'purple' },
-  { id: 'twitter', name: 'X/Twitter', emoji: '🐦', color: 'blue' },
-  { id: 'linkedin', name: 'LinkedIn', emoji: '💼', color: 'blue' }
+  { id: 'youtube', name: 'YouTube', color: 'red' },
+  { id: 'tiktok', name: 'TikTok', color: 'pink' },
+  { id: 'instagram', name: 'Instagram', color: 'purple' },
+  { id: 'twitter', name: 'X/Twitter', color: 'blue' },
+  { id: 'linkedin', name: 'LinkedIn', color: 'blue' }
 ]
 
 const ASPECT_RATIOS = [
@@ -289,15 +289,15 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
             <div 
               className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                 index <= currentIndex 
-                  ? 'bg-purple-600 text-white' 
-                  : 'bg-gray-200 text-gray-600'
+                  ? 'bg-primary text-primary-foreground' 
+                  : 'bg-muted text-muted-foreground'
               }`}
             >
               {index + 1}
             </div>
             {index < steps.length - 1 && (
               <div className={`w-12 h-0.5 mx-2 ${
-                index < currentIndex ? 'bg-purple-600' : 'bg-gray-200'
+                index < currentIndex ? 'bg-primary' : 'bg-muted'
               }`} />
             )}
           </div>
@@ -309,26 +309,26 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
   const renderBasicInfo = () => (
     <div className="space-y-4">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-foreground mb-2">
           Workflow Name *
         </label>
         <input
           type="text"
           value={workflow.name}
           onChange={(e) => setWorkflow(prev => ({ ...prev, name: e.target.value }))}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           placeholder="Enter workflow name"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-foreground mb-2">
           Description
         </label>
         <textarea
           value={workflow.description}
           onChange={(e) => setWorkflow(prev => ({ ...prev, description: e.target.value }))}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           rows={3}
           placeholder="Describe what this workflow does"
         />
@@ -340,9 +340,9 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
           id="isActive"
           checked={workflow.isActive}
           onChange={(e) => setWorkflow(prev => ({ ...prev, isActive: e.target.checked }))}
-          className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+          className="w-4 h-4 text-primary border-border rounded focus:ring-primary"
         />
-        <label htmlFor="isActive" className="text-sm text-gray-700">
+        <label htmlFor="isActive" className="text-sm text-foreground">
           Activate workflow immediately after creation
         </label>
       </div>
@@ -355,32 +355,32 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         return (
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Frequency</label>
-              <select className="w-full p-2 border border-gray-300 rounded">
+              <label className="block text-sm font-medium text-foreground mb-1">Frequency</label>
+              <select className="w-full p-2 border border-border rounded">
                 <option value="daily">Daily</option>
                 <option value="weekly">Weekly</option>
                 <option value="monthly">Monthly</option>
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-              <input type="time" className="w-full p-2 border border-gray-300 rounded" defaultValue="12:00" />
+              <label className="block text-sm font-medium text-foreground mb-1">Time</label>
+              <input type="time" className="w-full p-2 border border-border rounded" defaultValue="12:00" />
             </div>
           </div>
         )
       case 'keyword':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Keywords (comma separated)</label>
+            <label className="block text-sm font-medium text-foreground mb-1">Keywords (comma separated)</label>
             <input 
               type="text" 
-              className="w-full p-2 border border-gray-300 rounded" 
+              className="w-full p-2 border border-border rounded" 
               placeholder="gaming, tutorial, review"
             />
           </div>
         )
       default:
-        return <p className="text-sm text-gray-600">No additional configuration needed.</p>
+        return <p className="text-sm text-muted-foreground">No additional configuration needed.</p>
     }
   }
 
@@ -389,8 +389,8 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
       case 'crop':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Aspect Ratio</label>
-            <select className="w-full p-2 border border-gray-300 rounded">
+            <label className="block text-sm font-medium text-foreground mb-1">Aspect Ratio</label>
+            <select className="w-full p-2 border border-border rounded">
               {ASPECT_RATIOS.map(ratio => (
                 <option key={ratio.id} value={ratio.id}>{ratio.name}</option>
               ))}
@@ -401,19 +401,19 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         return (
           <div className="space-y-3">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Platform</label>
-              <select className="w-full p-2 border border-gray-300 rounded">
+              <label className="block text-sm font-medium text-foreground mb-1">Platform</label>
+              <select className="w-full p-2 border border-border rounded">
                 {PLATFORM_OPTIONS.map(platform => (
                   <option key={platform.id} value={platform.id}>
-                    {platform.emoji} {platform.name}
+                    {platform.name}
                   </option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Caption Template</label>
+              <label className="block text-sm font-medium text-foreground mb-1">Caption Template</label>
               <textarea 
-                className="w-full p-2 border border-gray-300 rounded" 
+                className="w-full p-2 border border-border rounded" 
                 rows={2}
                 placeholder="New content from ContentWizard! #automation #content"
               />
@@ -423,8 +423,8 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
       case 'schedule':
         return (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Delay</label>
-            <select className="w-full p-2 border border-gray-300 rounded">
+            <label className="block text-sm font-medium text-foreground mb-1">Delay</label>
+            <select className="w-full p-2 border border-border rounded">
               <option value="1h">1 hour</option>
               <option value="6h">6 hours</option>
               <option value="1d">1 day</option>
@@ -433,15 +433,15 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
           </div>
         )
       default:
-        return <p className="text-sm text-gray-600">No additional configuration needed.</p>
+        return <p className="text-sm text-muted-foreground">No additional configuration needed.</p>
     }
   }
 
   const renderTriggers = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Add Triggers</h3>
-        <p className="text-sm text-gray-600 mb-4">
+        <h3 className="text-lg font-medium text-foreground mb-2">Add Triggers</h3>
+        <p className="text-sm text-muted-foreground mb-4">
           Triggers determine when your workflow should run. You can add multiple triggers.
         </p>
         
@@ -458,12 +458,12 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg bg-${trigger.color}-100`}>
-                      <Icon className={`h-5 w-5 text-${trigger.color}-600`} />
+                    <div className={`p-2 rounded-lg bg-primary/10`}>
+                      <Icon className={`h-5 w-5 text-primary`} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{trigger.name}</h4>
-                      <p className="text-sm text-gray-600">{trigger.description}</p>
+                      <h4 className="font-medium text-foreground">{trigger.name}</h4>
+                      <p className="text-sm text-muted-foreground">{trigger.description}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -481,7 +481,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               <Button
                 size="sm"
                 onClick={() => addTrigger(selectedTriggerType)}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-primary hover:bg-purple-700"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add
@@ -495,7 +495,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
 
       {workflow.triggers.length > 0 && (
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Added Triggers ({workflow.triggers.length})</h4>
+          <h4 className="font-medium text-foreground mb-3">Added Triggers ({workflow.triggers.length})</h4>
           <div className="space-y-2">
             {workflow.triggers.map((trigger) => {
               const triggerType = TRIGGER_TYPES.find(t => t.id === trigger.type)
@@ -503,10 +503,10 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               
               return (
                 <div key={trigger.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <Icon className="h-5 w-5 text-gray-600" />
+                  <Icon className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
                     <span className="font-medium">{triggerType?.name}</span>
-                    <span className="text-sm text-gray-600 ml-2">
+                    <span className="text-sm text-muted-foreground ml-2">
                       {getTriggerDescription(trigger)}
                     </span>
                   </div>
@@ -530,8 +530,8 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
   const renderActions = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Add Actions</h3>
-        <p className="text-sm text-gray-600 mb-4">
+        <h3 className="text-lg font-medium text-foreground mb-2">Add Actions</h3>
+        <p className="text-sm text-muted-foreground mb-4">
           Actions are what your workflow will do when triggered. Add actions in the order you want them to execute.
         </p>
         
@@ -548,12 +548,12 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               >
                 <CardContent className="p-4">
                   <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg bg-${action.color}-100`}>
-                      <Icon className={`h-5 w-5 text-${action.color}-600`} />
+                    <div className={`p-2 rounded-lg bg-primary/10`}>
+                      <Icon className={`h-5 w-5 text-primary`} />
                     </div>
                     <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{action.name}</h4>
-                      <p className="text-sm text-gray-600">{action.description}</p>
+                      <h4 className="font-medium text-foreground">{action.name}</h4>
+                      <p className="text-sm text-muted-foreground">{action.description}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -571,7 +571,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               <Button
                 size="sm"
                 onClick={() => addAction(selectedActionType)}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-primary hover:bg-purple-700"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add
@@ -585,7 +585,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
 
       {workflow.actions.length > 0 && (
         <div>
-          <h4 className="font-medium text-gray-900 mb-3">Action Sequence ({workflow.actions.length})</h4>
+          <h4 className="font-medium text-foreground mb-3">Action Sequence ({workflow.actions.length})</h4>
           <div className="space-y-2">
             {workflow.actions.map((action, index) => {
               const actionType = ACTION_TYPES.find(a => a.id === action.type)
@@ -595,11 +595,11 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                 <div key={action.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-gray-500 font-medium">{index + 1}.</span>
-                    <Icon className="h-5 w-5 text-gray-600" />
+                    <Icon className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
                     <span className="font-medium">{actionType?.name}</span>
-                    <span className="text-sm text-gray-600 ml-2">
+                    <span className="text-sm text-muted-foreground ml-2">
                       {getActionDescription(action)}
                     </span>
                   </div>
@@ -623,8 +623,8 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
   const renderReview = () => (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Review Workflow</h3>
-        <p className="text-sm text-gray-600 mb-4">
+        <h3 className="text-lg font-medium text-foreground mb-2">Review Workflow</h3>
+        <p className="text-sm text-muted-foreground mb-4">
           Review your workflow configuration before saving.
         </p>
       </div>
@@ -639,7 +639,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">Triggers ({workflow.triggers.length})</h4>
+            <h4 className="font-medium text-foreground mb-2">Triggers ({workflow.triggers.length})</h4>
             {workflow.triggers.map((trigger) => {
               const triggerType = TRIGGER_TYPES.find(t => t.id === trigger.type)
               const Icon = triggerType?.icon || ClockIcon
@@ -653,14 +653,14 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
           </div>
 
           <div>
-            <h4 className="font-medium text-gray-900 mb-2">Actions ({workflow.actions.length})</h4>
+            <h4 className="font-medium text-foreground mb-2">Actions ({workflow.actions.length})</h4>
             {workflow.actions.map((action, index) => {
               const actionType = ACTION_TYPES.find(a => a.id === action.type)
               const Icon = actionType?.icon || CogIcon
               return (
                 <div key={action.id} className="flex items-center gap-2 text-sm">
                   <span className="text-gray-500">{index + 1}.</span>
-                  <Icon className="h-4 w-4 text-purple-600" />
+                  <Icon className="h-4 w-4 text-primary" />
                   <span>{actionType?.name}: {getActionDescription(action)}</span>
                 </div>
               )
@@ -669,7 +669,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
 
           <div className="pt-4 border-t">
             <div className="flex items-center gap-2">
-              <span className="text-sm text-gray-600">Status:</span>
+              <span className="text-sm text-muted-foreground">Status:</span>
               <Badge variant={workflow.isActive ? 'default' : 'secondary'}>
                 {workflow.isActive ? 'Active' : 'Inactive'}
               </Badge>
@@ -702,10 +702,10 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">
+              <h2 className="text-xl font-semibold text-foreground">
                 {editingWorkflow ? 'Edit Workflow' : 'Create New Workflow'}
               </h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Build automated workflows to streamline your content creation process
               </p>
             </div>
@@ -754,7 +754,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                 <Button 
                   onClick={handleSave}
                   disabled={saving || workflow.triggers.length === 0 || workflow.actions.length === 0}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-primary hover:bg-purple-700"
                 >
                   {saving ? 'Saving...' : (editingWorkflow ? 'Save Changes' : 'Create Workflow')}
                 </Button>
@@ -767,7 +767,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                       setStep(steps[currentIndex + 1] as typeof step)
                     }
                   }}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-primary hover:bg-purple-700"
                 >
                   Next
                   <ArrowRightIcon className="h-4 w-4 ml-2" />

@@ -180,8 +180,8 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-purple-100">
+    <div className="fixed inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-surface rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-border">
         <style jsx>{`
           .slider-thumb-purple::-webkit-slider-thumb {
             appearance: none;
@@ -205,22 +205,22 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
         `}</style>
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 rounded-t-2xl">
+        <div className="bg-gradient-to-r from-primary to-primary/90 p-6 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="bg-white/20 rounded-lg p-2">
+              <div className="bg-surface/20 rounded-lg p-2">
                 <svg className="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
                 </svg>
               </div>
               <div>
                 <h2 className="text-xl font-bold text-white">Create New Clip</h2>
-                <p className="text-purple-100 text-sm">Transform your video into engaging clips</p>
+                <p className="text-primary-foreground/80 text-sm">Transform your video into engaging clips</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="text-white/80 hover:text-white hover:bg-white/20 rounded-lg p-2 transition-all duration-200"
+              className="text-white/80 hover:text-white hover:bg-surface/20 rounded-lg p-2 transition-all duration-200"
             >
               <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -232,13 +232,13 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
         <div className="p-6">
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-foreground mb-2">
                 Select Video *
               </label>
               <select
                 value={selectedVideoId || ''}
                 onChange={(e) => setSelectedVideoId(e.target.value ? parseInt(e.target.value, 10) : undefined)}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 disabled={!!videoId}
               >
                 <option value="">Choose a video to create clips from</option>
@@ -252,7 +252,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
 
             <div>
               <div className="flex items-center justify-between mb-2">
-                <label className="block text-sm font-semibold text-gray-900">
+                <label className="block text-sm font-semibold text-foreground">
                   Clip Title *
                 </label>
                 {selectedVideo && (
@@ -261,11 +261,11 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                     size="sm"
                     onClick={generateAIMetadata}
                     disabled={isGeneratingAI}
-                    className="text-xs border-purple-200 text-purple-700 hover:bg-purple-50 hover:border-purple-300"
+                    className="text-xs border-primary/50 text-primary hover:bg-primary/10 hover:border-primary"
                   >
                     {isGeneratingAI ? (
                       <>
-                        <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-purple-500" fill="none" viewBox="0 0 24 24">
+                        <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-primary" fill="none" viewBox="0 0 24 24">
                           <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                           <path className="opacity-75" fill="currentColor" d="m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -288,13 +288,13 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                 onChange={(e) => setTitle(e.target.value)}
                 className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 transition-all duration-200 ${
                   aiSuggested 
-                    ? 'bg-purple-50 border-purple-300 focus:ring-purple-500 focus:border-purple-500' 
-                    : 'border-gray-300 focus:ring-purple-500 focus:border-purple-500'
+                    ? 'bg-primary/10 border-primary focus:ring-primary focus:border-primary' 
+                    : 'border-gray-300 focus:ring-primary focus:border-primary'
                 }`}
                 placeholder="Enter an engaging title for your clip"
               />
               {aiSuggested && title && (
-                <p className="text-xs text-purple-600 mt-2 flex items-center">
+                <p className="text-xs text-primary mt-2 flex items-center">
                   <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
@@ -304,7 +304,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-foreground mb-2">
                 Description
               </label>
               <textarea
@@ -313,13 +313,13 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                 rows={3}
                 className={`w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 transition-all duration-200 resize-none ${
                   aiSuggested && description 
-                    ? 'bg-purple-50 border-purple-300 focus:ring-purple-500 focus:border-purple-500' 
-                    : 'border-gray-300 focus:ring-purple-500 focus:border-purple-500'
+                    ? 'bg-primary/10 border-primary focus:ring-primary focus:border-primary' 
+                    : 'border-gray-300 focus:ring-primary focus:border-primary'
                 }`}
                 placeholder="Describe your clip to help with discovery (optional)"
               />
               {aiSuggested && description && (
-                <p className="text-xs text-purple-600 mt-2 flex items-center">
+                <p className="text-xs text-primary mt-2 flex items-center">
                   <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                   </svg>
@@ -329,7 +329,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-foreground mb-2">
                 Hashtags
               </label>
               <div className="space-y-3">
@@ -347,7 +347,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                       }
                     }
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 />
                 {hashtags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -356,8 +356,8 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                         key={index}
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
                           aiSuggested 
-                            ? 'bg-blue-50 text-blue-700 border-blue-200' 
-                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                            ? 'bg-primary/10 text-primary border-primary/50' 
+                            : 'bg-muted/20 text-gray-700 border-gray-200'
                         }`}
                       >
                         {hashtag}
@@ -385,7 +385,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <label className="block text-sm font-semibold text-foreground mb-2">
                 Tags
               </label>
               <div className="space-y-3">
@@ -402,7 +402,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                       }
                     }
                   }}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 />
                 {tags.length > 0 && (
                   <div className="flex flex-wrap gap-2">
@@ -412,7 +412,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
                           aiSuggested 
                             ? 'bg-green-50 text-green-700 border-green-200' 
-                            : 'bg-gray-50 text-gray-700 border-gray-200'
+                            : 'bg-muted/20 text-gray-700 border-gray-200'
                         }`}
                       >
                         {tag}
@@ -441,13 +441,13 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   Aspect Ratio
                 </label>
                 <select
                   value={aspectRatio}
                   onChange={(e) => setAspectRatio(e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 >
                   <option value="16:9">16:9 (Landscape)</option>
                   <option value="9:16">9:16 (TikTok/Reels)</option>
@@ -456,7 +456,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   Number of Clips
                 </label>
                 <input
@@ -465,41 +465,41 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                   max="10"
                   value={clipCount}
                   onChange={(e) => setClipCount(Math.max(1, Math.min(10, parseInt(e.target.value) || 1)))}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   Start Time
                 </label>
                 <input
                   type="text"
                   value={formatTime(startTime)}
                   onChange={(e) => setStartTime(parseTimeInput(e.target.value))}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                   placeholder="0:00"
                 />
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                <label className="block text-sm font-semibold text-foreground mb-2">
                   End Time
                 </label>
                 <input
                   type="text"
                   value={formatTime(endTime)}
                   onChange={(e) => setEndTime(parseTimeInput(e.target.value))}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all duration-200"
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
                   placeholder="0:30"
                 />
               </div>
             </div>
 
             {selectedVideo && (
-              <div className="space-y-4 bg-gray-50 rounded-xl p-4">
-                <label className="block text-sm font-semibold text-gray-900">
+              <div className="space-y-4 bg-muted/20 rounded-xl p-4">
+                <label className="block text-sm font-semibold text-foreground">
                   Timeline Selection
                 </label>
                 <div className="relative">
@@ -534,15 +534,15 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                   </div>
                 </div>
                 
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
+                <div className="bg-surface rounded-lg p-4 border border-gray-200">
                   <div className="flex items-center justify-between text-sm">
                     <div>
-                      <span className="font-medium text-gray-900">Video duration:</span>
+                      <span className="font-medium text-foreground">Video duration:</span>
                       <span className="text-gray-600 ml-1">{formatTime(selectedVideo.duration)}</span>
                     </div>
                     <div>
-                      <span className="font-medium text-gray-900">Clip duration:</span>
-                      <span className="text-purple-600 font-semibold ml-1">{formatTime(Math.max(0, endTime - startTime))}</span>
+                      <span className="font-medium text-foreground">Clip duration:</span>
+                      <span className="text-primary font-semibold ml-1">{formatTime(Math.max(0, endTime - startTime))}</span>
                     </div>
                   </div>
                   <div className="text-xs text-gray-500 mt-2 flex items-center">
@@ -582,14 +582,14 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
               variant="outline" 
               onClick={handleClose} 
               disabled={isCreating}
-              className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-gray-50 rounded-lg transition-all duration-200"
+              className="px-6 py-2 border-gray-300 text-gray-700 hover:bg-muted/20 rounded-lg transition-all duration-200"
             >
               Cancel
             </Button>
             <Button 
               onClick={handleCreateClip} 
               disabled={isCreating || !selectedVideoId || !title.trim()}
-              className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 bg-gradient-to-r from-primary to-primary/90 hover:from-purple-700 hover:to-purple-800 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCreating ? (
                 <>

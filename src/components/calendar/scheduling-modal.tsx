@@ -25,7 +25,6 @@ interface Platform {
   id: string
   name: string
   connected: boolean
-  icon: string
   optimalTimes: string[]
   audience: number
 }
@@ -247,8 +246,8 @@ export function SchedulingModal({
                   className={`
                     p-3 border rounded-lg cursor-pointer transition-colors
                     ${formData.platforms.includes(platform.id) 
-                      ? 'border-blue-500 bg-blue-50' 
-                      : 'border-gray-200 hover:bg-gray-50'
+                      ? 'border-primary bg-primary/10' 
+                      : 'border-border hover:bg-muted/50'
                     }
                   `}
                   onClick={() => handlePlatformToggle(platform.id)}
@@ -265,7 +264,7 @@ export function SchedulingModal({
                         {platform.audience.toLocaleString()} followers
                       </div>
                       {formData.useOptimalTime && optimalTimes[platform.id] && (
-                        <div className="text-xs text-blue-600 flex items-center gap-1 mt-1">
+                        <div className="text-xs text-primary flex items-center gap-1 mt-1">
                           <Zap className="h-3 w-3" />
                           Optimal: {optimalTimes[platform.id]}
                         </div>
@@ -284,7 +283,7 @@ export function SchedulingModal({
                   {disconnectedPlatforms.map(platform => (
                     <div
                       key={platform.id}
-                      className="p-3 border border-gray-200 rounded-lg opacity-50"
+                      className="p-3 border border-border rounded-lg opacity-50"
                     >
                       <div className="flex items-center gap-3">
                         <div className="font-medium">{platform.name}</div>
@@ -349,8 +348,8 @@ export function SchedulingModal({
             </div>
 
             {formData.useOptimalTime && (
-              <div className="p-3 bg-blue-50 rounded-lg">
-                <p className="text-sm text-blue-800 flex items-center gap-1">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <p className="text-sm text-primary flex items-center gap-1">
                   <Zap className="h-4 w-4" />
                   Posts will be scheduled at the best times for maximum engagement on each platform
                 </p>

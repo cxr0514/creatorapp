@@ -115,11 +115,11 @@ const ACTION_TYPES = [
 ]
 
 const PLATFORM_OPTIONS = [
-  { id: 'youtube', name: 'YouTube', emoji: '📺' },
-  { id: 'tiktok', name: 'TikTok', emoji: '🎵' },
-  { id: 'instagram', name: 'Instagram', emoji: '📸' },
-  { id: 'twitter', name: 'X/Twitter', emoji: '🐦' },
-  { id: 'linkedin', name: 'LinkedIn', emoji: '💼' }
+  { id: 'youtube', name: 'YouTube' },
+  { id: 'tiktok', name: 'TikTok' },
+  { id: 'instagram', name: 'Instagram' },
+  { id: 'twitter', name: 'X/Twitter' },
+  { id: 'linkedin', name: 'LinkedIn' }
 ]
 
 export function WorkflowBuilder() {
@@ -313,7 +313,7 @@ export function WorkflowBuilder() {
 
   const getPlatformEmoji = (platform?: string) => {
     const platformOption = PLATFORM_OPTIONS.find(p => p.id === platform)
-    return platformOption?.emoji || '📱'
+    return platformOption?.name || 'Platform'
   }
 
   if (loading) {

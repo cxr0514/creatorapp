@@ -54,10 +54,10 @@ export function ModernDashboard() {
   const [selectedScheduleDate, setSelectedScheduleDate] = useState<Date>()
   const [scheduledPosts, setScheduledPosts] = useState([])
   const [platforms] = useState([
-    { id: 'youtube', name: 'YouTube', connected: true, icon: '🎥', optimalTimes: ['14:00', '16:00', '20:00'], audience: 125000 },
-    { id: 'tiktok', name: 'TikTok', connected: true, icon: '🎵', optimalTimes: ['18:00', '20:00', '22:00'], audience: 85000 },
-    { id: 'instagram', name: 'Instagram', connected: false, icon: '📸', optimalTimes: ['11:00', '14:00', '17:00'], audience: 0 },
-    { id: 'twitter', name: 'Twitter', connected: false, icon: '🐦', optimalTimes: ['09:00', '12:00', '17:00'], audience: 0 }
+    { id: 'youtube', name: 'YouTube', connected: true, optimalTimes: ['14:00', '16:00', '20:00'], audience: 125000 },
+    { id: 'tiktok', name: 'TikTok', connected: true, optimalTimes: ['18:00', '20:00', '22:00'], audience: 85000 },
+    { id: 'instagram', name: 'Instagram', connected: false, optimalTimes: ['11:00', '14:00', '17:00'], audience: 0 },
+    { id: 'twitter', name: 'Twitter', connected: false, optimalTimes: ['09:00', '12:00', '17:00'], audience: 0 }
   ])
 
   // Fetch scheduled posts on component mount
@@ -158,7 +158,7 @@ export function ModernDashboard() {
   ]
 
   const stats = [
-    { name: 'Generated', value: '247', change: '+12%', icon: ScissorsIcon, color: 'text-purple-600' },
+    { name: 'Generated', value: '247', change: '+12%', icon: ScissorsIcon, color: 'text-primary' },
     { name: 'Published', value: '189', change: '+8%', icon: PlayIcon, color: 'text-green-600' },
     { name: 'Scheduled', value: '23', change: '+15%', icon: ClockIcon, color: 'text-blue-600' },
     { name: 'Storage', value: '4.2GB', change: '+2%', icon: CircleStackIcon, color: 'text-orange-600' },
@@ -171,12 +171,12 @@ export function ModernDashboard() {
   ]
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       {/* Mobile sidebar overlay */}
       {sidebarOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-purple-900 to-purple-800">
+          <div className="fixed inset-0 bg-black bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-gradient-to-b from-primary to-primary-hover">
             <div className="absolute top-0 right-0 -mr-12 pt-2">
               <button
                 type="button"
@@ -191,12 +191,12 @@ export function ModernDashboard() {
               <div className="flex-shrink-0 flex items-center px-4">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
-                    <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
-                      <span className="text-purple-600 font-bold text-lg">C</span>
+                    <div className="h-8 w-8 bg-foreground rounded-lg flex items-center justify-center">
+                      <span className="text-primary font-bold text-lg">C</span>
                     </div>
                   </div>
                   <div className="ml-3">
-                    <h1 className="text-xl font-bold text-white">ContentWizard</h1>
+                    <h1 className="text-xl font-bold text-foreground">ContentWizard</h1>
                   </div>
                 </div>
               </div>
@@ -212,13 +212,13 @@ export function ModernDashboard() {
                       }}
                       className={`${
                         isActive
-                          ? 'bg-purple-800 border-r-2 border-purple-300 text-white'
-                          : 'text-purple-100 hover:bg-purple-800 hover:text-white'
+                          ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
+                          : 'text-muted hover:bg-primary-hover hover:text-foreground'
                       } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
                     >
                       <item.icon
                         className={`${
-                          isActive ? 'text-purple-200' : 'text-purple-300'
+                          isActive ? 'text-primary-light' : 'text-muted'
                         } mr-3 flex-shrink-0 h-5 w-5`}
                         aria-hidden="true"
                       />
@@ -227,7 +227,7 @@ export function ModernDashboard() {
                   )
                 })}
               </nav>
-              <div className="mt-6 pt-6 border-t border-purple-700">
+              <div className="mt-6 pt-6 border-t border-primary-dark">
                 <nav className="px-2 space-y-1">
                   {bottomNavigation.map((item) => {
                     const isActive = activeTab === item.href
@@ -240,13 +240,13 @@ export function ModernDashboard() {
                         }}
                         className={`${
                           isActive
-                            ? 'bg-purple-800 border-r-2 border-purple-300 text-white'
-                            : 'text-purple-100 hover:bg-purple-800 hover:text-white'
+                            ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
+                            : 'text-muted hover:bg-primary-hover hover:text-foreground'
                         } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
                       >
                         <item.icon
                           className={`${
-                            isActive ? 'text-purple-200' : 'text-purple-300'
+                            isActive ? 'text-primary-light' : 'text-muted'
                           } mr-3 flex-shrink-0 h-5 w-5`}
                           aria-hidden="true"
                         />
@@ -263,16 +263,16 @@ export function ModernDashboard() {
 
       {/* Desktop sidebar */}
       <div className="hidden md:flex md:w-64 md:flex-col">
-        <div className="flex flex-col flex-grow pt-5 bg-gradient-to-b from-purple-900 to-purple-800 overflow-y-auto">
+        <div className="flex flex-col flex-grow pt-5 bg-gradient-to-b from-primary to-primary-hover overflow-y-auto">
           <div className="flex items-center flex-shrink-0 px-4">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <div className="h-8 w-8 bg-white rounded-lg flex items-center justify-center">
-                  <span className="text-purple-600 font-bold text-lg">C</span>
+                <div className="h-8 w-8 bg-foreground rounded-lg flex items-center justify-center">
+                  <span className="text-primary font-bold text-lg">C</span>
                 </div>
               </div>
               <div className="ml-3">
-                <h1 className="text-xl font-bold text-white">ContentWizard</h1>
+                <h1 className="text-xl font-bold text-foreground">ContentWizard</h1>
               </div>
             </div>
           </div>
@@ -286,13 +286,13 @@ export function ModernDashboard() {
                     onClick={() => setActiveTab(item.href)}
                     className={`${
                       isActive
-                        ? 'bg-purple-800 border-r-2 border-purple-300 text-white'
-                        : 'text-purple-100 hover:bg-purple-800 hover:text-white'
+                        ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
+                        : 'text-muted hover:bg-primary-hover hover:text-foreground'
                     } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
                   >
                     <item.icon
                       className={`${
-                        isActive ? 'text-purple-200' : 'text-purple-300'
+                        isActive ? 'text-primary-light' : 'text-muted'
                       } mr-3 flex-shrink-0 h-5 w-5`}
                       aria-hidden="true"
                     />
@@ -302,7 +302,7 @@ export function ModernDashboard() {
               })}
             </nav>
             <div className="px-2 space-y-1 pb-4">
-              <div className="border-t border-purple-700 pt-4">
+              <div className="border-t border-primary-dark pt-4">
                 {bottomNavigation.map((item) => {
                   const isActive = activeTab === item.href
                   return (
@@ -311,13 +311,13 @@ export function ModernDashboard() {
                       onClick={() => setActiveTab(item.href)}
                       className={`${
                         isActive
-                          ? 'bg-purple-800 border-r-2 border-purple-300 text-white'
-                          : 'text-purple-100 hover:bg-purple-800 hover:text-white'
+                          ? 'bg-primary-hover border-r-2 border-primary-light text-foreground'
+                          : 'text-muted hover:bg-primary-hover hover:text-foreground'
                       } group flex items-center px-2 py-2 text-sm font-medium rounded-md w-full text-left transition-colors duration-200`}
                     >
                       <item.icon
                         className={`${
-                          isActive ? 'text-purple-200' : 'text-purple-300'
+                          isActive ? 'text-primary-light' : 'text-muted'
                         } mr-3 flex-shrink-0 h-5 w-5`}
                         aria-hidden="true"
                       />
@@ -334,10 +334,10 @@ export function ModernDashboard() {
       {/* Main content */}
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Top nav */}
-        <div className="relative z-10 flex-shrink-0 flex h-16 bg-white shadow-sm">
+        <div className="relative z-10 flex-shrink-0 flex h-16 bg-surface shadow-sm">
           <button
             type="button"
-            className="px-4 border-r border-gray-200 text-gray-500 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-purple-500 md:hidden"
+            className="px-4 border-r border-border text-muted focus:outline-none focus:ring-2 focus:ring-inset focus:ring-primary md:hidden"
             onClick={() => setSidebarOpen(true)}
           >
             <span className="sr-only">Open sidebar</span>
@@ -349,13 +349,13 @@ export function ModernDashboard() {
                 <label htmlFor="search-field" className="sr-only">
                   Search
                 </label>
-                <div className="relative w-full text-gray-400 focus-within:text-gray-600">
+                <div className="relative w-full text-muted focus-within:text-foreground">
                   <div className="absolute inset-y-0 left-0 flex items-center pointer-events-none">
                     <MagnifyingGlassIcon className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <input
                     id="search-field"
-                    className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
+                    className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-foreground placeholder-muted focus:outline-none focus:placeholder-muted-foreground focus:ring-0 focus:border-transparent sm:text-sm bg-transparent"
                     placeholder="Search videos, clips, or workflows..."
                     type="search"
                   />
@@ -365,7 +365,7 @@ export function ModernDashboard() {
             <div className="ml-4 flex items-center md:ml-6 space-x-4">
               <button
                 type="button"
-                className="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                className="bg-surface p-1 rounded-full text-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
               >
                 <span className="sr-only">View notifications</span>
                 <BellIcon className="h-6 w-6" aria-hidden="true" />
@@ -384,14 +384,14 @@ export function ModernDashboard() {
                         height={32}
                       />
                     ) : (
-                      <div className="h-8 w-8 bg-purple-100 rounded-full flex items-center justify-center">
-                        <UserIcon className="h-5 w-5 text-purple-600" />
+                      <div className="h-8 w-8 bg-surface rounded-full flex items-center justify-center">
+                        <UserIcon className="h-5 w-5 text-primary" />
                       </div>
                     )}
                   </div>
                   <div className="hidden md:block">
-                    <div className="text-sm font-medium text-gray-700">{session?.user?.name}</div>
-                    <div className="text-xs text-gray-500">Free Plan</div>
+                    <div className="text-sm font-medium text-foreground">{session?.user?.name}</div>
+                    <div className="text-xs text-muted">Free Plan</div>
                   </div>
                   <Button variant="outline" size="sm" onClick={() => signOut()}>
                     Sign Out
@@ -410,8 +410,8 @@ export function ModernDashboard() {
                 <div className="space-y-6">
                   {/* Header */}
                   <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Good morning, {session?.user?.name?.split(' ')[0] || 'Creator'}</h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h1 className="text-2xl font-semibold text-foreground">Good morning, {session?.user?.name?.split(' ')[0] || 'Creator'}</h1>
+                    <p className="mt-1 text-sm text-muted">
                       Here&apos;s what&apos;s happening with your content today.
                     </p>
                   </div>
@@ -419,7 +419,7 @@ export function ModernDashboard() {
                   {/* Stats */}
                   <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                     {stats.map((item) => (
-                      <div key={item.name} className="bg-white overflow-hidden shadow rounded-lg">
+                      <div key={item.name} className="bg-surface overflow-hidden shadow rounded-lg">
                         <div className="p-5">
                           <div className="flex items-center">
                             <div className="flex-shrink-0">
@@ -427,9 +427,9 @@ export function ModernDashboard() {
                             </div>
                             <div className="ml-5 w-0 flex-1">
                               <dl>
-                                <dt className="text-sm font-medium text-gray-500 truncate">{item.name}</dt>
+                                <dt className="text-sm font-medium text-muted truncate">{item.name}</dt>
                                 <dd>
-                                  <div className="text-lg font-medium text-gray-900">{item.value}</div>
+                                  <div className="text-lg font-medium text-foreground">{item.value}</div>
                                 </dd>
                               </dl>
                             </div>
@@ -438,7 +438,7 @@ export function ModernDashboard() {
                             <div className="flex items-center text-sm">
                               <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
                               <span className="text-green-600 font-medium">{item.change}</span>
-                              <span className="text-gray-500 ml-1">from last month</span>
+                              <span className="text-muted ml-1">from last month</span>
                             </div>
                           </div>
                         </div>
@@ -447,33 +447,33 @@ export function ModernDashboard() {
                   </div>
 
                   {/* Quick Actions */}
-                  <div className="bg-white shadow rounded-lg">
+                  <div className="bg-surface shadow rounded-lg">
                     <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Quick Actions</h3>
+                      <h3 className="text-lg leading-6 font-medium text-foreground mb-4">Quick Actions</h3>
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
                         <button
                           onClick={() => setShowVideoUpload(true)}
-                          className="relative block w-full border-2 border-gray-300 border-dashed rounded-lg p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                          className="relative block w-full border-2 border-border border-dashed rounded-lg p-6 text-center hover:border-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
                         >
-                          <CloudArrowUpIcon className="mx-auto h-8 w-8 text-gray-400" />
-                          <span className="mt-2 block text-sm font-medium text-gray-900">Upload Video</span>
-                          <span className="mt-1 block text-xs text-gray-500">Upload a new video to get started</span>
+                          <CloudArrowUpIcon className="mx-auto h-8 w-8 text-muted" />
+                          <span className="mt-2 block text-sm font-medium text-foreground">Upload Video</span>
+                          <span className="mt-1 block text-xs text-muted">Upload a new video to get started</span>
                         </button>
                         <button
                           onClick={() => handleCreateClip()}
-                          className="relative block w-full border-2 border-gray-300 border-dashed rounded-lg p-6 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors"
+                          className="relative block w-full border-2 border-border border-dashed rounded-lg p-6 text-center hover:border-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
                         >
-                          <ScissorsIcon className="mx-auto h-8 w-8 text-gray-400" />
-                          <span className="mt-2 block text-sm font-medium text-gray-900">Create Clip</span>
-                          <span className="mt-1 block text-xs text-gray-500">Generate clips from your videos</span>
+                          <ScissorsIcon className="mx-auto h-8 w-8 text-muted" />
+                          <span className="mt-2 block text-sm font-medium text-foreground">Create Clip</span>
+                          <span className="mt-1 block text-xs text-muted">Generate clips from your videos</span>
                         </button>
                         <button
                           disabled
-                          className="relative block w-full border-2 border-gray-300 border-dashed rounded-lg p-6 text-center opacity-50 cursor-not-allowed"
+                          className="relative block w-full border-2 border-border border-dashed rounded-lg p-6 text-center opacity-50 cursor-not-allowed"
                         >
-                          <CalendarIcon className="mx-auto h-8 w-8 text-gray-400" />
-                          <span className="mt-2 block text-sm font-medium text-gray-900">Schedule Post</span>
-                          <span className="mt-1 block text-xs text-gray-500">Coming soon</span>
+                          <CalendarIcon className="mx-auto h-8 w-8 text-muted" />
+                          <span className="mt-2 block text-sm font-medium text-foreground">Schedule Post</span>
+                          <span className="mt-1 block text-xs text-muted">Coming soon</span>
                         </button>
                       </div>
                     </div>
@@ -481,18 +481,18 @@ export function ModernDashboard() {
 
                   {/* Performance Insights */}
                   <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                    <div className="bg-white shadow rounded-lg">
+                    <div className="bg-surface shadow rounded-lg">
                       <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Performance Insights</h3>
+                        <h3 className="text-lg leading-6 font-medium text-foreground mb-4">Performance Insights</h3>
                         <div className="space-y-4">
                           {recentMetrics.map((metric) => (
                             <div key={metric.name} className="flex items-center justify-between">
                               <div className="flex items-center">
-                                <metric.icon className="h-5 w-5 text-gray-400 mr-3" />
-                                <span className="text-sm font-medium text-gray-900">{metric.name}</span>
+                                <metric.icon className="h-5 w-5 text-muted mr-3" />
+                                <span className="text-sm font-medium text-foreground">{metric.name}</span>
                               </div>
                               <div className="flex items-center">
-                                <span className="text-sm font-semibold text-gray-900 mr-2">{metric.value}</span>
+                                <span className="text-sm font-semibold text-foreground mr-2">{metric.value}</span>
                                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                   {metric.trend}
                                 </span>
@@ -503,26 +503,26 @@ export function ModernDashboard() {
                       </div>
                     </div>
 
-                    <div className="bg-white shadow rounded-lg">
+                    <div className="bg-surface shadow rounded-lg">
                       <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg leading-6 font-medium text-gray-900 mb-4">Recent Activity</h3>
+                        <h3 className="text-lg leading-6 font-medium text-foreground mb-4">Recent Activity</h3>
                         <div className="flow-root">
                           <ul className="-mb-8">
                             <li>
                               <div className="relative pb-8">
                                 <div className="relative flex space-x-3">
                                   <div>
-                                    <span className="h-8 w-8 rounded-full bg-purple-500 flex items-center justify-center ring-8 ring-white">
-                                      <ScissorsIcon className="h-4 w-4 text-white" aria-hidden="true" />
+                                    <span className="h-8 w-8 rounded-full bg-primary flex items-center justify-center ring-8 ring-surface">
+                                      <ScissorsIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
                                     </span>
                                   </div>
                                   <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                     <div>
-                                      <p className="text-sm text-gray-500">
-                                        Created new clip <span className="font-medium text-gray-900">&quot;Best Moments&quot;</span>
+                                      <p className="text-sm text-muted">
+                                        Created new clip <span className="font-medium text-foreground">&quot;Best Moments&quot;</span>
                                       </p>
                                     </div>
-                                    <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                                    <div className="text-right text-sm whitespace-nowrap text-muted">
                                       2h ago
                                     </div>
                                   </div>
@@ -533,17 +533,17 @@ export function ModernDashboard() {
                               <div className="relative pb-8">
                                 <div className="relative flex space-x-3">
                                   <div>
-                                    <span className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-white">
-                                      <CloudArrowUpIcon className="h-4 w-4 text-white" aria-hidden="true" />
+                                    <span className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-surface">
+                                      <CloudArrowUpIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
                                     </span>
                                   </div>
                                   <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
                                     <div>
-                                      <p className="text-sm text-gray-500">
-                                        Uploaded video <span className="font-medium text-gray-900">&quot;Tutorial #5&quot;</span>
+                                      <p className="text-sm text-muted">
+                                        Uploaded video <span className="font-medium text-foreground">&quot;Tutorial #5&quot;</span>
                                       </p>
                                     </div>
-                                    <div className="text-right text-sm whitespace-nowrap text-gray-500">
+                                    <div className="text-right text-sm whitespace-nowrap text-muted">
                                       5h ago
                                     </div>
                                   </div>
@@ -562,8 +562,8 @@ export function ModernDashboard() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h1 className="text-2xl font-semibold text-gray-900">Video Library</h1>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <h1 className="text-2xl font-semibold text-foreground">Video Library</h1>
+                      <p className="mt-1 text-sm text-muted">
                         Manage and organize your uploaded videos
                       </p>
                     </div>
@@ -571,7 +571,6 @@ export function ModernDashboard() {
                       <Button 
                         onClick={() => setRefreshKey(prev => prev + 1)}
                         variant="outline"
-                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
                       >
                         <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -580,7 +579,6 @@ export function ModernDashboard() {
                       </Button>
                       <Button 
                         onClick={() => setShowVideoUpload(true)}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
                         <PlusIcon className="h-4 w-4 mr-2" />
                         Upload Video
@@ -589,7 +587,7 @@ export function ModernDashboard() {
                   </div>
                   
                   {showVideoUpload ? (
-                    <div className="bg-white shadow rounded-lg p-6">
+                    <div className="bg-surface shadow rounded-lg p-6">
                       <VideoUpload onUploadComplete={handleUploadComplete} />
                     </div>
                   ) : (
@@ -607,8 +605,8 @@ export function ModernDashboard() {
                 <div className="space-y-6">
                   <div className="flex justify-between items-center">
                     <div>
-                      <h1 className="text-2xl font-semibold text-gray-900">Generated Clips</h1>
-                      <p className="mt-1 text-sm text-gray-600">
+                      <h1 className="text-2xl font-semibold text-foreground">Generated Clips</h1>
+                      <p className="mt-1 text-sm text-muted">
                         View and manage your AI-generated video clips
                       </p>
                     </div>
@@ -616,7 +614,6 @@ export function ModernDashboard() {
                       <Button 
                         onClick={() => setClipRefreshKey(prev => prev + 1)}
                         variant="outline"
-                        className="border-purple-200 text-purple-700 hover:bg-purple-50"
                       >
                         <svg className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -625,7 +622,6 @@ export function ModernDashboard() {
                       </Button>
                       <Button 
                         onClick={() => handleCreateClip()}
-                        className="bg-purple-600 hover:bg-purple-700 text-white"
                       >
                         <PlusIcon className="h-4 w-4 mr-2" />
                         Create Clip
@@ -648,8 +644,8 @@ export function ModernDashboard() {
               {activeTab === 'ai' && (
                 <div className="space-y-6">
                   <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">AI Enhancement Suite</h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h1 className="text-2xl font-semibold text-foreground">AI Enhancement Suite</h1>
+                    <p className="mt-1 text-sm text-muted">
                       Leverage AI to automatically generate optimized metadata for your content
                     </p>
                   </div>
@@ -673,8 +669,8 @@ export function ModernDashboard() {
               {activeTab === 'calendar' && (
                 <div className="space-y-6">
                   <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Publishing Calendar</h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h1 className="text-2xl font-semibold text-foreground">Publishing Calendar</h1>
+                    <p className="mt-1 text-sm text-muted">
                       Schedule and manage your content across all platforms
                     </p>
                   </div>
@@ -695,22 +691,22 @@ export function ModernDashboard() {
               {activeTab === 'profile' && (
                 <div className="space-y-6">
                   <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Profile & Settings</h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h1 className="text-2xl font-semibold text-foreground">Profile & Settings</h1>
+                    <p className="mt-1 text-sm text-muted">
                       Manage your account information, social connections, and preferences
                     </p>
                   </div>
 
                   {/* Profile Sub-Navigation */}
-                  <div className="bg-white shadow rounded-lg overflow-hidden">
-                    <div className="border-b border-gray-200">
+                  <div className="bg-surface shadow rounded-lg overflow-hidden">
+                    <div className="border-b border-border">
                       <nav className="-mb-px flex space-x-8 px-6" aria-label="Profile tabs">
                         <button
                           onClick={() => setProfileTab('settings')}
                           className={`${
                             profileTab === 'settings'
-                              ? 'border-purple-500 text-purple-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                              ? 'border-primary text-primary'
+                              : 'border-transparent text-muted hover:text-foreground hover:border-border'
                           } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
                         >
                           Account Settings
@@ -719,8 +715,8 @@ export function ModernDashboard() {
                           onClick={() => setProfileTab('connections')}
                           className={`${
                             profileTab === 'connections'
-                              ? 'border-purple-500 text-purple-600'
-                              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                              ? 'border-primary text-primary'
+                              : 'border-transparent text-muted hover:text-foreground hover:border-border'
                           } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
                         >
                           Social Connections
@@ -732,25 +728,25 @@ export function ModernDashboard() {
                       {profileTab === 'settings' && (
                         <div className="space-y-6">
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">Full Name</label>
+                            <label className="block text-sm font-medium text-foreground">Full Name</label>
                             <input
                               type="text"
                               value={session?.user?.name || ''}
                               disabled
-                              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 sm:text-sm"
+                              className="mt-1 block w-full border-border rounded-md shadow-sm bg-surface text-muted sm:text-sm"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">Email Address</label>
+                            <label className="block text-sm font-medium text-foreground">Email Address</label>
                             <input
                               type="email"
                               value={session?.user?.email || ''}
                               disabled
-                              className="mt-1 block w-full border-gray-300 rounded-md shadow-sm bg-gray-50 text-gray-500 sm:text-sm"
+                              className="mt-1 block w-full border-border rounded-md shadow-sm bg-surface text-muted sm:text-sm"
                             />
                           </div>
                           <div>
-                            <label className="block text-sm font-medium text-gray-700">Profile Picture</label>
+                            <label className="block text-sm font-medium text-foreground">Profile Picture</label>
                             <div className="mt-1 flex items-center space-x-4">
                               {session?.user?.image ? (
                                 <Image
@@ -761,8 +757,8 @@ export function ModernDashboard() {
                                   className="rounded-full"
                                 />
                               ) : (
-                                <div className="h-12 w-12 bg-gray-300 rounded-full flex items-center justify-center">
-                                  <UserIcon className="h-6 w-6 text-gray-500" />
+                                <div className="h-12 w-12 bg-surface rounded-full flex items-center justify-center">
+                                  <UserIcon className="h-6 w-6 text-muted" />
                                 </div>
                               )}
                               <Button disabled size="sm" variant="outline">
@@ -786,18 +782,18 @@ export function ModernDashboard() {
               {activeTab === 'pricing' && (
                 <div className="space-y-6">
                   <div>
-                    <h1 className="text-2xl font-semibold text-gray-900">Subscription & Billing</h1>
-                    <p className="mt-1 text-sm text-gray-600">
+                    <h1 className="text-2xl font-semibold text-foreground">Subscription & Billing</h1>
+                    <p className="mt-1 text-sm text-muted">
                       Manage your subscription and billing information
                     </p>
                   </div>
                   
                   <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div className="bg-white border rounded-lg p-6">
+                    <div className="bg-surface border rounded-lg p-6">
                       <div className="text-center">
-                        <h3 className="text-lg font-semibold text-gray-900">Free</h3>
-                        <div className="mt-2 text-3xl font-bold text-gray-900">$0<span className="text-sm text-gray-500 font-normal">/month</span></div>
-                        <ul className="mt-4 text-sm text-gray-600 space-y-2">
+                        <h3 className="text-lg font-semibold text-foreground">Free</h3>
+                        <div className="mt-2 text-3xl font-bold text-foreground">$0<span className="text-sm text-muted font-normal">/month</span></div>
+                        <ul className="mt-4 text-sm text-muted space-y-2">
                           <li>• Up to 5 videos</li>
                           <li>• Basic clip creation</li>
                           <li>• Standard quality</li>
@@ -808,27 +804,27 @@ export function ModernDashboard() {
                       </div>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-lg p-6">
+                    <div className="bg-gradient-to-br from-primary/10 to-primary/20 border-2 border-primary rounded-lg p-6">
                       <div className="text-center">
-                        <h3 className="text-lg font-semibold text-gray-900">Pro</h3>
-                        <div className="mt-2 text-3xl font-bold text-gray-900">$29<span className="text-sm text-gray-500 font-normal">/month</span></div>
-                        <ul className="mt-4 text-sm text-gray-600 space-y-2">
+                        <h3 className="text-lg font-semibold text-foreground">Pro</h3>
+                        <div className="mt-2 text-3xl font-bold text-foreground">$29<span className="text-sm text-muted font-normal">/month</span></div>
+                        <ul className="mt-4 text-sm text-muted space-y-2">
                           <li>• Unlimited videos</li>
                           <li>• AI-powered features</li>
                           <li>• HD quality exports</li>
                           <li>• Social media scheduling</li>
                         </ul>
-                        <Button disabled className="w-full mt-6 bg-purple-600 hover:bg-purple-700 text-white">
+                        <Button disabled className="w-full mt-6">
                           Coming Soon
                         </Button>
                       </div>
                     </div>
                     
-                    <div className="bg-white border rounded-lg p-6">
+                    <div className="bg-surface border rounded-lg p-6">
                       <div className="text-center">
-                        <h3 className="text-lg font-semibold text-gray-900">Enterprise</h3>
-                        <div className="mt-2 text-3xl font-bold text-gray-900">$99<span className="text-sm text-gray-500 font-normal">/month</span></div>
-                        <ul className="mt-4 text-sm text-gray-600 space-y-2">
+                        <h3 className="text-lg font-semibold text-foreground">Enterprise</h3>
+                        <div className="mt-2 text-3xl font-bold text-foreground">$99<span className="text-sm text-muted font-normal">/month</span></div>
+                        <ul className="mt-4 text-sm text-muted space-y-2">
                           <li>• Everything in Pro</li>
                           <li>• Team collaboration</li>
                           <li>• White-label options</li>

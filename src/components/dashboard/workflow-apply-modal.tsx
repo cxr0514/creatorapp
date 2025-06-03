@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { SocialIcon } from '@/components/ui/social-icon'
 import { 
   XMarkIcon,
   PlayIcon,
@@ -71,11 +72,11 @@ interface WorkflowApplyModalProps {
 }
 
 const PLATFORM_OPTIONS = [
-  { id: 'youtube', name: 'YouTube', emoji: '📺', color: 'bg-red-100 text-red-800' },
-  { id: 'tiktok', name: 'TikTok', emoji: '🎵', color: 'bg-pink-100 text-pink-800' },
-  { id: 'instagram', name: 'Instagram', emoji: '📸', color: 'bg-purple-100 text-purple-800' },
-  { id: 'twitter', name: 'X/Twitter', emoji: '🐦', color: 'bg-blue-100 text-blue-800' },
-  { id: 'linkedin', name: 'LinkedIn', emoji: '💼', color: 'bg-indigo-100 text-indigo-800' }
+  { id: 'youtube', name: 'YouTube', color: 'bg-destructive/10 text-destructive' },
+  { id: 'tiktok', name: 'TikTok', color: 'bg-primary/10 text-primary' },
+  { id: 'instagram', name: 'Instagram', color: 'bg-primary/10 text-primary' },
+  { id: 'twitter', name: 'X/Twitter', color: 'bg-primary/10 text-primary' },
+  { id: 'linkedin', name: 'LinkedIn', color: 'bg-primary/10 text-primary' }
 ]
 
 export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: WorkflowApplyModalProps) {
@@ -154,8 +155,9 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
     if (!platform) return null
 
     return (
-      <Badge key={platformId} className={`text-xs ${platform.color}`}>
-        {platform.emoji} {platform.name}
+      <Badge key={platformId} className={`text-xs ${platform.color} flex items-center gap-1`}>
+        <SocialIcon platform={platform.id} size={12} />
+        {platform.name}
       </Badge>
     )
   }
