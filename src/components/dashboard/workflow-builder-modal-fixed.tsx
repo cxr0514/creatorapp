@@ -514,7 +514,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                     size="sm"
                     variant="ghost"
                     onClick={() => removeTrigger(trigger.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-accent-danger hover:text-accent-danger hover:bg-accent-danger/10"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </Button>
@@ -542,7 +542,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               <Card 
                 key={action.id}
                 className={`cursor-pointer hover:shadow-md transition-shadow ${
-                  selectedActionType === action.id ? 'ring-2 ring-purple-500' : ''
+                  selectedActionType === action.id ? 'ring-2 ring-primary' : ''
                 }`}
                 onClick={() => setSelectedActionType(action.id === selectedActionType ? '' : action.id)}
               >
@@ -563,15 +563,15 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </div>
 
         {selectedActionType && (
-          <div className="p-4 bg-purple-50 rounded-lg">
+          <div className="p-4 bg-primary/10 rounded-lg">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-purple-900">
+              <h4 className="font-medium text-primary">
                 Configure {ACTION_TYPES.find(a => a.id === selectedActionType)?.name}
               </h4>
               <Button
                 size="sm"
                 onClick={() => addAction(selectedActionType)}
-                className="bg-primary hover:bg-purple-700"
+                className="bg-primary hover:bg-primary-hover"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add
@@ -679,10 +679,10 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
       </Card>
 
       {(workflow.triggers.length === 0 || workflow.actions.length === 0) && (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="p-4 bg-accent-warning/10 border border-accent-warning/20 rounded-lg">
           <div className="flex items-start gap-2">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 mt-0.5" />
-            <div className="text-sm text-yellow-800">
+            <ExclamationTriangleIcon className="h-5 w-5 text-accent-warning mt-0.5" />
+            <div className="text-sm text-accent-warning">
               <p className="font-medium">Workflow Incomplete</p>
               <p>
                 {workflow.triggers.length === 0 && 'You need at least one trigger. '}
@@ -754,7 +754,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                 <Button 
                   onClick={handleSave}
                   disabled={saving || workflow.triggers.length === 0 || workflow.actions.length === 0}
-                  className="bg-primary hover:bg-purple-700"
+                  className="bg-primary hover:bg-primary-hover"
                 >
                   {saving ? 'Saving...' : (editingWorkflow ? 'Save Changes' : 'Create Workflow')}
                 </Button>
@@ -767,7 +767,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                       setStep(steps[currentIndex + 1] as typeof step)
                     }
                   }}
-                  className="bg-primary hover:bg-purple-700"
+                  className="bg-primary hover:bg-primary-hover"
                 >
                   Next
                   <ArrowRightIcon className="h-4 w-4 ml-2" />

@@ -157,20 +157,20 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
     <div className="w-full">
       {/* Authentication Status */}
       {status === 'loading' && (
-        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-          <p className="text-blue-700 text-sm">Loading authentication...</p>
+        <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
+          <p className="text-primary text-sm">Loading authentication...</p>
         </div>
       )}
       
       {status === 'unauthenticated' && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <p className="text-yellow-700 text-sm">Please log in to upload videos</p>
+        <div className="mb-4 p-3 bg-accent-warning/10 border border-accent-warning/20 rounded-lg">
+          <p className="text-accent-warning text-sm">Please log in to upload videos</p>
         </div>
       )}
       
       {status === 'authenticated' && session && (
-        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
-          <p className="text-green-700 text-sm">Logged in as {session.user?.email}</p>
+        <div className="mb-4 p-3 bg-accent-success/10 border border-accent-success/20 rounded-lg">
+          <p className="text-accent-success text-sm">Logged in as {session.user?.email}</p>
         </div>
       )}
 
@@ -178,36 +178,36 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
         {...getRootProps()}
         className={`
           border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300
-          ${isDragActive ? 'border-purple-500 bg-purple-50 scale-105' : 'border-border'}
-          ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-purple-400 hover:bg-purple-50/50'}
-          ${error ? 'border-red-300 bg-red-50' : ''}
-          ${success ? 'border-green-300 bg-green-50' : ''}
+          ${isDragActive ? 'border-primary bg-primary/5 scale-105' : 'border-border'}
+          ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-primary hover:bg-primary/5'}
+          ${error ? 'border-accent-danger/30 bg-accent-danger/5' : ''}
+          ${success ? 'border-accent-success/30 bg-accent-success/5' : ''}
         `}
       >
         <input {...getInputProps()} />
         
         <div className="flex flex-col items-center gap-6">
           {success ? (
-            <div className="bg-green-100 rounded-full p-4">
-              <CheckCircle className="w-12 h-12 text-green-600" />
+            <div className="bg-accent-success/10 rounded-full p-4">
+              <CheckCircle className="w-12 h-12 text-accent-success" />
             </div>
           ) : error ? (
-            <div className="bg-red-100 rounded-full p-4">
-              <AlertCircle className="w-12 h-12 text-red-600" />
+            <div className="bg-accent-danger/10 rounded-full p-4">
+              <AlertCircle className="w-12 h-12 text-accent-danger" />
             </div>
           ) : (
-            <div className={`rounded-full p-4 transition-all duration-300 ${uploading ? 'bg-purple-100' : 'bg-gradient-to-br from-purple-100 to-purple-200'}`}>
-              <Upload className={`w-12 h-12 transition-all duration-300 ${uploading ? 'text-purple-600 animate-pulse' : 'text-purple-600'}`} />
+            <div className={`rounded-full p-4 transition-all duration-300 ${uploading ? 'bg-primary/10' : 'bg-gradient-to-br from-primary/10 to-primary/20'}`}>
+              <Upload className={`w-12 h-12 transition-all duration-300 ${uploading ? 'text-primary animate-pulse' : 'text-primary'}`} />
             </div>
           )}
           
           <div>
             {uploading ? (
               <div className="space-y-4">
-                <p className="text-xl font-semibold text-purple-700">Uploading your video...</p>
+                <p className="text-xl font-semibold text-primary">Uploading your video...</p>
                 <div className="w-80 bg-muted rounded-full h-3 shadow-inner">
                   <div 
-                    className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 shadow-sm"
+                    className="bg-gradient-to-r from-primary to-primary h-3 rounded-full transition-all duration-500 shadow-sm"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
@@ -216,18 +216,18 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
               </div>
             ) : success ? (
               <div className="space-y-2">
-                <p className="text-xl font-semibold text-green-700">Upload successful!</p>
-                <p className="text-sm text-green-600">Your video is ready for clip creation</p>
+                <p className="text-xl font-semibold text-accent-success">Upload successful!</p>
+                <p className="text-sm text-accent-success">Your video is ready for clip creation</p>
               </div>
             ) : error ? (
               <div className="space-y-2">
-                <p className="text-xl font-semibold text-red-700">Upload failed</p>
-                <p className="text-sm text-red-600 max-w-md">{error}</p>
+                <p className="text-xl font-semibold text-accent-danger">Upload failed</p>
+                <p className="text-sm text-accent-danger max-w-md">{error}</p>
               </div>
             ) : isDragActive ? (
               <div className="space-y-2">
-                <p className="text-xl font-semibold text-purple-700">Drop your video here!</p>
-                <p className="text-sm text-purple-600">Release to start uploading</p>
+                <p className="text-xl font-semibold text-primary">Drop your video here!</p>
+                <p className="text-sm text-primary">Release to start uploading</p>
               </div>
             ) : (
               <div className="space-y-4">
@@ -260,7 +260,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
         <div className="mt-6 text-center">
           <Button
             onClick={() => setError(null)}
-            className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+            className="bg-gradient-to-r from-primary to-primary hover:from-primary-hover hover:to-primary-hover text-white px-6 py-2 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
           >
             <Upload className="w-4 h-4 mr-2" />
             Try Again

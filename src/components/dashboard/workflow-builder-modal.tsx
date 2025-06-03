@@ -316,7 +316,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
           type="text"
           value={workflow.name}
           onChange={(e) => setWorkflow(prev => ({ ...prev, name: e.target.value }))}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           placeholder="Enter workflow name"
         />
       </div>
@@ -328,7 +328,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         <textarea
           value={workflow.description}
           onChange={(e) => setWorkflow(prev => ({ ...prev, description: e.target.value }))}
-          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent"
           rows={3}
           placeholder="Describe what this workflow does"
         />
@@ -542,7 +542,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               <Card 
                 key={action.id}
                 className={`cursor-pointer hover:shadow-md transition-shadow ${
-                  selectedActionType === action.id ? 'ring-2 ring-purple-500' : ''
+                  selectedActionType === action.id ? 'ring-2 ring-primary' : ''
                 }`}
                 onClick={() => setSelectedActionType(action.id === selectedActionType ? '' : action.id)}
               >
@@ -563,15 +563,15 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </div>
 
         {selectedActionType && (
-          <div className="p-4 bg-purple-50 rounded-lg">
+          <div className="p-4 bg-primary/10 rounded-lg">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-purple-900">
+              <h4 className="font-medium text-primary">
                 Configure {ACTION_TYPES.find(a => a.id === selectedActionType)?.name}
               </h4>
               <Button
                 size="sm"
                 onClick={() => addAction(selectedActionType)}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-primary hover:bg-primary-hover"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add
@@ -645,7 +645,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = triggerType?.icon || ClockIcon
               return (
                 <div key={trigger.id} className="flex items-center gap-2 text-sm">
-                  <Icon className="h-4 w-4 text-blue-600" />
+                  <Icon className="h-4 w-4 text-primary" />
                   <span>{triggerType?.name}: {getTriggerDescription(trigger)}</span>
                 </div>
               )
@@ -660,7 +660,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               return (
                 <div key={action.id} className="flex items-center gap-2 text-sm">
                   <span className="text-gray-500">{index + 1}.</span>
-                  <Icon className="h-4 w-4 text-purple-600" />
+                  <Icon className="h-4 w-4 text-primary" />
                   <span>{actionType?.name}: {getActionDescription(action)}</span>
                 </div>
               )
@@ -754,7 +754,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                 <Button 
                   onClick={handleSave}
                   disabled={saving || workflow.triggers.length === 0 || workflow.actions.length === 0}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-primary hover:bg-primary-hover"
                 >
                   {saving ? 'Saving...' : (editingWorkflow ? 'Save Changes' : 'Create Workflow')}
                 </Button>
@@ -767,7 +767,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                       setStep(steps[currentIndex + 1] as typeof step)
                     }
                   }}
-                  className="bg-purple-600 hover:bg-purple-700"
+                  className="bg-primary hover:bg-primary-hover"
                 >
                   Next
                   <ArrowRightIcon className="h-4 w-4 ml-2" />

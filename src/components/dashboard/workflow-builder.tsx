@@ -358,7 +358,7 @@ export function WorkflowBuilder() {
             Automate your content creation and publishing process
           </p>
         </div>
-        <Button onClick={() => setShowCreateModal(true)} className="bg-purple-600 hover:bg-purple-700">
+        <Button onClick={() => setShowCreateModal(true)} className="bg-primary hover:bg-primary-hover">
           <PlusIcon className="h-4 w-4 mr-2" />
           Create Workflow
         </Button>
@@ -373,7 +373,7 @@ export function WorkflowBuilder() {
                 <p className="text-sm font-medium text-white">Total Workflows</p>
                 <p className="text-2xl font-bold text-white">{workflows.length}</p>
               </div>
-              <RectangleStackIcon className="h-8 w-8 text-purple-600" />
+              <RectangleStackIcon className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -383,9 +383,9 @@ export function WorkflowBuilder() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white">Active</p>
-                <p className="text-2xl font-bold text-green-600">{workflows.filter(w => w.isActive).length}</p>
+                <p className="text-2xl font-bold text-accent-success">{workflows.filter(w => w.isActive).length}</p>
               </div>
-              <CheckCircleIcon className="h-8 w-8 text-green-600" />
+              <CheckCircleIcon className="h-8 w-8 text-accent-success" />
             </div>
           </CardContent>
         </Card>
@@ -395,9 +395,9 @@ export function WorkflowBuilder() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white">Total Runs</p>
-                <p className="text-2xl font-bold text-blue-600">{workflows.reduce((sum, w) => sum + w.totalRuns, 0)}</p>
+                <p className="text-2xl font-bold text-primary">{workflows.reduce((sum, w) => sum + w.totalRuns, 0)}</p>
               </div>
-              <PlayIcon className="h-8 w-8 text-blue-600" />
+              <PlayIcon className="h-8 w-8 text-primary" />
             </div>
           </CardContent>
         </Card>
@@ -407,11 +407,11 @@ export function WorkflowBuilder() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-white">Avg Success Rate</p>
-                <p className="text-2xl font-bold text-orange-600">
+                <p className="text-2xl font-bold text-accent-warning">
                   {workflows.length > 0 ? Math.round(workflows.reduce((sum, w) => sum + w.successRate, 0) / workflows.length) : 0}%
                 </p>
               </div>
-              <BoltIcon className="h-8 w-8 text-orange-600" />
+              <BoltIcon className="h-8 w-8 text-accent-warning" />
             </div>
           </CardContent>
         </Card>
@@ -423,13 +423,13 @@ export function WorkflowBuilder() {
           const TriggerIcon = getTriggerIcon(workflow.triggers[0]?.type || 'manual')
           
           return (
-            <Card key={workflow.id} className={`relative ${workflow.isActive ? 'ring-2 ring-green-200' : ''}`}>
+            <Card key={workflow.id} className={`relative ${workflow.isActive ? 'ring-2 ring-accent-success/20' : ''}`}>
               <CardHeader className="pb-4">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <CardTitle className="text-lg">{workflow.name}</CardTitle>
-                      <Badge variant={workflow.isActive ? 'default' : 'secondary'} className={workflow.isActive ? 'bg-green-100 text-green-800' : ''}>
+                      <Badge variant={workflow.isActive ? 'default' : 'secondary'} className={workflow.isActive ? 'bg-accent-success/10 text-accent-success' : ''}>
                         {workflow.isActive ? 'Active' : 'Inactive'}
                       </Badge>
                     </div>
@@ -466,11 +466,11 @@ export function WorkflowBuilder() {
               
               <CardContent className="space-y-4">
                 {/* Trigger */}
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <TriggerIcon className="h-5 w-5 text-blue-600" />
+                <div className="flex items-center gap-3 p-3 bg-primary/10 rounded-lg">
+                  <TriggerIcon className="h-5 w-5 text-primary" />
                   <div className="flex-1">
-                    <p className="text-sm font-medium text-blue-900">Trigger</p>
-                    <p className="text-xs text-blue-700">
+                    <p className="text-sm font-medium text-primary">Trigger</p>
+                    <p className="text-xs text-primary/70">
                       {TRIGGER_TYPES.find(t => t.id === workflow.triggers[0]?.type)?.name || 'Unknown'}
                     </p>
                   </div>
@@ -510,7 +510,7 @@ export function WorkflowBuilder() {
                   </div>
                   <div className="text-center">
                     <p className="text-xs text-white">Success Rate</p>
-                    <p className={`text-sm font-medium ${workflow.successRate >= 90 ? 'text-green-600' : workflow.successRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
+                    <p className={`text-sm font-medium ${workflow.successRate >= 90 ? 'text-accent-success' : workflow.successRate >= 70 ? 'text-accent-warning' : 'text-accent-danger'}`}>
                       {workflow.successRate}%
                     </p>
                   </div>
@@ -522,7 +522,7 @@ export function WorkflowBuilder() {
                     variant="outline"
                     size="sm"
                     onClick={() => handleToggleWorkflow(workflow.id)}
-                    className={`w-full ${workflow.isActive ? 'border-red-200 text-red-700 hover:bg-red-50' : 'border-green-200 text-green-700 hover:bg-green-50'}`}
+                    className={`w-full ${workflow.isActive ? 'border-accent-danger/20 text-accent-danger hover:bg-accent-danger/10' : 'border-accent-success/20 text-accent-success hover:bg-accent-success/10'}`}
                   >
                     {workflow.isActive ? (
                       <>
@@ -553,7 +553,7 @@ export function WorkflowBuilder() {
               Create your first automated workflow to streamline your content creation process.
             </p>
             <div className="mt-6">
-              <Button onClick={() => setShowCreateModal(true)} className="bg-purple-600 hover:bg-purple-700">
+              <Button onClick={() => setShowCreateModal(true)} className="bg-primary hover:bg-primary-hover">
                 <PlusIcon className="h-4 w-4 mr-2" />
                 Create Your First Workflow
               </Button>

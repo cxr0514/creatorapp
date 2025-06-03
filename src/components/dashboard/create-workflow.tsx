@@ -79,14 +79,14 @@ export function CreateWorkflow() {
       id: 'instagram',
       name: 'Instagram',
       icon: SiInstagram,
-      bgColor: 'bg-gradient-to-br from-purple-500 via-pink-500 to-orange-400',
+      bgColor: 'bg-gradient-to-br from-primary via-primary to-primary',
       textColor: 'text-white'
     },
     {
       id: 'youtube',
       name: 'YouTube',
       icon: SiYoutube,
-      bgColor: 'bg-red-600',
+      bgColor: 'bg-accent-danger',
       textColor: 'text-white'
     },
     {
@@ -146,15 +146,15 @@ export function CreateWorkflow() {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Create your first workflow</h1>
-        <p className="mt-2 text-lg text-gray-600">
+        <h1 className="text-3xl font-bold text-foreground">Create your first workflow</h1>
+        <p className="mt-2 text-lg text-muted-foreground">
           A workflow automates taking content from one platform and publishing it to another.
         </p>
       </div>
 
       {/* Workflow Type Selection */}
       <div>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Choose a workflow type</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-6">Choose a workflow type</h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {workflowTypes.map((workflow) => (
             <div
@@ -163,7 +163,7 @@ export function CreateWorkflow() {
               className={`relative cursor-pointer rounded-lg border-2 p-6 transition-all duration-200 ${
                 selectedWorkflow === workflow.id
                   ? 'border-primary bg-primary/10 shadow-md'
-                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
+                  : 'border-border bg-card hover:border-border/60 hover:shadow-sm'
               }`}
             >
               {workflow.popular && (
@@ -176,13 +176,13 @@ export function CreateWorkflow() {
               
               <div className="flex items-start space-x-4">
                 <div className={`flex-shrink-0 p-2 rounded-lg ${
-                  selectedWorkflow === workflow.id ? 'bg-primary/20 text-primary' : 'bg-gray-100 text-gray-600'
+                  selectedWorkflow === workflow.id ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
                 }`}>
                   {workflow.icon}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-medium text-gray-900">{workflow.title}</h3>
-                  <p className="mt-1 text-sm text-gray-500">{workflow.description}</p>
+                  <h3 className="text-base font-medium text-foreground">{workflow.title}</h3>
+                  <p className="mt-1 text-sm text-muted-foreground">{workflow.description}</p>
                 </div>
                 {selectedWorkflow === workflow.id && (
                   <CheckCircleIcon className="h-5 w-5 text-primary flex-shrink-0" />
@@ -195,19 +195,19 @@ export function CreateWorkflow() {
 
       {/* Workflow Details */}
       {selectedWorkflow && workflowDetails && (
-        <div className="bg-white border border-gray-200 rounded-lg p-6">
+        <div className="bg-card border border-border rounded-lg p-6">
           <div className="mb-6">
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
+            <h3 className="text-lg font-medium text-foreground mb-2">
               {workflowTypes.find(w => w.id === selectedWorkflow)?.title}
             </h3>
-            <p className="text-gray-600">{workflowDetails.subtitle}</p>
+            <p className="text-muted-foreground">{workflowDetails.subtitle}</p>
           </div>
 
           {workflowDetails.showSourceDestination && (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
               {/* Source Selection */}
               <div>
-                <h4 className="text-base font-medium text-gray-900 mb-4">Source (choose one)</h4>
+                <h4 className="text-base font-medium text-foreground mb-4">Source (choose one)</h4>
                 <div className="space-y-3">
                   {platforms.map((platform) => (
                     <div
@@ -216,13 +216,13 @@ export function CreateWorkflow() {
                       className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                         selectedSource === platform.id
                           ? 'border-primary bg-primary/10'
-                          : 'border-gray-200 hover:border-gray-300'
+                          : 'border-border hover:border-border/60'
                       }`}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium mr-3 ${platform.bgColor} ${platform.textColor}`}>
                         <platform.icon className="h-5 w-5" />
                       </div>
-                      <span className="font-medium text-gray-900">{platform.name}</span>
+                      <span className="font-medium text-foreground">{platform.name}</span>
                       {selectedSource === platform.id && (
                         <CheckCircleIcon className="h-5 w-5 text-primary ml-auto" />
                       )}
@@ -234,14 +234,14 @@ export function CreateWorkflow() {
               {/* Arrow */}
               <div className="hidden lg:flex items-center justify-center">
                 <div className="flex flex-col items-center">
-                  <ArrowRightIcon className="h-8 w-8 text-gray-400" />
-                  <span className="text-sm text-gray-500 mt-2">Publishes to</span>
+                  <ArrowRightIcon className="h-8 w-8 text-muted-foreground" />
+                  <span className="text-sm text-muted-foreground mt-2">Publishes to</span>
                 </div>
               </div>
 
               {/* Destination Selection */}
               <div>
-                <h4 className="text-base font-medium text-gray-900 mb-4">Destination (choose one)</h4>
+                <h4 className="text-base font-medium text-foreground mb-4">Destination (choose one)</h4>
                 <div className="space-y-3">
                   {platforms.map((platform) => (
                     <div
@@ -251,14 +251,14 @@ export function CreateWorkflow() {
                         selectedDestination === platform.id
                           ? 'border-primary bg-primary/10'
                           : selectedSource === platform.id
-                          ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
-                          : 'border-gray-200 hover:border-gray-300'
+                          ? 'border-border bg-muted cursor-not-allowed opacity-50'
+                          : 'border-border hover:border-border/60'
                       } ${selectedSource === platform.id ? 'pointer-events-none' : ''}`}
                     >
                       <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-sm font-medium mr-3 ${platform.bgColor} ${platform.textColor}`}>
                         <platform.icon className="h-5 w-5" />
                       </div>
-                      <span className="font-medium text-gray-900">{platform.name}</span>
+                      <span className="font-medium text-foreground">{platform.name}</span>
                       {selectedDestination === platform.id && selectedSource !== platform.id && (
                         <CheckCircleIcon className="h-5 w-5 text-primary ml-auto" />
                       )}
@@ -277,8 +277,8 @@ export function CreateWorkflow() {
           disabled={!canCreateWorkflow}
           className={`px-8 py-3 text-lg font-medium rounded-lg transition-all duration-200 ${
             canCreateWorkflow
-              ? 'bg-gradient-to-r from-pink-400 to-pink-500 hover:from-pink-500 hover:to-pink-600 text-white shadow-lg hover:shadow-xl'
-              : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+              ? 'bg-gradient-to-r from-primary to-primary hover:from-primary-hover hover:to-primary-hover text-white shadow-lg hover:shadow-xl'
+              : 'bg-muted text-muted-foreground cursor-not-allowed'
           }`}
         >
           Create Workflow
@@ -288,7 +288,7 @@ export function CreateWorkflow() {
       {/* Help Text */}
       {!canCreateWorkflow && workflowDetails?.showSourceDestination && (
         <div className="text-center">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Please select both a source and destination platform to create your workflow
           </p>
         </div>

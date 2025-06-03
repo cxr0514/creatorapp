@@ -244,7 +244,7 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                       key={workflow.id} 
                       className={`cursor-pointer transition-all duration-200 ${
                         selectedWorkflow === workflow.id 
-                          ? 'ring-2 ring-purple-500 bg-purple-50' 
+                          ? 'ring-2 ring-primary bg-primary/5' 
                           : 'hover:shadow-md hover:bg-muted'
                       }`}
                       onClick={() => setSelectedWorkflow(workflow.id)}
@@ -255,7 +255,7 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                             <CardTitle className="text-base flex items-center gap-2">
                               {workflow.name}
                               {selectedWorkflow === workflow.id && (
-                                <CheckCircleIcon className="h-5 w-5 text-purple-600" />
+                                <CheckCircleIcon className="h-5 w-5 text-primary" />
                               )}
                             </CardTitle>
                             <CardDescription className="text-sm mt-1">
@@ -285,8 +285,8 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                           <div>
                             <p className="text-xs text-muted-foreground">Success Rate</p>
                             <p className={`text-sm font-medium ${
-                              workflow.successRate >= 90 ? 'text-green-600' : 
-                              workflow.successRate >= 70 ? 'text-yellow-600' : 'text-red-600'
+                              workflow.successRate >= 90 ? 'text-accent-success' : 
+                              workflow.successRate >= 70 ? 'text-accent-warning' : 'text-accent-danger'
                             }`}>
                               {workflow.successRate}%
                             </p>
@@ -304,9 +304,9 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
 
               {/* Selected Workflow Preview */}
               {selectedWorkflow && (
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <h4 className="font-medium text-blue-900 mb-2">Workflow Preview</h4>
-                  <div className="text-sm text-blue-800">
+                <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                  <h4 className="font-medium text-primary mb-2">Workflow Preview</h4>
+                  <div className="text-sm text-primary/80">
                     {(() => {
                       const workflow = workflows.find(w => w.id === selectedWorkflow)
                       if (!workflow) return null
@@ -333,7 +333,7 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                         <ul className="space-y-1">
                           {steps.map((step, index) => (
                             <li key={index} className="flex items-center gap-2">
-                              <span className="w-5 h-5 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-medium">
+                              <span className="w-5 h-5 bg-primary/10 text-primary rounded-full flex items-center justify-center text-xs font-medium">
                                 {index + 1}
                               </span>
                               {step}
@@ -350,8 +350,8 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-6 border-t border-gray-200 bg-gray-50">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-between p-6 border-t border-border bg-muted">
+          <div className="text-sm text-muted-foreground">
             {selectedWorkflow && (
               <>Selected: {workflows.find(w => w.id === selectedWorkflow)?.name}</>
             )}
