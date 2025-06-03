@@ -93,14 +93,14 @@ export function CreateWorkflow() {
       id: 'facebook',
       name: 'Facebook',
       icon: SiFacebook,
-      bgColor: 'bg-blue-600',
+      bgColor: 'bg-primary',
       textColor: 'text-white'
     },
     {
       id: 'dropbox',
       name: 'Dropbox',
       icon: SiDropbox,
-      bgColor: 'bg-blue-500',
+      bgColor: 'bg-primary',
       textColor: 'text-white'
     }
   ]
@@ -162,13 +162,13 @@ export function CreateWorkflow() {
               onClick={() => setSelectedWorkflow(workflow.id)}
               className={`relative cursor-pointer rounded-lg border-2 p-6 transition-all duration-200 ${
                 selectedWorkflow === workflow.id
-                  ? 'border-purple-500 bg-purple-50 shadow-md'
+                  ? 'border-primary bg-primary/10 shadow-md'
                   : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow-sm'
               }`}
             >
               {workflow.popular && (
                 <div className="absolute -top-2 -right-2">
-                  <span className="inline-flex items-center rounded-full bg-purple-100 px-2.5 py-0.5 text-xs font-medium text-purple-800">
+                  <span className="inline-flex items-center rounded-full bg-primary/20 px-2.5 py-0.5 text-xs font-medium text-primary">
                     Popular
                   </span>
                 </div>
@@ -176,7 +176,7 @@ export function CreateWorkflow() {
               
               <div className="flex items-start space-x-4">
                 <div className={`flex-shrink-0 p-2 rounded-lg ${
-                  selectedWorkflow === workflow.id ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-600'
+                  selectedWorkflow === workflow.id ? 'bg-primary/20 text-primary' : 'bg-gray-100 text-gray-600'
                 }`}>
                   {workflow.icon}
                 </div>
@@ -185,7 +185,7 @@ export function CreateWorkflow() {
                   <p className="mt-1 text-sm text-gray-500">{workflow.description}</p>
                 </div>
                 {selectedWorkflow === workflow.id && (
-                  <CheckCircleIcon className="h-5 w-5 text-purple-600 flex-shrink-0" />
+                  <CheckCircleIcon className="h-5 w-5 text-primary flex-shrink-0" />
                 )}
               </div>
             </div>
@@ -215,7 +215,7 @@ export function CreateWorkflow() {
                       onClick={() => setSelectedSource(platform.id)}
                       className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                         selectedSource === platform.id
-                          ? 'border-purple-500 bg-purple-50'
+                          ? 'border-primary bg-primary/10'
                           : 'border-gray-200 hover:border-gray-300'
                       }`}
                     >
@@ -224,7 +224,7 @@ export function CreateWorkflow() {
                       </div>
                       <span className="font-medium text-gray-900">{platform.name}</span>
                       {selectedSource === platform.id && (
-                        <CheckCircleIcon className="h-5 w-5 text-purple-600 ml-auto" />
+                        <CheckCircleIcon className="h-5 w-5 text-primary ml-auto" />
                       )}
                     </div>
                   ))}
@@ -249,7 +249,7 @@ export function CreateWorkflow() {
                       onClick={() => setSelectedDestination(platform.id)}
                       className={`flex items-center p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
                         selectedDestination === platform.id
-                          ? 'border-purple-500 bg-purple-50'
+                          ? 'border-primary bg-primary/10'
                           : selectedSource === platform.id
                           ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-50'
                           : 'border-gray-200 hover:border-gray-300'
@@ -260,7 +260,7 @@ export function CreateWorkflow() {
                       </div>
                       <span className="font-medium text-gray-900">{platform.name}</span>
                       {selectedDestination === platform.id && selectedSource !== platform.id && (
-                        <CheckCircleIcon className="h-5 w-5 text-purple-600 ml-auto" />
+                        <CheckCircleIcon className="h-5 w-5 text-primary ml-auto" />
                       )}
                     </div>
                   ))}

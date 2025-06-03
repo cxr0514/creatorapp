@@ -113,7 +113,7 @@ export function AnalyticsDashboard() {
     switch (impact) {
       case 'high': return 'bg-red-100 text-red-700 border-red-200'
       case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-      case 'low': return 'bg-blue-100 text-blue-700 border-blue-200'
+      case 'low': return 'bg-primary/20 text-primary border-primary/30'
       default: return 'bg-muted text-muted-foreground border-border'
     }
   }
@@ -256,7 +256,7 @@ export function AnalyticsDashboard() {
                 {formatPercentage(analyticsData.overview.viewsChange)} vs last period
               </p>
             </div>
-            <EyeIcon className="h-8 w-8 text-blue-600" />
+            <EyeIcon className="h-8 w-8 text-primary" />
           </div>
         </div>
 
@@ -295,7 +295,7 @@ export function AnalyticsDashboard() {
                 {formatPercentage(analyticsData.overview.watchTimeChange)} vs last period
               </p>
             </div>
-            <ClockIcon className="h-8 w-8 text-purple-600" />
+            <ClockIcon className="h-8 w-8 text-primary" />
           </div>
         </div>
       </div>
@@ -372,7 +372,7 @@ export function AnalyticsDashboard() {
                 <div className="flex items-center space-x-2">
                   <div className={`w-2 h-2 rounded-full ${
                     rec.impact === 'high' ? 'bg-red-500' : 
-                    rec.impact === 'medium' ? 'bg-yellow-500' : 'bg-blue-500'
+                    rec.impact === 'medium' ? 'bg-yellow-500' : 'bg-primary'
                   }`} />
                   <h4 className="font-semibold text-accent-foreground">{rec.title}</h4>
                 </div>

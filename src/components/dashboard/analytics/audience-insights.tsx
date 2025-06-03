@@ -22,7 +22,7 @@ interface ProgressBarProps {
   value: string
 }
 
-function ProgressBar({ percentage, color = 'bg-blue-500', label, value }: ProgressBarProps) {
+function ProgressBar({ percentage, color = 'bg-primary', label, value }: ProgressBarProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between text-sm">
@@ -93,11 +93,11 @@ const DEVICE_ICONS = {
 } as const
 
 const AGE_COLORS = [
-  'bg-blue-500',
-  'bg-green-500', 
-  'bg-yellow-500',
-  'bg-red-500',
-  'bg-purple-500'
+  'bg-primary',
+  'bg-accent-success', 
+  'bg-accent-warning',
+  'bg-accent-danger',
+  'bg-primary'
 ]
 
 const LOCATION_COLORS = [
@@ -129,7 +129,7 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
         {/* Demographics */}
         <MetricsSection
           title="Age Demographics"
-          icon={<Users className="h-5 w-5 text-blue-600" />}
+          icon={<Users className="h-5 w-5 text-primary" />}
           isLoading={isLoading}
         >
           {insights.demographics.map((demo, index) => (
@@ -163,7 +163,7 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
         {/* Device Breakdown */}
         <MetricsSection
           title="Device Usage"
-          icon={<Monitor className="h-5 w-5 text-purple-600" />}
+          icon={<Monitor className="h-5 w-5 text-primary" />}
           isLoading={isLoading}
         >
           {insights.deviceBreakdown.map((device, index) => {
@@ -193,15 +193,15 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
 
       {/* Summary Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="h-5 w-5 text-blue-600" />
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <Users className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-blue-800 font-medium">Primary Audience</p>
-                <p className="text-lg font-bold text-blue-900">
+                <p className="text-sm text-primary font-medium">Primary Audience</p>
+                <p className="text-lg font-bold text-primary">
                   {insights.demographics[0]?.ageGroup || 'N/A'}
                 </p>
               </div>
@@ -225,15 +225,15 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
           </CardContent>
         </Card>
 
-        <Card className="bg-gradient-to-r from-purple-50 to-violet-50 border-purple-200">
+        <Card className="bg-gradient-to-r from-primary/10 to-primary/5 border-primary/30">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <Smartphone className="h-5 w-5 text-purple-600" />
+              <div className="p-2 bg-primary/20 rounded-lg">
+                <Smartphone className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-sm text-purple-800 font-medium">Primary Device</p>
-                <p className="text-lg font-bold text-purple-900">
+                <p className="text-sm text-primary font-medium">Primary Device</p>
+                <p className="text-lg font-bold text-primary">
                   {insights.deviceBreakdown[0]?.device || 'N/A'}
                 </p>
               </div>

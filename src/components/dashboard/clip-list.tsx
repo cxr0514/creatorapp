@@ -521,10 +521,10 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                   {clip.hashtags.slice(0, 3).map((hashtag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-400 border border-blue-400/30"
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-primary/20 text-primary border border-primary/30"
                       title="AI-generated hashtag"
                     >
-                      <svg className="w-3 h-3 mr-1 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3 h-3 mr-1 text-primary" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                       </svg>
                       #{hashtag}
@@ -613,7 +613,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                       variant="outline"
                       onClick={() => openWorkflowModal(clip)}
                       disabled={selectionMode}
-                      className="flex-1 border-blue-400/30 text-blue-400 hover:bg-blue-500/10 hover:border-blue-400/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-primary/30 text-primary hover:bg-primary/10 hover:border-primary/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 14.5M14.25 3.104c.251.023.501.05.75.082M19.8 14.5l-2.407 2.407A2.25 2.25 0 0116.001 17.5H8.001a2.25 2.25 0 01-1.392-.493L4.2 14.5" />
