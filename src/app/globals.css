@@ -4,6 +4,8 @@
   /* Basecom Dark Theme - Matching Reference Design */
   --background: #0a0a0a;
   --foreground: #ffffff;
+  --card: #1f1f1f;
+  --card-foreground: #ffffff;
   --surface: #141414;
   --surface-secondary: #1f1f1f;
   --primary: #8b5cf6;
@@ -13,6 +15,7 @@
   --text-primary: #ffffff;
   --text-secondary: #d1d5db;
   --text-muted: #9ca3af;
+  --muted-foreground: #9ca3af;
   --border: #2d2d2d;
   --hero-gradient-from: #000000;
   --hero-gradient-to: #1a0d2e;
@@ -21,6 +24,8 @@
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
   --color-surface: var(--surface);
   --color-surface-secondary: var(--surface-secondary);
   --color-primary: var(--primary);
@@ -30,6 +35,7 @@
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
   --color-text-muted: var(--text-muted);
+  --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
   --color-hero-gradient-from: var(--hero-gradient-from);
   --color-hero-gradient-to: var(--hero-gradient-to);

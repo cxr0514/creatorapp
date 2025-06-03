@@ -502,7 +502,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = triggerType?.icon || ClockIcon
               
               return (
-                <div key={trigger.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={trigger.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                   <Icon className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
                     <span className="font-medium">{triggerType?.name}</span>
@@ -592,9 +592,9 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = actionType?.icon || CogIcon
               
               return (
-                <div key={action.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={action.id} className="flex items-center gap-3 p-3 bg-muted rounded-lg">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 font-medium">{index + 1}.</span>
+                    <span className="text-sm text-muted-foreground font-medium">{index + 1}.</span>
                     <Icon className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
@@ -659,7 +659,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = actionType?.icon || CogIcon
               return (
                 <div key={action.id} className="flex items-center gap-2 text-sm">
-                  <span className="text-gray-500">{index + 1}.</span>
+                  <span className="text-muted-foreground">{index + 1}.</span>
                   <Icon className="h-4 w-4 text-primary" />
                   <span>{actionType?.name}: {getActionDescription(action)}</span>
                 </div>
@@ -699,7 +699,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-border">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-xl font-semibold text-foreground">
@@ -726,7 +726,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-gray-200 bg-gray-50">
+        <div className="p-6 border-t border-border bg-muted">
           <div className="flex justify-between">
             <div>
               {step !== 'basic' && (

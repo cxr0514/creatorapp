@@ -350,7 +350,7 @@ export function BatchAIProcessor({
       case 'processing':
         return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
       default:
-        return <Clock className="h-4 w-4 text-gray-400" />
+        return <Clock className="h-4 w-4 text-muted-foreground" />
     }
   }
 
@@ -359,7 +359,7 @@ export function BatchAIProcessor({
       case 'completed': return 'text-green-600'
       case 'error': return 'text-red-600'
       case 'processing': return 'text-blue-600'
-      default: return 'text-gray-500'
+      default: return 'text-muted-foreground'
     }
   }
 
@@ -500,7 +500,7 @@ export function BatchAIProcessor({
               <div className="flex justify-between items-center">
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Overall Progress</p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-muted-foreground">
                     {completedCount}/{selectedItems.length} completed
                     {errorCount > 0 && `, ${errorCount} errors`}
                   </p>
@@ -586,7 +586,7 @@ export function BatchAIProcessor({
                       <h4 className="font-medium truncate">{item.title}</h4>
                     </div>
                     {item.description && (
-                      <p className="text-sm text-gray-600 truncate">{item.description}</p>
+                      <p className="text-sm text-muted-foreground truncate">{item.description}</p>
                     )}
                     
                     {item.progress > 0 && (
@@ -613,7 +613,7 @@ export function BatchAIProcessor({
         </div>
 
         {batchItems.length === 0 && (
-          <div className="text-center py-8 text-gray-500">
+          <div className="text-center py-8 text-muted-foreground">
             No items available for processing.
           </div>
         )}

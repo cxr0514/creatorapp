@@ -103,17 +103,17 @@ export function SocialConnections() {
   if (loading) {
     return (
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-gray-900">Social Media Connections</h2>
+        <h2 className="text-2xl font-bold text-card-foreground">Social Media Connections</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[...Array(5)].map((_, i) => (
-            <div key={i} className="bg-white rounded-xl border border-gray-200 p-6 animate-pulse">
+            <div key={i} className="bg-card rounded-xl border border-border p-6 animate-pulse">
               <div className="flex items-center space-x-4">
-                <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                <div className="w-12 h-12 bg-muted rounded-full"></div>
                 <div className="flex-1">
-                  <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                  <div className="h-3 bg-gray-100 rounded w-32"></div>
+                  <div className="h-4 bg-muted rounded w-24 mb-2"></div>
+                  <div className="h-3 bg-accent rounded w-32"></div>
                 </div>
-                <div className="w-20 h-8 bg-gray-200 rounded"></div>
+                <div className="w-20 h-8 bg-muted rounded"></div>
               </div>
             </div>
           ))}
@@ -126,8 +126,8 @@ export function SocialConnections() {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Social Media Connections</h2>
-          <p className="text-gray-600 mt-1">Connect your social media accounts to publish content directly</p>
+          <h2 className="text-2xl font-bold text-card-foreground">Social Media Connections</h2>
+          <p className="text-muted-foreground mt-1">Connect your social media accounts to publish content directly</p>
         </div>
         <Button
           onClick={fetchConnectedAccounts}
@@ -149,20 +149,20 @@ export function SocialConnections() {
           const isConnecting = connecting === platform.id
 
           return (
-            <div key={platform.id} className="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg transition-shadow">
+            <div key={platform.id} className="bg-card rounded-xl border border-border p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className={`w-12 h-12 bg-gradient-to-r ${getPlatformColor(platform.id)} rounded-full flex items-center justify-center text-white p-2`}>
                     <SocialIcon platform={platform.id} size={24} className="text-white" />
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{platform.displayName}</h3>
-                    <p className="text-sm text-gray-600">
+                    <h3 className="font-semibold text-card-foreground">{platform.displayName}</h3>
+                    <p className="text-sm text-muted-foreground">
                       {isConnected ? account?.accountName : `Connect your ${platform.displayName} account`}
                     </p>
                     <div className="flex items-center space-x-2 mt-1">
-                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-gray-300'}`}></div>
-                      <span className={`text-xs font-medium ${isConnected ? 'text-green-600' : 'text-gray-500'}`}>
+                      <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500' : 'bg-muted'}`}></div>
+                      <span className={`text-xs font-medium ${isConnected ? 'text-green-600' : 'text-muted-foreground'}`}>
                         {isConnected ? 'Connected' : 'Not connected'}
                       </span>
                     </div>
@@ -180,7 +180,7 @@ export function SocialConnections() {
                       >
                         Disconnect
                       </Button>
-                      <div className="text-xs text-gray-500 text-center">
+                      <div className="text-xs text-muted-foreground text-center">
                         {account?.permissions.join(', ')}
                       </div>
                     </>
@@ -213,27 +213,27 @@ export function SocialConnections() {
               </div>
 
               {/* Platform Details */}
-              <div className="mt-4 pt-4 border-t border-gray-100">
+              <div className="mt-4 pt-4 border-t border-border">
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-500">Max file size:</span>
+                    <span className="text-muted-foreground">Max file size:</span>
                     <span className="ml-1 font-medium">{platform.maxFileSize}MB</span>
                   </div>
                   <div>
-                    <span className="text-gray-500">Max duration:</span>
+                    <span className="text-muted-foreground">Max duration:</span>
                     <span className="ml-1 font-medium">{Math.floor(platform.maxDuration / 60)}min</span>
                   </div>
                   <div className="col-span-2">
-                    <span className="text-gray-500">Supported formats:</span>
+                    <span className="text-muted-foreground">Supported formats:</span>
                     <span className="ml-1 font-medium">{platform.supportedFormats.join(', ')}</span>
                   </div>
                   <div className="col-span-2">
                     <div className="flex items-center space-x-2">
-                      <span className="text-gray-500">Scheduling:</span>
+                      <span className="text-muted-foreground">Scheduling:</span>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${
                         platform.supportsScheduling 
                           ? 'bg-green-100 text-green-700' 
-                          : 'bg-gray-100 text-gray-600'
+                          : 'bg-accent text-accent-foreground'
                       }`}>
                         {platform.supportsScheduling ? 'Supported' : 'Not available'}
                       </span>
@@ -250,8 +250,8 @@ export function SocialConnections() {
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-xl p-6 border border-purple-200">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="font-semibold text-gray-900">Connection Status</h3>
-            <p className="text-gray-600 mt-1">
+            <h3 className="font-semibold text-card-foreground">Connection Status</h3>
+            <p className="text-muted-foreground mt-1">
               {connectedAccounts.filter(acc => acc.isConnected).length} of {SOCIAL_PLATFORMS.length} platforms connected
             </p>
           </div>
@@ -259,7 +259,7 @@ export function SocialConnections() {
             <div className="text-2xl font-bold text-purple-600">
               {Math.round((connectedAccounts.filter(acc => acc.isConnected).length / SOCIAL_PLATFORMS.length) * 100)}%
             </div>
-            <div className="text-sm text-gray-600">Connected</div>
+            <div className="text-sm text-muted-foreground">Connected</div>
           </div>
         </div>
         

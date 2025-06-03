@@ -178,7 +178,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
         {...getRootProps()}
         className={`
           border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-300
-          ${isDragActive ? 'border-purple-500 bg-purple-50 scale-105' : 'border-gray-300'}
+          ${isDragActive ? 'border-purple-500 bg-purple-50 scale-105' : 'border-border'}
           ${uploading ? 'opacity-50 cursor-not-allowed' : 'hover:border-purple-400 hover:bg-purple-50/50'}
           ${error ? 'border-red-300 bg-red-50' : ''}
           ${success ? 'border-green-300 bg-green-50' : ''}
@@ -205,14 +205,14 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
             {uploading ? (
               <div className="space-y-4">
                 <p className="text-xl font-semibold text-purple-700">Uploading your video...</p>
-                <div className="w-80 bg-gray-200 rounded-full h-3 shadow-inner">
+                <div className="w-80 bg-muted rounded-full h-3 shadow-inner">
                   <div 
                     className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500 shadow-sm"
                     style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
-                <p className="text-sm text-gray-600 font-medium">{uploadProgress}% complete</p>
-                <p className="text-xs text-gray-500">This may take a few minutes for large files</p>
+                <p className="text-sm text-muted-foreground font-medium">{uploadProgress}% complete</p>
+                <p className="text-xs text-muted-foreground">This may take a few minutes for large files</p>
               </div>
             ) : success ? (
               <div className="space-y-2">
@@ -232,23 +232,23 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
             ) : (
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <p className="text-xl font-semibold text-gray-900">
+                  <p className="text-xl font-semibold text-card-foreground">
                     Upload Your Video
                   </p>
-                  <p className="text-gray-600">
+                  <p className="text-muted-foreground">
                     Drag & drop a video file, or click to browse
                   </p>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-4 max-w-md mx-auto">
-                  <p className="text-sm text-gray-600 font-medium mb-2">Supported formats:</p>
+                <div className="bg-muted rounded-lg p-4 max-w-md mx-auto">
+                  <p className="text-sm text-muted-foreground font-medium mb-2">Supported formats:</p>
                   <div className="flex flex-wrap gap-2 justify-center">
                     {['MP4', 'MOV', 'AVI', 'MKV', 'WebM'].map(format => (
-                      <span key={format} className="px-2 py-1 bg-white rounded border text-xs font-medium text-gray-700">
+                      <span key={format} className="px-2 py-1 bg-background rounded border text-xs font-medium text-foreground">
                         {format}
                       </span>
                     ))}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Maximum file size: 500MB</p>
+                  <p className="text-xs text-muted-foreground mt-2">Maximum file size: 500MB</p>
                 </div>
               </div>
             )}

@@ -34,7 +34,7 @@ const ClipTrimmer: React.FC<ClipTrimmerProps> = ({
       <video ref={videoRef} src={videoSrc} controls className="w-full rounded mb-4" />
       <div className="space-y-2">
         <div>
-          <label htmlFor="startTime" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="startTime" className="block text-sm font-medium text-card-foreground">
             Start Time: {startTime.toFixed(2)}s
           </label>
           {/* Basic input for now, will be replaced by a visual slider */}
@@ -46,11 +46,11 @@ const ClipTrimmer: React.FC<ClipTrimmerProps> = ({
             step={0.1}
             value={startTime}
             onChange={(e) => setStartTime(Math.min(parseFloat(e.target.value), endTime - 0.1))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
           />
         </div>
         <div>
-          <label htmlFor="endTime" className="block text-sm font-medium text-gray-700">
+          <label htmlFor="endTime" className="block text-sm font-medium text-card-foreground">
             End Time: {endTime.toFixed(2)}s
           </label>
           {/* Basic input for now, will be replaced by a visual slider */}
@@ -62,11 +62,11 @@ const ClipTrimmer: React.FC<ClipTrimmerProps> = ({
             step={0.1}
             value={endTime}
             onChange={(e) => setEndTime(Math.max(parseFloat(e.target.value), startTime + 0.1))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+            className="w-full h-2 bg-muted rounded-lg appearance-none cursor-pointer"
           />
         </div>
       </div>
-      <p className="text-xs text-gray-500 mt-2">
+      <p className="text-xs text-muted-foreground mt-2">
         Selected duration: {(endTime - startTime).toFixed(2)}s
       </p>
     </div>

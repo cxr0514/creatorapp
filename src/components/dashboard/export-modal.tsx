@@ -341,9 +341,9 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                     />
                   </div>
                 ) : (
-                  <div className="p-8 border-2 border-dashed border-gray-300 rounded-lg text-center">
+                  <div className="p-8 border-2 border-dashed border-border rounded-lg text-center">
                     <p className="text-muted-foreground mb-2">No template selected</p>
-                    <p className="text-sm text-gray-400">Go to the Templates tab to choose a style template</p>
+                    <p className="text-sm text-muted-foreground">Go to the Templates tab to choose a style template</p>
                   </div>
                 )}
 

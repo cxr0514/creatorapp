@@ -57,7 +57,7 @@ export function TemplatePreview({
         {/* Video Preview */}
         <div className="flex justify-center">
           <div 
-            className="relative rounded-lg border-2 border-dashed border-gray-300 overflow-hidden"
+            className="relative rounded-lg border-2 border-dashed border-border overflow-hidden"
             style={{ 
               width: `${width}px`, 
               height: `${height}px`,
@@ -162,21 +162,21 @@ export function TemplatePreview({
               <div className="flex gap-1">
                 {template.primaryColor && (
                   <div
-                    className="w-4 h-4 rounded border border-gray-300"
+                    className="w-4 h-4 rounded border border-border"
                     style={{ backgroundColor: template.primaryColor }}
                     title={`Primary: ${template.primaryColor}`}
                   />
                 )}
                 {template.secondaryColor && (
                   <div
-                    className="w-4 h-4 rounded border border-gray-300"
+                    className="w-4 h-4 rounded border border-border"
                     style={{ backgroundColor: template.secondaryColor }}
                     title={`Secondary: ${template.secondaryColor}`}
                   />
                 )}
                 {template.backgroundColor && (
                   <div
-                    className="w-4 h-4 rounded border border-gray-300"
+                    className="w-4 h-4 rounded border border-border"
                     style={{ backgroundColor: template.backgroundColor }}
                     title={`Background: ${template.backgroundColor}`}
                   />

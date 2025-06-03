@@ -335,14 +335,14 @@ export function AIMetadataEnhancer({
 
           <div>
             <label className="text-sm font-medium mb-2 block">Current Hashtags</label>
-            <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border rounded-md">
+            <div className="flex flex-wrap gap-2 min-h-[40px] p-2 border border-border rounded-md bg-card">
               {hashtags.map((tag, index) => (
                 <Badge key={index} variant="secondary" className="text-xs">
                   #{tag}
                 </Badge>
               ))}
               {hashtags.length === 0 && (
-                <span className="text-gray-500 text-sm">No hashtags yet...</span>
+                <span className="text-muted-foreground text-sm">No hashtags yet...</span>
               )}
             </div>
           </div>
@@ -442,10 +442,10 @@ export function AIMetadataEnhancer({
 
             <TabsContent value="titles" className="space-y-3">
               {generatedMetadata.titles?.map((generatedTitle, index) => (
-                <div key={index} className="flex items-center gap-2 p-3 border rounded-lg">
+                <div key={index} className="flex items-center gap-2 p-3 border border-border rounded-lg bg-card">
                   <div className="flex-1">
                     <p className="font-medium">{generatedTitle}</p>
-                    <p className="text-sm text-gray-500">{generatedTitle.length} characters</p>
+                    <p className="text-sm text-muted-foreground">{generatedTitle.length} characters</p>
                   </div>
                   <Button
                     size="sm"
@@ -470,9 +470,9 @@ export function AIMetadataEnhancer({
 
             <TabsContent value="description" className="space-y-3">
               {generatedMetadata.description && (
-                <div className="p-3 border rounded-lg">
+                <div className="p-3 border border-border rounded-lg bg-card">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {generatedMetadata.description.length} characters
                     </p>
                     <div className="flex gap-2">
@@ -503,9 +503,9 @@ export function AIMetadataEnhancer({
 
             <TabsContent value="hashtags" className="space-y-3">
               {generatedMetadata.hashtags && (
-                <div className="p-3 border rounded-lg">
+                <div className="p-3 border border-border rounded-lg bg-card">
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {generatedMetadata.hashtags.length} hashtags
                     </p>
                     <div className="flex gap-2">
@@ -547,7 +547,7 @@ export function AIMetadataEnhancer({
               {(generatedMetadata.categories || generatedMetadata.keywords) && (
                 <div className="space-y-4">
                   {generatedMetadata.categories && (
-                    <div className="p-3 border rounded-lg">
+                    <div className="p-3 border border-border rounded-lg bg-card">
                       <h4 className="font-medium mb-2">Categories</h4>
                       <div className="flex flex-wrap gap-2">
                         {generatedMetadata.categories.map((category, index) => (
@@ -560,7 +560,7 @@ export function AIMetadataEnhancer({
                   )}
                   
                   {generatedMetadata.keywords && (
-                    <div className="p-3 border rounded-lg">
+                    <div className="p-3 border border-border rounded-lg bg-card">
                       <h4 className="font-medium mb-2">Keywords</h4>
                       <div className="flex flex-wrap gap-2">
                         {generatedMetadata.keywords.map((keyword, index) => (
@@ -586,14 +586,14 @@ export function AIMetadataEnhancer({
             <CardContent className="space-y-4">
               <div>
                 <h4 className="font-medium text-lg mb-1">{title || 'Your Video Title'}</h4>
-                <p className="text-sm text-gray-600">{title.length} characters</p>
+                <p className="text-sm text-muted-foreground">{title.length} characters</p>
               </div>
               
               <div>
-                <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                <p className="text-sm text-foreground whitespace-pre-wrap">
                   {description || 'Your video description will appear here...'}
                 </p>
-                <p className="text-xs text-gray-500 mt-1">{description.length} characters</p>
+                <p className="text-xs text-muted-foreground mt-1">{description.length} characters</p>
               </div>
               
               {hashtags.length > 0 && (
@@ -601,7 +601,7 @@ export function AIMetadataEnhancer({
                   <p className="text-sm font-medium mb-2">Hashtags:</p>
                   <div className="flex flex-wrap gap-1">
                     {hashtags.map((tag, index) => (
-                      <span key={index} className="text-blue-600 text-sm">
+                      <span key={index} className="text-primary text-sm">
                         #{tag}
                       </span>
                     ))}

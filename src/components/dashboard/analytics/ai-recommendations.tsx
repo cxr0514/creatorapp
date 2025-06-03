@@ -81,14 +81,14 @@ function RecommendationCard({ recommendation, onApply, onDismiss }: Recommendati
             </div>
             <div className="flex-1">
               <div className="flex items-center space-x-2 mb-1">
-                <CardTitle className="text-base font-semibold text-gray-900">
+                <CardTitle className="text-base font-semibold text-card-foreground">
                   {recommendation.title}
                 </CardTitle>
                 <Badge className={`text-xs font-medium ${impactColor}`}>
                   {recommendation.impact} impact
                 </Badge>
               </div>
-              <p className="text-sm text-gray-600 leading-relaxed">
+              <p className="text-sm text-muted-foreground leading-relaxed">
                 {recommendation.description}
               </p>
             </div>
@@ -143,21 +143,21 @@ function SkeletonRecommendationCard() {
     <Card>
       <CardHeader className="pb-3">
         <div className="flex items-start space-x-3">
-          <div className="w-9 h-9 bg-gray-200 rounded-lg animate-pulse" />
+          <div className="w-9 h-9 bg-muted rounded-lg animate-pulse" />
           <div className="flex-1 space-y-2">
             <div className="flex items-center space-x-2">
-              <div className="h-5 w-40 bg-gray-200 rounded animate-pulse" />
-              <div className="h-5 w-16 bg-gray-200 rounded-full animate-pulse" />
+              <div className="h-5 w-40 bg-muted rounded animate-pulse" />
+              <div className="h-5 w-16 bg-muted rounded-full animate-pulse" />
             </div>
-            <div className="h-4 w-full bg-gray-200 rounded animate-pulse" />
-            <div className="h-4 w-3/4 bg-gray-200 rounded animate-pulse" />
+            <div className="h-4 w-full bg-muted rounded animate-pulse" />
+            <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />
           </div>
         </div>
       </CardHeader>
       <CardContent className="pt-0">
         <div className="flex items-center justify-between">
-          <div className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
-          <div className="h-8 w-24 bg-gray-200 rounded animate-pulse" />
+          <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+          <div className="h-8 w-24 bg-muted rounded animate-pulse" />
         </div>
       </CardContent>
     </Card>
@@ -173,7 +173,7 @@ export function AIRecommendations({
   if (isLoading) {
     return (
       <div className="space-y-6">
-        <h2 className="text-xl font-semibold text-gray-900">AI Recommendations</h2>
+        <h2 className="text-xl font-semibold text-card-foreground">AI Recommendations</h2>
         <div className="space-y-4">
           {Array.from({ length: 3 }).map((_, i) => (
             <SkeletonRecommendationCard key={i} />
@@ -194,8 +194,8 @@ export function AIRecommendations({
         </CardHeader>
         <CardContent className="text-center py-8">
           <div className="text-4xl mb-3">🤖</div>
-          <p className="text-sm text-gray-600 mb-1">No recommendations available</p>
-          <p className="text-xs text-gray-500">
+          <p className="text-sm text-muted-foreground mb-1">No recommendations available</p>
+          <p className="text-xs text-muted-foreground">
             AI is analyzing your content performance to generate insights
           </p>
         </CardContent>
@@ -210,11 +210,11 @@ export function AIRecommendations({
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 flex items-center space-x-2">
+          <h2 className="text-xl font-semibold text-card-foreground flex items-center space-x-2">
             <Lightbulb className="h-5 w-5 text-yellow-500" />
             <span>AI Recommendations</span>
           </h2>
-          <p className="text-sm text-gray-600 mt-1">
+          <p className="text-sm text-muted-foreground mt-1">
             Personalized suggestions to improve your content performance
           </p>
         </div>

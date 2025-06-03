@@ -631,7 +631,7 @@ export function EnhancedCreateClipModal({
                     step={1}
                     className="mt-2"
                   />
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-muted-foreground mt-1">
                     {numberOfClips} clip{numberOfClips !== 1 ? 's' : ''}
                   </div>
                 </div>

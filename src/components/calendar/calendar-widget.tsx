@@ -51,7 +51,7 @@ export function CalendarWidget({
       twitter: 'bg-blue-500',
       linkedin: 'bg-blue-700'
     }
-    return colors[platform as keyof typeof colors] || 'bg-gray-500'
+    return colors[platform as keyof typeof colors] || 'bg-muted-foreground'
   }
 
   const getStatusColor = (status: string) => {
@@ -60,7 +60,7 @@ export function CalendarWidget({
       published: 'border-green-500',
       failed: 'border-red-500'
     }
-    return colors[status as keyof typeof colors] || 'border-gray-500'
+    return colors[status as keyof typeof colors] || 'border-muted-foreground'
   }
 
   const handleDateClick = (date: Date) => {
@@ -130,9 +130,9 @@ export function CalendarWidget({
                 key={date.toISOString()}
                 className={`
                   min-h-[80px] p-2 border rounded-lg cursor-pointer transition-colors
-                  ${isSelected ? 'bg-blue-50 border-blue-500' : 'hover:bg-gray-50'}
+                  ${isSelected ? 'bg-blue-50 border-blue-500' : 'hover:bg-muted'}
                   ${!isCurrentMonth ? 'opacity-30' : ''}
-                  ${isTodayDate ? 'border-blue-300 bg-blue-25' : 'border-gray-200'}
+                  ${isTodayDate ? 'border-blue-300 bg-blue-25' : 'border-border'}
                 `}
                 onClick={() => handleDateClick(date)}
               >
@@ -174,7 +174,7 @@ export function CalendarWidget({
                         <div className={`w-2 h-2 rounded-full ${getPlatformColor(post.platform)}`} />
                         <span className="truncate flex-1">{post.title}</span>
                       </div>
-                      <div className="text-gray-500 text-xs">
+                      <div className="text-muted-foreground text-xs">
                         {format(new Date(post.scheduledTime), 'HH:mm')}
                       </div>
                     </div>
@@ -193,7 +193,7 @@ export function CalendarWidget({
 
         {/* Selected date details */}
         {selectedDate && (
-          <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+          <div className="mt-4 p-4 bg-muted rounded-lg">
             <h4 className="font-medium mb-2">
               {format(selectedDate, 'EEEE, MMMM d, yyyy')}
             </h4>

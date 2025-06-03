@@ -187,11 +187,11 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between p-6 border-b border-border">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Apply Workflow</h2>
+            <h2 className="text-xl font-semibold text-card-foreground">Apply Workflow</h2>
             {clip && (
-              <p className="text-sm text-gray-600 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Apply an automated workflow to &ldquo;{clip.title}&rdquo;
               </p>
             )}
@@ -205,18 +205,18 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
         <div className="p-6 overflow-y-auto max-h-[calc(90vh-140px)]">
           {loading ? (
             <div className="space-y-4">
-              <p className="text-gray-600">Loading available workflows...</p>
+              <p className="text-muted-foreground">Loading available workflows...</p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[1, 2, 3, 4].map((i) => (
                   <Card key={i} className="animate-pulse">
                     <CardHeader>
-                      <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                      <div className="h-4 bg-muted rounded w-3/4"></div>
+                      <div className="h-3 bg-muted rounded w-1/2"></div>
                     </CardHeader>
                     <CardContent>
                       <div className="space-y-2">
-                        <div className="h-3 bg-gray-200 rounded"></div>
-                        <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                        <div className="h-3 bg-muted rounded"></div>
+                        <div className="h-3 bg-muted rounded w-2/3"></div>
                       </div>
                     </CardContent>
                   </Card>
@@ -225,16 +225,16 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
             </div>
           ) : workflows.length === 0 ? (
             <div className="text-center py-12">
-              <BoltIcon className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-2 text-lg font-medium text-gray-900">No Active Workflows</h3>
-              <p className="mt-1 text-sm text-gray-500">
+              <BoltIcon className="mx-auto h-12 w-12 text-muted-foreground" />
+              <h3 className="mt-2 text-lg font-medium text-card-foreground">No Active Workflows</h3>
+              <p className="mt-1 text-sm text-muted-foreground">
                 Create some workflows first to apply them to your clips.
               </p>
             </div>
           ) : (
             <div className="space-y-6">
               <div>
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
+                <h3 className="text-lg font-medium text-card-foreground mb-4">
                   Select a workflow to apply ({workflows.length} available)
                 </h3>
                 
@@ -245,7 +245,7 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                       className={`cursor-pointer transition-all duration-200 ${
                         selectedWorkflow === workflow.id 
                           ? 'ring-2 ring-purple-500 bg-purple-50' 
-                          : 'hover:shadow-md hover:bg-gray-50'
+                          : 'hover:shadow-md hover:bg-muted'
                       }`}
                       onClick={() => setSelectedWorkflow(workflow.id)}
                     >
@@ -268,7 +268,7 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                       <CardContent className="space-y-3">
                         {/* Platforms */}
                         <div>
-                          <p className="text-xs font-medium text-gray-700 mb-2">Platforms</p>
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Platforms</p>
                           <div className="flex flex-wrap gap-1">
                             {workflow.platforms.map(platformId => getPlatformBadge(platformId))}
                           </div>
@@ -276,14 +276,14 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
 
                         {/* Actions */}
                         <div>
-                          <p className="text-xs font-medium text-gray-700 mb-2">Actions</p>
-                          <p className="text-xs text-gray-600">{getActionSummary(workflow.actions)}</p>
+                          <p className="text-xs font-medium text-muted-foreground mb-2">Actions</p>
+                          <p className="text-xs text-muted-foreground">{getActionSummary(workflow.actions)}</p>
                         </div>
 
                         {/* Stats */}
-                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-gray-200">
+                        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-border">
                           <div>
-                            <p className="text-xs text-gray-500">Success Rate</p>
+                            <p className="text-xs text-muted-foreground">Success Rate</p>
                             <p className={`text-sm font-medium ${
                               workflow.successRate >= 90 ? 'text-green-600' : 
                               workflow.successRate >= 70 ? 'text-yellow-600' : 'text-red-600'
@@ -292,8 +292,8 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs text-gray-500">Total Runs</p>
-                            <p className="text-sm font-medium text-gray-900">{workflow.totalRuns}</p>
+                            <p className="text-xs text-muted-foreground">Total Runs</p>
+                            <p className="text-sm font-medium text-card-foreground">{workflow.totalRuns}</p>
                           </div>
                         </div>
                       </CardContent>

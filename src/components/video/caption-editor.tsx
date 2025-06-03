@@ -186,7 +186,7 @@ export function CaptionEditor({
                 value={progress.progress} 
                 className="h-2"
               />
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-muted-foreground mt-1">
                 Status: {progress.status}
               </p>
             </div>
@@ -293,7 +293,7 @@ export function CaptionEditor({
                 </>
               ) : (
                 <>
-                  <div className="text-sm text-gray-500">
+                  <div className="text-sm text-muted-foreground">
                     {formatTimestamp(caption.start)} → {formatTimestamp(caption.end)}
                   </div>
                   <div className="text-sm">{caption.text}</div>

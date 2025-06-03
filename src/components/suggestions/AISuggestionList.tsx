@@ -61,7 +61,7 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
   }
 
   if (suggestions.length === 0) {
-    return <p className="text-center text-gray-500 p-6">No AI suggestions available for this video yet.</p>;
+    return <p className="text-center text-muted-foreground p-6">No AI suggestions available for this video yet.</p>;
   }
 
   return (
@@ -78,11 +78,11 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
             <CardDescription className="text-xs">{suggestion.description}</CardDescription>
           </CardHeader>
           <CardContent className="space-y-2 text-sm">
-            <div className="flex items-center justify-between text-xs text-gray-600">
+            <div className="flex items-center justify-between text-xs text-muted-foreground">
               <span>Format: <strong>{suggestion.suggestedFormat}</strong></span>
               {suggestion.suggestedPlatform && <span>Platform: <Badge variant="outline">{suggestion.suggestedPlatform}</Badge></span>}
             </div>
-            <div className="text-xs text-gray-600">
+            <div className="text-xs text-muted-foreground">
               Segment: {suggestion.startTime.toFixed(1)}s - {suggestion.endTime.toFixed(1)}s
               (Duration: {(suggestion.endTime - suggestion.startTime).toFixed(1)}s)
             </div>

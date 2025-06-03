@@ -394,18 +394,18 @@ export function ExportPreviewModal({
                       <p className="text-muted-foreground">
                         Brightness: {Math.round(currentPreview.contentAnalysis.sceneAnalysis.brightness * 100)}%
                       </p>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Composition: {currentPreview.contentAnalysis.sceneAnalysis.composition.type}
                       </p>
                     </div>
 
                     <div>
                       <h4 className="font-medium mb-2">Object Detection</h4>
-                      <p className="text-gray-600">
+                      <p className="text-muted-foreground">
                         Objects: {currentPreview.contentAnalysis.objectDetection.objects.length}
                       </p>
                       {currentPreview.contentAnalysis.objectDetection.mainSubject && (
-                        <p className="text-gray-600">
+                        <p className="text-muted-foreground">
                           Main Subject: {currentPreview.contentAnalysis.objectDetection.mainSubject.label}
                         </p>
                       )}
@@ -433,7 +433,7 @@ export function ExportPreviewModal({
 
         {/* Action Buttons */}
         <div className="flex justify-between items-center mt-6 pt-4 border-t">
-          <div className="text-sm text-gray-600">
+          <div className="text-sm text-muted-foreground">
             {selectedFormats.length} format{selectedFormats.length !== 1 ? 's' : ''} selected
           </div>
           <div className="flex gap-2">

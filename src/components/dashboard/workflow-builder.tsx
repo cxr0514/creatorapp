@@ -321,8 +321,8 @@ export function WorkflowBuilder() {
       <div className="space-y-6">
         <div className="flex justify-between items-center">
           <div>
-            <h1 className="text-2xl font-semibold text-gray-900">Workflows</h1>
-            <p className="mt-1 text-sm text-gray-600">
+            <h1 className="text-2xl font-semibold text-white">Workflows</h1>
+            <p className="mt-1 text-sm text-white">
               Automate your content creation and publishing process
             </p>
           </div>
@@ -332,13 +332,13 @@ export function WorkflowBuilder() {
           {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-4 bg-white rounded w-3/4"></div>
+                <div className="h-3 bg-white rounded w-1/2"></div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                  <div className="h-3 bg-white rounded"></div>
+                  <div className="h-3 bg-white rounded w-2/3"></div>
                 </div>
               </CardContent>
             </Card>
@@ -353,8 +353,8 @@ export function WorkflowBuilder() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold text-gray-900">Workflows</h1>
-          <p className="mt-1 text-sm text-gray-600">
+          <h1 className="text-2xl font-semibold text-white">Workflows</h1>
+          <p className="mt-1 text-sm text-white">
             Automate your content creation and publishing process
           </p>
         </div>
@@ -370,8 +370,8 @@ export function WorkflowBuilder() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Workflows</p>
-                <p className="text-2xl font-bold text-gray-900">{workflows.length}</p>
+                <p className="text-sm font-medium text-white">Total Workflows</p>
+                <p className="text-2xl font-bold text-white">{workflows.length}</p>
               </div>
               <RectangleStackIcon className="h-8 w-8 text-purple-600" />
             </div>
@@ -382,7 +382,7 @@ export function WorkflowBuilder() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Active</p>
+                <p className="text-sm font-medium text-white">Active</p>
                 <p className="text-2xl font-bold text-green-600">{workflows.filter(w => w.isActive).length}</p>
               </div>
               <CheckCircleIcon className="h-8 w-8 text-green-600" />
@@ -394,7 +394,7 @@ export function WorkflowBuilder() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Runs</p>
+                <p className="text-sm font-medium text-white">Total Runs</p>
                 <p className="text-2xl font-bold text-blue-600">{workflows.reduce((sum, w) => sum + w.totalRuns, 0)}</p>
               </div>
               <PlayIcon className="h-8 w-8 text-blue-600" />
@@ -406,7 +406,7 @@ export function WorkflowBuilder() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Avg Success Rate</p>
+                <p className="text-sm font-medium text-white">Avg Success Rate</p>
                 <p className="text-2xl font-bold text-orange-600">
                   {workflows.length > 0 ? Math.round(workflows.reduce((sum, w) => sum + w.successRate, 0) / workflows.length) : 0}%
                 </p>
@@ -478,12 +478,12 @@ export function WorkflowBuilder() {
 
                 {/* Actions */}
                 <div className="space-y-2">
-                  <p className="text-sm font-medium text-gray-700">Actions ({workflow.actions.length})</p>
+                  <p className="text-sm font-medium text-white">Actions ({workflow.actions.length})</p>
                   <div className="space-y-1">
                     {workflow.actions.slice(0, 3).map((action) => {
                       const ActionIcon = getActionIcon(action.type)
                       return (
-                        <div key={action.id} className="flex items-center gap-2 text-xs text-gray-600">
+                        <div key={action.id} className="flex items-center gap-2 text-xs text-white">
                           <ActionIcon className="h-3 w-3" />
                           <span>{ACTION_TYPES.find(a => a.id === action.type)?.name}</span>
                           {action.platform && (
@@ -493,7 +493,7 @@ export function WorkflowBuilder() {
                       )
                     })}
                     {workflow.actions.length > 3 && (
-                      <p className="text-xs text-gray-500 pl-5">+{workflow.actions.length - 3} more</p>
+                      <p className="text-xs text-white pl-5">+{workflow.actions.length - 3} more</p>
                     )}
                   </div>
                 </div>
@@ -501,15 +501,15 @@ export function WorkflowBuilder() {
                 {/* Stats */}
                 <div className="grid grid-cols-3 gap-4 pt-4 border-t border-gray-200">
                   <div className="text-center">
-                    <p className="text-xs text-gray-500">Last Run</p>
+                    <p className="text-xs text-white">Last Run</p>
                     <p className="text-sm font-medium">{formatLastRun(workflow.lastRun)}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-gray-500">Total Runs</p>
+                    <p className="text-xs text-white">Total Runs</p>
                     <p className="text-sm font-medium">{workflow.totalRuns}</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xs text-gray-500">Success Rate</p>
+                    <p className="text-xs text-white">Success Rate</p>
                     <p className={`text-sm font-medium ${workflow.successRate >= 90 ? 'text-green-600' : workflow.successRate >= 70 ? 'text-yellow-600' : 'text-red-600'}`}>
                       {workflow.successRate}%
                     </p>
@@ -547,9 +547,9 @@ export function WorkflowBuilder() {
       {workflows.length === 0 && (
         <Card className="p-12">
           <div className="text-center">
-            <BoltIcon className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-lg font-medium text-gray-900">No Workflows Yet</h3>
-            <p className="mt-1 text-sm text-gray-500">
+            <BoltIcon className="mx-auto h-12 w-12 text-white" />
+            <h3 className="mt-2 text-lg font-medium text-white">No Workflows Yet</h3>
+            <p className="mt-1 text-sm text-white">
               Create your first automated workflow to streamline your content creation process.
             </p>
             <div className="mt-6">

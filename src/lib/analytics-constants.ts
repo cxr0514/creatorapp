@@ -2,7 +2,7 @@ import { Platform, TimeRange, ImpactLevel } from './types/analytics'
 
 // Platform Configuration
 export const PLATFORMS: Array<{ value: Platform; label: string; icon: string; colorClass: string }> = [
-  { value: 'all', label: 'All Platforms', icon: 'Globe', colorClass: 'text-gray-600' },
+  { value: 'all', label: 'All Platforms', icon: 'Globe', colorClass: 'text-muted-foreground' },
   { value: 'youtube', label: 'YouTube', icon: 'Play', colorClass: 'text-red-600' },
   { value: 'tiktok', label: 'TikTok', icon: 'Music', colorClass: 'text-black' },
   { value: 'instagram', label: 'Instagram', icon: 'Camera', colorClass: 'text-pink-600' },

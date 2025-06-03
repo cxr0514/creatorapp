@@ -17,12 +17,12 @@ export default function DebugPage() {
         <CardContent className="space-y-4">
           <div>
             <h3 className="font-semibold">Session Status:</h3>
-            <p className="font-mono bg-gray-100 p-2 rounded">{status}</p>
+            <p className="font-mono bg-muted p-2 rounded">{status}</p>
           </div>
           
           <div>
             <h3 className="font-semibold">Session Data:</h3>
-            <pre className="font-mono bg-gray-100 p-2 rounded text-sm overflow-auto">
+            <pre className="font-mono bg-muted p-2 rounded text-sm overflow-auto">
               {JSON.stringify(session, null, 2)}
             </pre>
           </div>

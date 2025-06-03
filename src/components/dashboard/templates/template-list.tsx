@@ -123,7 +123,7 @@ export function TemplateList() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Style Templates</h2>
-          <p className="text-gray-600">Create and manage brand templates for your video exports</p>
+          <p className="text-muted-foreground">Create and manage brand templates for your video exports</p>
         </div>
         <Button onClick={handleCreateTemplate} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
@@ -134,9 +134,9 @@ export function TemplateList() {
       {templates.length === 0 ? (
         <Card>
           <CardContent className="py-12 text-center">
-            <Palette className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <Palette className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
             <h3 className="text-lg font-semibold mb-2">No templates yet</h3>
-            <p className="text-gray-600 mb-4">
+            <p className="text-muted-foreground mb-4">
               Create your first style template to brand your video exports with consistent colors, fonts, and overlays.
             </p>
             <Button onClick={handleCreateTemplate}>Create Your First Template</Button>
@@ -177,7 +177,7 @@ export function TemplateList() {
                     {/* Color Preview */}
                     {preview.hasColors && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Colors:</span>
+                        <span className="text-sm text-muted-foreground">Colors:</span>
                         <div className="flex gap-1">
                           {template.primaryColor && (
                             <div
@@ -207,7 +207,7 @@ export function TemplateList() {
                     {/* Font */}
                     {template.fontFamily && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Font:</span>
+                        <span className="text-sm text-muted-foreground">Font:</span>
                         <span className="text-sm font-medium" style={{ fontFamily: template.fontFamily }}>
                           {template.fontFamily}
                         </span>
@@ -217,7 +217,7 @@ export function TemplateList() {
                     {/* Assets */}
                     {preview.hasAssets && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Assets:</span>
+                        <span className="text-sm text-muted-foreground">Assets:</span>
                         <div className="flex gap-1 text-xs">
                           {template.logoCloudinaryId && (
                             <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">Logo</span>
@@ -235,7 +235,7 @@ export function TemplateList() {
                     {/* Text Overlays */}
                     {preview.hasText && (
                       <div className="flex items-center gap-2">
-                        <span className="text-sm text-gray-600">Text:</span>
+                        <span className="text-sm text-muted-foreground">Text:</span>
                         <div className="flex gap-1 text-xs">
                           {template.lowerThirdText && (
                             <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">Lower Third</span>
@@ -247,7 +247,7 @@ export function TemplateList() {
                       </div>
                     )}
 
-                    <div className="pt-2 border-t text-xs text-gray-500">
+                    <div className="pt-2 border-t text-xs text-muted-foreground">
                       Updated {formatDate(template.updatedAt)}
                     </div>
                   </div>

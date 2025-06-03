@@ -31,7 +31,7 @@ export function formatPercentage(num: number): string {
 export function getChangeColor(change: number): string {
   if (change > 0) return 'text-green-600'
   if (change < 0) return 'text-red-600'
-  return 'text-gray-600'
+  return 'text-muted-foreground'
 }
 
 /**

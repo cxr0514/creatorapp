@@ -502,7 +502,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
               {publishMode === 'smart' && (
                 <div>
                   <p className="text-sm text-muted-foreground mb-2">Recommended Times:</p>
-                  <ul className="text-sm text-gray-800 space-y-1">
+                  <ul className="text-sm text-card-foreground space-y-1">
                     {smartRecommendations.length === 0 ? (
                       <li>No recommendations available. Adjust your settings or try again later.</li>
                     ) : (
@@ -536,7 +536,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-border bg-gray-50 rounded-b-xl">
+        <div className="p-6 border-t border-border bg-muted rounded-b-xl">
           <div className="flex justify-between items-center">
             <div className="text-sm text-muted-foreground">
               {selectedPlatforms.size > 0 && (
