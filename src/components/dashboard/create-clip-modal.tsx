@@ -374,7 +374,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                   </div>
                 )}
                 {aiSuggested && hashtags.length > 0 && (
-                  <p className="text-xs text-blue-600 flex items-center">
+                  <p className="text-xs text-primary flex items-center">
                     <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
@@ -411,7 +411,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                         key={index}
                         className={`inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium border transition-all duration-200 ${
                           aiSuggested 
-                            ? 'bg-green-50 text-green-700 border-green-200' 
+                            ? 'bg-accent-success/10 text-accent-success border-accent-success/30' 
                             : 'bg-muted/20 text-gray-700 border-gray-200'
                         }`}
                       >
@@ -429,7 +429,7 @@ export function CreateClipModal({ isOpen, onClose, videoId, onClipCreated }: Cre
                   </div>
                 )}
                 {aiSuggested && tags.length > 0 && (
-                  <p className="text-xs text-green-600 flex items-center">
+                  <p className="text-xs text-accent-success flex items-center">
                     <svg className="h-3 w-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>

@@ -244,7 +244,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'ready':
-        return 'bg-green-100/20 text-green-400 border border-green-400/30'
+        return 'bg-accent-success/20 text-accent-success border border-accent-success/30'
       case 'processing':
         return 'bg-primary/20 text-primary border border-primary/30'
       case 'failed':
@@ -546,10 +546,10 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                   {clip.tags.slice(0, 3).map((tag, index) => (
                     <span
                       key={index}
-                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-500/20 text-green-400 border border-green-400/30"
+                      className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-accent-success/20 text-accent-success border border-accent-success/30"
                       title="AI-generated tag"
                     >
-                      <svg className="w-3 h-3 mr-1 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-3 h-3 mr-1 text-accent-success" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
                       </svg>
                       {tag}
@@ -601,7 +601,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
                       variant="outline"
                       onClick={() => openPublishModal(clip)}
                       disabled={selectionMode}
-                      className="flex-1 border-green-400/30 text-green-400 hover:bg-green-500/10 hover:border-green-400/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 border-accent-success/30 text-accent-success hover:bg-accent-success/10 hover:border-accent-success/50 font-medium rounded-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <svg className="h-4 w-4 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4V2a1 1 0 011-1h4a1 1 0 011 1v2m5 0H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zM9 12l2 2 4-4" />

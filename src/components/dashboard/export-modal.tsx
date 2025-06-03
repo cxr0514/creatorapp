@@ -241,7 +241,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                           const recommended = getRecommendedCroppingStrategy('general', format, true)
                           const isOptimal = recommended === croppingStrategy
                           return (
-                            <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-green-500/10 text-green-400' : 'bg-muted'}`}>
+                            <div key={format.format} className={`p-2 rounded ${isOptimal ? 'bg-accent-success/10 text-accent-success' : 'bg-muted'}`}>
                               <span className="font-medium">{format.displayName}:</span> {recommended}
                               {isOptimal && <span className="ml-1">✓</span>}
                             </div>
@@ -263,7 +263,7 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                         <p className="text-sm text-muted-foreground">{format.description}</p>
                       </div>
                       {isCurrentFormat(format.format) && (
-                        <span className="text-xs bg-green-500/10 text-green-400 px-2 py-1 rounded">
+                        <span className="text-xs bg-accent-success/10 text-accent-success px-2 py-1 rounded">
                           Current Format
                         </span>
                       )}
@@ -412,10 +412,10 @@ export function ExportModal({ clip, isOpen, onClose, onExportComplete }: ExportM
                   key={index}
                   className={`p-3 rounded-md ${
                     result.status === 'error'
-                      ? 'bg-red-50 text-red-700'
+                      ? 'bg-accent-danger/10 text-accent-danger'
                       : result.status === 'exists'
-                      ? 'bg-yellow-50 text-yellow-700'
-                      : 'bg-green-50 text-green-700'
+                      ? 'bg-accent-warning/10 text-accent-warning'
+                      : 'bg-accent-success/10 text-accent-success'
                   }`}
                 >
                   <div className="flex items-center justify-between">

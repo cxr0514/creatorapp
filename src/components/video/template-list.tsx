@@ -213,7 +213,7 @@ export function TemplateList({
                     variant="outline"
                     size="sm"
                     onClick={() => handleDelete(template)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-accent-danger hover:text-accent-danger/80 hover:bg-accent-danger/10"
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
@@ -246,7 +246,7 @@ export function TemplateList({
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
-              className="bg-red-600 hover:bg-red-700"
+              className="bg-accent-danger hover:bg-accent-danger/90"
             >
               Delete
             </AlertDialogAction>

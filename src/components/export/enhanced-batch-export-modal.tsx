@@ -685,7 +685,7 @@ export function EnhancedBatchExportModal({
                             <div className="text-sm text-muted-foreground">Processing</div>
                           </div>
                           <div className="text-center">
-                            <div className="text-2xl font-bold text-green-400">{stats.completed}</div>
+                            <div className="text-2xl font-bold text-accent-success">{stats.completed}</div>
                             <div className="text-sm text-muted-foreground">Completed</div>
                           </div>
                           <div className="text-center">
@@ -727,7 +727,7 @@ export function EnhancedBatchExportModal({
                               <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
                                   <div className="w-12 h-12 bg-surface border border-border rounded flex items-center justify-center">
-                                    {item.status === 'completed' && <CheckCircle className="h-6 w-6 text-green-400" />}
+                                    {item.status === 'completed' && <CheckCircle className="h-6 w-6 text-accent-success" />}
                                     {item.status === 'failed' && <XCircle className="h-6 w-6 text-destructive" />}
                                     {item.status === 'processing' && (
                                       <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent" />
@@ -761,7 +761,7 @@ export function EnhancedBatchExportModal({
                                     <p className="text-xs text-destructive mt-1">{item.error}</p>
                                   )}
                                   {(item.retryCount || 0) > 0 && (
-                                    <p className="text-xs text-yellow-400 mt-1">
+                                    <p className="text-xs text-accent-warning mt-1">
                                       Retry #{item.retryCount || 0}
                                     </p>
                                   )}

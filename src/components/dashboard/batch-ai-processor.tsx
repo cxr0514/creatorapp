@@ -344,9 +344,9 @@ export function BatchAIProcessor({
   const getStatusIcon = (status: BatchItem['status']) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />
+        return <CheckCircle className="h-4 w-4 text-accent-success" />
       case 'error':
-        return <XCircle className="h-4 w-4 text-red-500" />
+        return <XCircle className="h-4 w-4 text-accent-danger" />
       case 'processing':
         return <Loader2 className="h-4 w-4 text-primary animate-spin" />
       default:
@@ -356,8 +356,8 @@ export function BatchAIProcessor({
 
   const getStatusColor = (status: BatchItem['status']) => {
     switch (status) {
-      case 'completed': return 'text-green-600'
-      case 'error': return 'text-red-600'
+      case 'completed': return 'text-accent-success'
+      case 'error': return 'text-accent-danger'
       case 'processing': return 'text-primary'
       default: return 'text-muted-foreground'
     }
@@ -596,7 +596,7 @@ export function BatchAIProcessor({
                     )}
                     
                     {item.error && (
-                      <p className="text-xs text-red-600 mt-1">{item.error}</p>
+                      <p className="text-xs text-accent-danger mt-1">{item.error}</p>
                     )}
                   </div>
                   

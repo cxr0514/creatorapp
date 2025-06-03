@@ -11,7 +11,7 @@ function Badge({ className, variant = "default", ...props }: BadgeProps) {
   const variantClasses = {
     default: "border-transparent bg-primary text-white hover:bg-primary-hover",
     secondary: "border-transparent bg-card text-card-foreground hover:bg-surface",
-    destructive: "border-transparent bg-accent-danger text-white hover:bg-red-700",
+    destructive: "border-transparent bg-accent-danger text-white hover:bg-accent-danger/90",
     outline: "text-card-foreground border-border"
   }
 

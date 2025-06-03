@@ -45,8 +45,8 @@ export function CalendarWidget({
 
   const getPlatformColor = (platform: string) => {
     const colors = {
-      youtube: 'bg-red-500',
-      instagram: 'bg-pink-500',
+      youtube: 'bg-accent-danger',
+      instagram: 'bg-accent-warning',
       tiktok: 'bg-black',
       twitter: 'bg-primary',
       linkedin: 'bg-primary'
@@ -229,7 +229,7 @@ export function CalendarWidget({
                     <div className="flex items-center gap-2">
                       <Badge
                         variant={post.status === 'published' ? 'default' : 'outline'}
-                        className={post.status === 'failed' ? 'border-red-500 text-red-600' : ''}
+                        className={post.status === 'failed' ? 'border-accent-danger text-accent-danger' : ''}
                       >
                         {post.status}
                       </Badge>

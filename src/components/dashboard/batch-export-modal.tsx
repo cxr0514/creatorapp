@@ -422,7 +422,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                       <div className="flex items-center space-x-2">
                         <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                           item.status === 'completed' 
-                            ? 'bg-green-500/20 text-green-400'
+                            ? 'bg-accent-success/20 text-accent-success'
                             : item.status === 'processing'
                             ? 'bg-primary/20 text-primary'
                             : item.status === 'failed'

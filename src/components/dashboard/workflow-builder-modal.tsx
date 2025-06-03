@@ -473,15 +473,15 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
         </div>
 
         {selectedTriggerType && (
-          <div className="p-4 bg-purple-50 rounded-lg">
+          <div className="p-4 bg-primary/10 rounded-lg">
             <div className="flex items-center justify-between mb-3">
-              <h4 className="font-medium text-purple-900">
+              <h4 className="font-medium text-primary">
                 Configure {TRIGGER_TYPES.find(t => t.id === selectedTriggerType)?.name}
               </h4>
               <Button
                 size="sm"
                 onClick={() => addTrigger(selectedTriggerType)}
-                className="bg-purple-600 hover:bg-purple-700"
+                className="bg-primary hover:bg-primary/90"
               >
                 <PlusIcon className="h-4 w-4 mr-1" />
                 Add
@@ -502,7 +502,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = triggerType?.icon || ClockIcon
               
               return (
-                <div key={trigger.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={trigger.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
                   <Icon className="h-5 w-5 text-muted-foreground" />
                   <div className="flex-1">
                     <span className="font-medium">{triggerType?.name}</span>
@@ -514,7 +514,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                     size="sm"
                     variant="ghost"
                     onClick={() => removeTrigger(trigger.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-accent-danger hover:text-accent-danger/80 hover:bg-accent-danger/10"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </Button>
@@ -592,9 +592,9 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
               const Icon = actionType?.icon || CogIcon
               
               return (
-                <div key={action.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                <div key={action.id} className="flex items-center gap-3 p-3 bg-muted/20 rounded-lg">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-500 font-medium">{index + 1}.</span>
+                    <span className="text-sm text-muted font-medium">{index + 1}.</span>
                     <Icon className="h-5 w-5 text-muted-foreground" />
                   </div>
                   <div className="flex-1">
@@ -607,7 +607,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
                     size="sm"
                     variant="ghost"
                     onClick={() => removeAction(action.id)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    className="text-accent-danger hover:text-accent-danger/80 hover:bg-accent-danger/10"
                   >
                     <TrashIcon className="h-4 w-4" />
                   </Button>
@@ -632,7 +632,7 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <CheckCircleIcon className="h-5 w-5 text-green-600" />
+            <CheckCircleIcon className="h-5 w-5 text-accent-success" />
             {workflow.name}
           </CardTitle>
           <CardDescription>{workflow.description}</CardDescription>
@@ -679,10 +679,10 @@ export function WorkflowBuilderModal({ isOpen, onClose, editingWorkflow, onSave 
       </Card>
 
       {(workflow.triggers.length === 0 || workflow.actions.length === 0) && (
-        <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+        <div className="p-4 bg-accent-warning/10 border border-accent-warning/30 rounded-lg">
           <div className="flex items-start gap-2">
-            <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 mt-0.5" />
-            <div className="text-sm text-yellow-800">
+            <ExclamationTriangleIcon className="h-5 w-5 text-accent-warning mt-0.5" />
+            <div className="text-sm text-accent-warning">
               <p className="font-medium">Workflow Incomplete</p>
               <p>
                 {workflow.triggers.length === 0 && 'You need at least one trigger. '}

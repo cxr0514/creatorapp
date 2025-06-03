@@ -165,7 +165,7 @@ export function TemplateList() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDeleteTemplate(template.id)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        className="h-8 w-8 p-0 text-accent-danger hover:text-accent-danger/80"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -220,13 +220,13 @@ export function TemplateList() {
                         <span className="text-sm text-muted-foreground">Assets:</span>
                         <div className="flex gap-1 text-xs">
                           {template.logoCloudinaryId && (
-                            <span className="px-2 py-1 bg-blue-100 text-blue-800 rounded">Logo</span>
+                            <span className="px-2 py-1 bg-primary/20 text-primary rounded">Logo</span>
                           )}
                           {template.introCloudinaryId && (
-                            <span className="px-2 py-1 bg-green-100 text-green-800 rounded">Intro</span>
+                            <span className="px-2 py-1 bg-accent-success/20 text-accent-success rounded">Intro</span>
                           )}
                           {template.outroCloudinaryId && (
-                            <span className="px-2 py-1 bg-purple-100 text-purple-800 rounded">Outro</span>
+                            <span className="px-2 py-1 bg-primary/20 text-primary rounded">Outro</span>
                           )}
                         </div>
                       </div>
@@ -238,10 +238,10 @@ export function TemplateList() {
                         <span className="text-sm text-muted-foreground">Text:</span>
                         <div className="flex gap-1 text-xs">
                           {template.lowerThirdText && (
-                            <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded">Lower Third</span>
+                            <span className="px-2 py-1 bg-accent-warning/20 text-accent-warning rounded">Lower Third</span>
                           )}
                           {template.callToActionText && (
-                            <span className="px-2 py-1 bg-red-100 text-red-800 rounded">CTA</span>
+                            <span className="px-2 py-1 bg-accent-danger/20 text-accent-danger rounded">CTA</span>
                           )}
                         </div>
                       </div>

@@ -63,7 +63,7 @@ function ContentItem({ content, onViewDetails }: ContentItemProps) {
           {/* Content Info */}
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between mb-2">
-              <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-blue-600 transition-colors">
+              <h3 className="text-sm font-semibold text-gray-900 line-clamp-2 group-hover:text-primary transition-colors">
                 {content.title}
               </h3>
               {onViewDetails && (
@@ -95,13 +95,13 @@ function ContentItem({ content, onViewDetails }: ContentItemProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-1">
-                  <Eye className="h-3 w-3 text-blue-600" />
+                  <Eye className="h-3 w-3 text-primary" />
                   <span className="text-xs font-medium text-gray-900">
                     {formatNumber(content.views)}
                   </span>
                 </div>
                 <div className="flex items-center space-x-1">
-                  <Heart className="h-3 w-3 text-pink-600" />
+                  <Heart className="h-3 w-3 text-accent-warning" />
                   <span className="text-xs font-medium text-gray-900">
                     {formatNumber(content.engagement)}
                   </span>

@@ -3,11 +3,11 @@ import { Platform, TimeRange, ImpactLevel } from './types/analytics'
 // Platform Configuration
 export const PLATFORMS: Array<{ value: Platform; label: string; icon: string; colorClass: string }> = [
   { value: 'all', label: 'All Platforms', icon: 'Globe', colorClass: 'text-muted-foreground' },
-  { value: 'youtube', label: 'YouTube', icon: 'Play', colorClass: 'text-red-600' },
-  { value: 'tiktok', label: 'TikTok', icon: 'Music', colorClass: 'text-black' },
-  { value: 'instagram', label: 'Instagram', icon: 'Camera', colorClass: 'text-pink-600' },
-  { value: 'twitter', label: 'X/Twitter', icon: 'MessageCircle', colorClass: 'text-blue-500' },
-  { value: 'linkedin', label: 'LinkedIn', icon: 'Briefcase', colorClass: 'text-blue-700' }
+  { value: 'youtube', label: 'YouTube', icon: 'Play', colorClass: 'text-accent-danger' },
+  { value: 'tiktok', label: 'TikTok', icon: 'Film', colorClass: 'text-foreground' },
+  { value: 'instagram', label: 'Instagram', icon: 'Camera', colorClass: 'text-accent-warning' },
+  { value: 'twitter', label: 'X/Twitter', icon: 'MessageCircle', colorClass: 'text-primary' },
+  { value: 'linkedin', label: 'LinkedIn', icon: 'Briefcase', colorClass: 'text-primary' }
 ]
 
 // Time Range Configuration
@@ -23,9 +23,9 @@ export const VALID_PLATFORMS: Platform[] = ['all', 'youtube', 'tiktok', 'instagr
 
 // Impact Level Colors
 export const IMPACT_COLORS: Record<ImpactLevel, string> = {
-  high: 'bg-red-100 text-red-700 border-red-200',
-  medium: 'bg-yellow-100 text-yellow-700 border-yellow-200',
-  low: 'bg-blue-100 text-blue-700 border-blue-200'
+  high: 'bg-accent-danger/10 text-accent-danger border-accent-danger/30',
+  medium: 'bg-accent-warning/10 text-accent-warning border-accent-warning/30',
+  low: 'bg-primary/10 text-primary border-primary/30'
 }
 
 // Platform Distribution Weights (for mock data generation)

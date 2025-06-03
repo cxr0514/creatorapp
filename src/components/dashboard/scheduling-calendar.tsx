@@ -76,9 +76,9 @@ export function SchedulingCalendar() {
 
   const getStatusColor = (status: ScheduledPost['status']) => {
     const colors: Record<string, string> = {
-      pending: 'bg-blue-100 text-blue-700',
-      posted: 'bg-green-100 text-green-700',
-      failed: 'bg-red-100 text-red-700',
+      pending: 'bg-primary/10 text-primary',
+      posted: 'bg-accent-success/10 text-accent-success',
+      failed: 'bg-accent-danger/10 text-accent-danger',
       cancelled: 'bg-gray-100 text-gray-700'
     }
     return colors[status] || 'bg-gray-100 text-gray-700'
@@ -105,7 +105,7 @@ export function SchedulingCalendar() {
           <div className="flex justify-between items-start mb-2">
             <span className="text-sm font-medium text-gray-900">{day}</span>
             {postsForDay.length > 0 && (
-              <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">
+              <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full">
                 {postsForDay.length}
               </span>
             )}
@@ -200,28 +200,28 @@ export function SchedulingCalendar() {
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-purple-600">
+          <div className="text-2xl font-bold text-primary">
             {scheduledPosts.filter(p => p.status === 'pending').length}
           </div>
           <div className="text-sm text-gray-600">Scheduled Posts</div>
         </div>
         
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-green-600">
+          <div className="text-2xl font-bold text-accent-success">
             {scheduledPosts.filter(p => p.status === 'posted').length}
           </div>
           <div className="text-sm text-gray-600">Published This Month</div>
         </div>
         
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-blue-600">
+          <div className="text-2xl font-bold text-accent-warning">
             {new Set(scheduledPosts.map(p => p.platform)).size}
           </div>
           <div className="text-sm text-gray-600">Active Platforms</div>
         </div>
         
         <div className="bg-white p-4 rounded-lg border border-gray-200">
-          <div className="text-2xl font-bold text-red-600">
+          <div className="text-2xl font-bold text-accent-danger">
             {scheduledPosts.filter(p => p.status === 'failed').length}
           </div>
           <div className="text-sm text-gray-600">Failed Posts</div>

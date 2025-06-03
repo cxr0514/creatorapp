@@ -33,7 +33,7 @@ function MetricCard({ title, value, change, icon, formatter = formatNumber }: Me
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <div className="p-2 bg-blue-50 rounded-lg">
+        <div className="p-2 bg-primary/10 rounded-lg">
           {icon}
         </div>
       </CardHeader>
@@ -83,19 +83,19 @@ export function MetricsOverview({ metrics, isLoading = false }: MetricsOverviewP
       title: 'Total Views',
       value: metrics.totalViews,
       change: metrics.viewsChange,
-      icon: <Eye className="h-4 w-4 text-blue-600" />
+      icon: <Eye className="h-4 w-4 text-primary" />
     },
     {
       title: 'Engagement',
       value: metrics.totalEngagement,
       change: metrics.engagementChange,
-      icon: <Heart className="h-4 w-4 text-pink-600" />
+      icon: <Heart className="h-4 w-4 text-accent-warning" />
     },
     {
       title: 'Shares',
       value: metrics.totalShares,
       change: metrics.sharesChange,
-      icon: <Share2 className="h-4 w-4 text-green-600" />
+      icon: <Share2 className="h-4 w-4 text-accent-success" />
     },
     {
       title: 'Avg Watch Time',

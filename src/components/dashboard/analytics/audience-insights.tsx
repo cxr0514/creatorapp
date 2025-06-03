@@ -102,7 +102,7 @@ const AGE_COLORS = [
 
 const LOCATION_COLORS = [
   'bg-indigo-500',
-  'bg-pink-500',
+  'bg-accent-warning',
   'bg-teal-500',
   'bg-orange-500',
   'bg-cyan-500',
@@ -146,7 +146,7 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
         {/* Locations */}
         <MetricsSection
           title="Top Locations"
-          icon={<Globe className="h-5 w-5 text-green-600" />}
+          icon={<Globe className="h-5 w-5 text-accent-success" />}
           isLoading={isLoading}
         >
           {insights.topLocations.map((location, index) => (
@@ -212,12 +212,12 @@ export function AudienceInsights({ insights, isLoading = false }: AudienceInsigh
         <Card className="bg-gradient-to-r from-green-50 to-emerald-50 border-green-200">
           <CardContent className="p-4">
             <div className="flex items-center space-x-3">
-              <div className="p-2 bg-green-100 rounded-lg">
-                <Globe className="h-5 w-5 text-green-600" />
+              <div className="p-2 bg-accent-success/10 rounded-lg">
+                <Globe className="h-5 w-5 text-accent-success" />
               </div>
               <div>
-                <p className="text-sm text-green-800 font-medium">Top Country</p>
-                <p className="text-lg font-bold text-green-900">
+                <p className="text-sm text-accent-success font-medium">Top Country</p>
+                <p className="text-lg font-bold text-accent-success">
                   {insights.topLocations[0]?.country || 'N/A'}
                 </p>
               </div>

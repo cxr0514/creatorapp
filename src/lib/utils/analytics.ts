@@ -29,8 +29,8 @@ export function formatPercentage(num: number): string {
  * @returns Tailwind CSS color class
  */
 export function getChangeColor(change: number): string {
-  if (change > 0) return 'text-green-600'
-  if (change < 0) return 'text-red-600'
+  if (change > 0) return 'text-accent-success'
+  if (change < 0) return 'text-accent-danger'
   return 'text-muted-foreground'
 }
 

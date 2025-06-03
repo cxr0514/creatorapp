@@ -354,7 +354,7 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
                       <p>Max: {platform.maxFileSize}MB, {Math.floor(platform.maxDuration / 60)}min</p>
                       <p>Formats: {platform.supportedFormats.join(', ')}</p>
                       {!isConnected && (
-                        <p className="text-red-600 mt-1">Not connected</p>
+                        <p className="text-accent-danger mt-1">Not connected</p>
                       )}
                     </div>
                   </div>
@@ -413,25 +413,25 @@ export function PublishingModal({ clip, isOpen, onClose, onPublishComplete }: Pu
 
                     return (
                       <div key={platformId} className={`p-3 rounded-lg border ${
-                        result.valid ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'
+                        result.valid ? 'border-accent-success/30 bg-accent-success/10' : 'border-accent-danger/30 bg-accent-danger/10'
                       }`}>
                         <div className="flex items-center space-x-2 mb-1">
                           <span className="font-medium text-sm">{platform.displayName}</span>
                           {result.valid ? (
-                            <span className="text-green-600 text-xs">✓ Valid</span>
+                            <span className="text-accent-success text-xs">✓ Valid</span>
                           ) : (
-                            <span className="text-red-600 text-xs">✗ Invalid</span>
+                            <span className="text-accent-danger text-xs">✗ Invalid</span>
                           )}
                         </div>
                         {result.errors?.length > 0 && (
-                          <ul className="text-sm text-red-600 space-y-1">
+                          <ul className="text-sm text-accent-danger space-y-1">
                             {result.errors.map((error: string, i: number) => (
                               <li key={i}>• {error}</li>
                             ))}
                           </ul>
                         )}
                         {result.warnings?.length > 0 && (
-                          <ul className="text-sm text-yellow-600 space-y-1">
+                          <ul className="text-sm text-accent-warning space-y-1">
                             {result.warnings.map((warning: string, i: number) => (
                               <li key={i}>⚠ {warning}</li>
                             ))}

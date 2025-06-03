@@ -110,8 +110,8 @@ function RecommendationCard({ recommendation, onApply, onDismiss }: Recommendati
       <CardContent className="pt-0">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <Target className="h-4 w-4 text-green-600" />
-            <span className="text-sm font-medium text-green-700">
+            <Target className="h-4 w-4 text-accent-success" />
+            <span className="text-sm font-medium text-accent-success">
               {recommendation.estimatedImprovement}
             </span>
           </div>
@@ -188,7 +188,7 @@ export function AIRecommendations({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">
-            <Lightbulb className="h-5 w-5 text-yellow-500" />
+            <Lightbulb className="h-5 w-5 text-accent-warning" />
             <span>AI Recommendations</span>
           </CardTitle>
         </CardHeader>
@@ -211,7 +211,7 @@ export function AIRecommendations({
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-semibold text-card-foreground flex items-center space-x-2">
-            <Lightbulb className="h-5 w-5 text-yellow-500" />
+            <Lightbulb className="h-5 w-5 text-accent-warning" />
             <span>AI Recommendations</span>
           </h2>
           <p className="text-sm text-muted-foreground mt-1">

@@ -436,8 +436,8 @@ export function ModernDashboard() {
                           </div>
                           <div className="mt-3">
                             <div className="flex items-center text-sm">
-                              <ArrowTrendingUpIcon className="h-4 w-4 text-green-500 mr-1" />
-                              <span className="text-green-600 font-medium">{item.change}</span>
+                              <ArrowTrendingUpIcon className="h-4 w-4 text-accent-success mr-1" />
+                              <span className="text-accent-success font-medium">{item.change}</span>
                               <span className="text-muted ml-1">from last month</span>
                             </div>
                           </div>
@@ -493,7 +493,7 @@ export function ModernDashboard() {
                               </div>
                               <div className="flex items-center">
                                 <span className="text-sm font-semibold text-foreground mr-2">{metric.value}</span>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-success/20 text-accent-success">
                                   {metric.trend}
                                 </span>
                               </div>
@@ -533,7 +533,7 @@ export function ModernDashboard() {
                               <div className="relative pb-8">
                                 <div className="relative flex space-x-3">
                                   <div>
-                                    <span className="h-8 w-8 rounded-full bg-green-500 flex items-center justify-center ring-8 ring-surface">
+                                    <span className="h-8 w-8 rounded-full bg-accent-success flex items-center justify-center ring-8 ring-surface">
                                       <CloudArrowUpIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
                                     </span>
                                   </div>

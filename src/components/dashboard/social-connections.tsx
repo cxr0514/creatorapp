@@ -264,8 +264,8 @@ export function SocialConnections() {
         </div>
         
         {connectedAccounts.filter(acc => acc.isConnected).length === 0 && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-800">
+          <div className="mt-4 p-4 bg-accent-warning/10 border border-accent-warning/30 rounded-lg">
+            <p className="text-sm text-accent-warning">
               <strong>Get started:</strong> Connect at least one social media account to begin publishing your content directly from CreatorApp.
             </p>
           </div>

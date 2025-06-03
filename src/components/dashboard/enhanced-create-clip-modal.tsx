@@ -421,7 +421,7 @@ export function EnhancedCreateClipModal({
 
         {/* Validation Errors */}
         {validationErrors.length > 0 && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+          <div className="bg-accent-danger/10 border border-accent-danger/30 rounded-lg p-4 mb-4">
             <h4 className="text-sm font-semibold text-destructive mb-2">Please fix these issues:</h4>
             <ul className="list-disc list-inside text-sm text-destructive">
               {validationErrors.map((error, index) => (
@@ -558,7 +558,7 @@ export function EnhancedCreateClipModal({
                   {/* Selection Range */}
                   {selectionStart !== null && (
                     <div
-                      className="absolute top-0 h-full bg-green-500/50"
+                      className="absolute top-0 h-full bg-accent-success/50"
                       style={{
                         left: `${(selectionStart / duration) * 100}%`,
                         width: selectionEnd 

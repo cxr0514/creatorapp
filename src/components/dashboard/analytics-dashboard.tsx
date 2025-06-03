@@ -104,15 +104,15 @@ export function AnalyticsDashboard() {
   }
 
   const getChangeColor = (change: number): string => {
-    if (change > 0) return 'text-green-600'
-    if (change < 0) return 'text-red-600'
+    if (change > 0) return 'text-accent-success'
+    if (change < 0) return 'text-accent-danger'
     return 'text-muted-foreground'
   }
 
   const getImpactColor = (impact: string): string => {
     switch (impact) {
-      case 'high': return 'bg-red-100 text-red-700 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-700 border-yellow-200'
+      case 'high': return 'bg-accent-danger/20 text-accent-danger border-accent-danger/30'
+      case 'medium': return 'bg-accent-warning/20 text-accent-warning border-accent-warning/30'
       case 'low': return 'bg-primary/20 text-primary border-primary/30'
       default: return 'bg-muted text-muted-foreground border-border'
     }
@@ -269,7 +269,7 @@ export function AnalyticsDashboard() {
                 {formatPercentage(analyticsData.overview.engagementChange)} vs last period
               </p>
             </div>
-            <HeartIcon className="h-8 w-8 text-red-600" />
+            <HeartIcon className="h-8 w-8 text-accent-danger" />
           </div>
         </div>
 
@@ -282,7 +282,7 @@ export function AnalyticsDashboard() {
                 {formatPercentage(analyticsData.overview.sharesChange)} vs last period
               </p>
             </div>
-            <ShareIcon className="h-8 w-8 text-green-600" />
+            <ShareIcon className="h-8 w-8 text-accent-success" />
           </div>
         </div>
 
@@ -371,8 +371,8 @@ export function AnalyticsDashboard() {
               <div className="flex items-start justify-between mb-3">
                 <div className="flex items-center space-x-2">
                   <div className={`w-2 h-2 rounded-full ${
-                    rec.impact === 'high' ? 'bg-red-500' : 
-                    rec.impact === 'medium' ? 'bg-yellow-500' : 'bg-primary'
+                    rec.impact === 'high' ? 'bg-accent-danger' : 
+                    rec.impact === 'medium' ? 'bg-accent-warning' : 'bg-primary'
                   }`} />
                   <h4 className="font-semibold text-accent-foreground">{rec.title}</h4>
                 </div>
@@ -391,7 +391,7 @@ export function AnalyticsDashboard() {
                   <div className="flex items-center space-x-1">
                     <div className="w-16 bg-muted rounded-full h-1.5">
                       <div
-                        className="bg-green-500 h-1.5 rounded-full"
+                        className="bg-accent-success h-1.5 rounded-full"
                         style={{ width: `${rec.confidence}%` }}
                       />
                     </div>

@@ -363,7 +363,7 @@ export function WorkflowApplyModal({ isOpen, onClose, clip, onApplyWorkflow }: W
             <Button 
               onClick={handleApplyWorkflow}
               disabled={!selectedWorkflow || applying}
-              className="bg-purple-600 hover:bg-purple-700"
+              className="bg-primary hover:bg-primary/90"
             >
               {applying ? (
                 <>

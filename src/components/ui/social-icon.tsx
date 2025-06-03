@@ -17,9 +17,9 @@ const PLATFORM_ICONS: Record<string, string> = {
 }
 
 const PLATFORM_COLORS: Record<string, string> = {
-  youtube: 'text-red-600',
+  youtube: 'text-accent-danger',
   tiktok: 'text-black',
-  instagram: 'text-pink-600', 
+  instagram: 'text-accent-warning', 
   twitter: 'text-primary',
   linkedin: 'text-primary',
   facebook: 'text-primary'

@@ -456,7 +456,7 @@ export function WorkflowBuilder() {
                       variant="ghost"
                       size="sm"
                       onClick={() => handleDeleteWorkflow(workflow.id)}
-                      className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      className="h-8 w-8 p-0 text-accent-danger hover:text-accent-danger/80"
                     >
                       <TrashIcon className="h-4 w-4" />
                     </Button>

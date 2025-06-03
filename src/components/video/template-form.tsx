@@ -257,7 +257,7 @@ export function TemplateForm({
                 <p className="text-sm text-muted-foreground">Uploading logo...</p>
               )}
               {formData.logoCloudinaryId && (
-                <p className="text-sm text-green-600">Logo uploaded successfully</p>
+                <p className="text-sm text-accent-success">Logo uploaded successfully</p>
               )}
             </div>
 
@@ -287,7 +287,7 @@ export function TemplateForm({
                 <p className="text-sm text-muted-foreground">Uploading intro...</p>
               )}
               {formData.introCloudinaryId && (
-                <p className="text-sm text-green-600">Intro uploaded successfully</p>
+                <p className="text-sm text-accent-success">Intro uploaded successfully</p>
               )}
             </div>
 
@@ -317,7 +317,7 @@ export function TemplateForm({
                 <p className="text-sm text-muted-foreground">Uploading outro...</p>
               )}
               {formData.outroCloudinaryId && (
-                <p className="text-sm text-green-600">Outro uploaded successfully</p>
+                <p className="text-sm text-accent-success">Outro uploaded successfully</p>
               )}
             </div>
           </div>
@@ -405,8 +405,8 @@ export function TemplateForm({
           </div>
 
           {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-md">
-              <p className="text-sm text-red-600">{error}</p>
+            <div className="p-3 bg-accent-danger/10 border border-accent-danger/30 rounded-md">
+              <p className="text-sm text-accent-danger">{error}</p>
             </div>
           )}
 
