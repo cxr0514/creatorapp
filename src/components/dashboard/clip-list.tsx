@@ -53,10 +53,21 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
       const response = await fetch('/api/clips')
       if (response.ok) {
         const data = await response.json()
-        setClips(data)
+        // Ensure data is an array, handle different response formats
+        if (Array.isArray(data)) {
+          setClips(data)
+        } else if (data && Array.isArray(data.data)) {
+          // Handle wrapped response format
+          setClips(data.data)
+        } else {
+          // Fallback to empty array if unexpected format
+          console.warn('Unexpected API response format:', data)
+          setClips([])
+        }
       }
     } catch (error) {
       console.error('Error fetching clips:', error)
+      setClips([]) // Ensure clips is always an array
     } finally {
       setLoading(false)
     }
@@ -75,7 +86,17 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
       
       if (response.ok) {
         const data = await response.json()
-        setClips(data)
+        // Ensure data is an array, handle different response formats
+        if (Array.isArray(data)) {
+          setClips(data)
+        } else if (data && Array.isArray(data.data)) {
+          // Handle wrapped response format
+          setClips(data.data)
+        } else {
+          // Fallback to empty array if unexpected format
+          console.warn('Unexpected sync API response format:', data)
+          setClips([])
+        }
         onRefresh?.()
       } else if (response.status === 401) {
         console.error('Authentication required for sync')
@@ -288,7 +309,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
     )
   }
 
-  if (clips.length === 0) {
+  if (!Array.isArray(clips) || clips.length === 0) {
     return (
       <div className="text-center py-16">
         <div className="mb-6">
@@ -424,7 +445,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {clips.map((clip) => (
+      {Array.isArray(clips) && clips.map((clip) => (
         <div key={clip.id} className={`group bg-surface rounded-xl shadow-sm border transition-all duration-300 overflow-hidden ${
           selectionMode && selectedClips.has(clip.id) 
             ? 'border-primary/50 shadow-lg ring-2 ring-primary/20' 

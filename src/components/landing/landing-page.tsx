@@ -1,9 +1,23 @@
 'use client'
 
-import { signIn } from 'next-auth/react'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { AuthForm } from '@/components/auth/auth-form'
+import { 
+  PlayIcon, 
+  XMarkIcon,
+  SparklesIcon,
+  ChartBarIcon,
+  ClockIcon,
+  ShareIcon,
+  CheckIcon,
+  StarIcon
+} from '@heroicons/react/24/outline'
 
 export function LandingPage() {
+  const [showAuthModal, setShowAuthModal] = useState(false)
+  const [authMode, setAuthMode] = useState<'signin' | 'signup'>('signin')
+  const [showVideoModal, setShowVideoModal] = useState(false)
   return (
     <div className="min-h-screen bg-gradient-to-br from-hero-gradient-from via-background to-hero-gradient-to relative overflow-hidden">
       {/* Background decoration */}

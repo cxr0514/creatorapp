@@ -35,10 +35,21 @@ export function VideoList({ onCreateClip, onRefresh, onUploadClick }: VideoListP
       const response = await fetch('/api/videos')
       if (response.ok) {
         const data = await response.json()
-        setVideos(data)
+        // Ensure data is an array, handle different response formats
+        if (Array.isArray(data)) {
+          setVideos(data)
+        } else if (data && Array.isArray(data.data)) {
+          // Handle wrapped response format
+          setVideos(data.data)
+        } else {
+          // Fallback to empty array if unexpected format
+          console.warn('Unexpected API response format:', data)
+          setVideos([])
+        }
       }
     } catch (error) {
       console.error('Error fetching videos:', error)
+      setVideos([]) // Ensure videos is always an array
     } finally {
       setLoading(false)
     }
@@ -57,7 +68,17 @@ export function VideoList({ onCreateClip, onRefresh, onUploadClick }: VideoListP
       
       if (response.ok) {
         const data = await response.json()
-        setVideos(data)
+        // Ensure data is an array, handle different response formats
+        if (Array.isArray(data)) {
+          setVideos(data)
+        } else if (data && Array.isArray(data.data)) {
+          // Handle wrapped response format
+          setVideos(data.data)
+        } else {
+          // Fallback to empty array if unexpected format
+          console.warn('Unexpected sync API response format:', data)
+          setVideos([])
+        }
         onRefresh?.()
       } else if (response.status === 401) {
         console.error('Authentication required for sync')
@@ -125,7 +146,7 @@ export function VideoList({ onCreateClip, onRefresh, onUploadClick }: VideoListP
     )
   }
 
-  if (videos.length === 0) {
+  if (!Array.isArray(videos) || videos.length === 0) {
     return (
       <div className="text-center py-16">
         <div className="mb-6">
@@ -203,7 +224,7 @@ export function VideoList({ onCreateClip, onRefresh, onUploadClick }: VideoListP
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {videos.map((video) => (
+      {Array.isArray(videos) && videos.map((video) => (
         <div key={video.id} className="group bg-surface rounded-xl shadow-sm border border-border hover:shadow-lg hover:border-primary/50 transition-all duration-300 overflow-hidden">
           <div className="aspect-video bg-gradient-to-br from-muted/10 to-muted/20 relative overflow-hidden">
             {video.thumbnailUrl ? (

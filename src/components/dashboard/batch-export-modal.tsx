@@ -41,7 +41,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
   const [showQueue, setShowQueue] = useState(false)
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && Array.isArray(clips)) {
       // Auto-select all passed clips and reset other state
       setSelectedClips(new Set(clips.map(clip => clip.id)))
       setSelectedFormats(new Set())
@@ -90,6 +90,8 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
   }
 
   const selectAllClips = () => {
+    if (!Array.isArray(clips)) return
+    
     if (selectedClips.size === clips.length) {
       setSelectedClips(new Set())
     } else {
@@ -269,7 +271,7 @@ export function BatchExportModal({ clips, isOpen, onClose, onExportComplete }: B
                 </Button>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-40 overflow-y-auto">
-                {clips.map((clip) => (
+                {Array.isArray(clips) && clips.map((clip) => (
                   <button
                     key={clip.id}
                     onClick={() => toggleClip(clip.id)}

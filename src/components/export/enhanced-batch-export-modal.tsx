@@ -93,7 +93,7 @@ export function EnhancedBatchExportModal({
 
   // Reset state when modal opens
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && Array.isArray(clips)) {
       setSelectedClips(new Set(clips.map(clip => clip.id)))
       setSelectedFormats(new Set())
       setSelectedPlatforms(new Set())
@@ -148,6 +148,8 @@ export function EnhancedBatchExportModal({
   }
 
   const selectAllClips = () => {
+    if (!Array.isArray(clips)) return
+    
     if (selectedClips.size === clips.length) {
       setSelectedClips(new Set())
     } else {
@@ -432,7 +434,7 @@ export function EnhancedBatchExportModal({
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {clips.map((clip) => (
+                      {Array.isArray(clips) && clips.map((clip) => (
                         <div 
                           key={clip.id}
                           className={`relative border rounded-lg p-4 cursor-pointer transition-colors ${

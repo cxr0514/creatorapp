@@ -11,11 +11,7 @@ export async function GET(request: NextRequest) {
     // For development/testing: Allow access even without session
     if (!session?.user?.email) {
       console.warn('No authenticated session found, returning empty videos list for development')
-      return NextResponse.json({
-        success: true,
-        data: [],
-        total: 0
-      })
+      return NextResponse.json([])
     }
 
     const { searchParams } = new URL(request.url)

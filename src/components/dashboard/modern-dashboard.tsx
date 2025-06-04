@@ -15,6 +15,9 @@ import { WorkflowBuilder } from './workflow-builder'
 import { AnalyticsDashboard } from './analytics-dashboard-refactored'
 import { AIMetadataEnhancer } from './ai-metadata-enhancer'
 import { BatchAIProcessor } from './batch-ai-processor'
+import { EnhancedDashboard } from './enhanced-dashboard'
+import { AdvancedAnalytics } from './advanced-analytics'
+import { MobileDashboard } from './mobile-dashboard'
 import { 
   HomeIcon, 
   VideoCameraIcon, 
@@ -24,7 +27,7 @@ import {
   Cog6ToothIcon,
   UserIcon,
   CreditCardIcon,
-  ArrowTrendingUpIcon,
+  UserGroupIcon,
   PlayIcon,
   CloudArrowUpIcon,
   ClockIcon,
@@ -53,12 +56,24 @@ export function ModernDashboard() {
   const [showSchedulingModal, setShowSchedulingModal] = useState(false)
   const [selectedScheduleDate, setSelectedScheduleDate] = useState<Date>()
   const [scheduledPosts, setScheduledPosts] = useState([])
+  const [isMobile, setIsMobile] = useState(false)
   const [platforms] = useState([
     { id: 'youtube', name: 'YouTube', connected: true, optimalTimes: ['14:00', '16:00', '20:00'], audience: 125000 },
     { id: 'tiktok', name: 'TikTok', connected: true, optimalTimes: ['18:00', '20:00', '22:00'], audience: 85000 },
     { id: 'instagram', name: 'Instagram', connected: false, optimalTimes: ['11:00', '14:00', '17:00'], audience: 0 },
     { id: 'twitter', name: 'Twitter', connected: false, optimalTimes: ['09:00', '12:00', '17:00'], audience: 0 }
   ])
+
+  // Mobile detection
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+    
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   // Fetch scheduled posts on component mount
   useEffect(() => {
@@ -407,155 +422,129 @@ export function ModernDashboard() {
           <div className="py-6">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
               {activeTab === 'dashboard' && (
-                <div className="space-y-6">
-                  {/* Header */}
-                  <div>
-                    <h1 className="text-2xl font-semibold text-foreground">Good morning, {session?.user?.name?.split(' ')[0] || 'Creator'}</h1>
-                    <p className="mt-1 text-sm text-muted">
-                      Here&apos;s what&apos;s happening with your content today.
-                    </p>
-                  </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                    {stats.map((item) => (
-                      <div key={item.name} className="bg-surface overflow-hidden shadow rounded-lg">
-                        <div className="p-5">
-                          <div className="flex items-center">
-                            <div className="flex-shrink-0">
-                              <item.icon className={`h-6 w-6 ${item.color}`} aria-hidden="true" />
-                            </div>
-                            <div className="ml-5 w-0 flex-1">
-                              <dl>
-                                <dt className="text-sm font-medium text-muted truncate">{item.name}</dt>
-                                <dd>
-                                  <div className="text-lg font-medium text-foreground">{item.value}</div>
-                                </dd>
-                              </dl>
-                            </div>
-                          </div>
-                          <div className="mt-3">
-                            <div className="flex items-center text-sm">
-                              <ArrowTrendingUpIcon className="h-4 w-4 text-accent-success mr-1" />
-                              <span className="text-accent-success font-medium">{item.change}</span>
-                              <span className="text-muted ml-1">from last month</span>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Quick Actions */}
-                  <div className="bg-surface shadow rounded-lg">
-                    <div className="px-4 py-5 sm:p-6">
-                      <h3 className="text-lg leading-6 font-medium text-foreground mb-4">Quick Actions</h3>
-                      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                        <button
-                          onClick={() => setShowVideoUpload(true)}
-                          className="relative block w-full border-2 border-border border-dashed rounded-lg p-6 text-center hover:border-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-                        >
-                          <CloudArrowUpIcon className="mx-auto h-8 w-8 text-muted" />
-                          <span className="mt-2 block text-sm font-medium text-foreground">Upload Video</span>
-                          <span className="mt-1 block text-xs text-muted">Upload a new video to get started</span>
-                        </button>
-                        <button
-                          onClick={() => handleCreateClip()}
-                          className="relative block w-full border-2 border-border border-dashed rounded-lg p-6 text-center hover:border-primary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-colors"
-                        >
-                          <ScissorsIcon className="mx-auto h-8 w-8 text-muted" />
-                          <span className="mt-2 block text-sm font-medium text-foreground">Create Clip</span>
-                          <span className="mt-1 block text-xs text-muted">Generate clips from your videos</span>
-                        </button>
-                        <button
-                          disabled
-                          className="relative block w-full border-2 border-border border-dashed rounded-lg p-6 text-center opacity-50 cursor-not-allowed"
-                        >
-                          <CalendarIcon className="mx-auto h-8 w-8 text-muted" />
-                          <span className="mt-2 block text-sm font-medium text-foreground">Schedule Post</span>
-                          <span className="mt-1 block text-xs text-muted">Coming soon</span>
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Performance Insights */}
-                  <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-                    <div className="bg-surface shadow rounded-lg">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg leading-6 font-medium text-foreground mb-4">Performance Insights</h3>
-                        <div className="space-y-4">
-                          {recentMetrics.map((metric) => (
-                            <div key={metric.name} className="flex items-center justify-between">
-                              <div className="flex items-center">
-                                <metric.icon className="h-5 w-5 text-muted mr-3" />
-                                <span className="text-sm font-medium text-foreground">{metric.name}</span>
-                              </div>
-                              <div className="flex items-center">
-                                <span className="text-sm font-semibold text-foreground mr-2">{metric.value}</span>
-                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-success/20 text-accent-success">
-                                  {metric.trend}
-                                </span>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-surface shadow rounded-lg">
-                      <div className="px-4 py-5 sm:p-6">
-                        <h3 className="text-lg leading-6 font-medium text-foreground mb-4">Recent Activity</h3>
-                        <div className="flow-root">
-                          <ul className="-mb-8">
-                            <li>
-                              <div className="relative pb-8">
-                                <div className="relative flex space-x-3">
-                                  <div>
-                                    <span className="h-8 w-8 rounded-full bg-primary flex items-center justify-center ring-8 ring-surface">
-                                      <ScissorsIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
-                                    </span>
-                                  </div>
-                                  <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                    <div>
-                                      <p className="text-sm text-muted">
-                                        Created new clip <span className="font-medium text-foreground">&quot;Best Moments&quot;</span>
-                                      </p>
-                                    </div>
-                                    <div className="text-right text-sm whitespace-nowrap text-muted">
-                                      2h ago
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </li>
-                            <li>
-                              <div className="relative pb-8">
-                                <div className="relative flex space-x-3">
-                                  <div>
-                                    <span className="h-8 w-8 rounded-full bg-accent-success flex items-center justify-center ring-8 ring-surface">
-                                      <CloudArrowUpIcon className="h-4 w-4 text-foreground" aria-hidden="true" />
-                                    </span>
-                                  </div>
-                                  <div className="min-w-0 flex-1 pt-1.5 flex justify-between space-x-4">
-                                    <div>
-                                      <p className="text-sm text-muted">
-                                        Uploaded video <span className="font-medium text-foreground">&quot;Tutorial #5&quot;</span>
-                                      </p>
-                                    </div>
-                                    <div className="text-right text-sm whitespace-nowrap text-muted">
-                                      5h ago
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-                            </li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+                isMobile ? (
+                  <MobileDashboard
+                    stats={[
+                      { title: 'Total Views', value: '2.4M', change: '+12%', icon: EyeIcon, trend: 'up', color: 'text-blue-500' },
+                      { title: 'Engagement', value: '18.5K', change: '+8%', icon: HeartIcon, trend: 'up', color: 'text-red-500' },
+                      { title: 'New Followers', value: '1.2K', change: '+25%', icon: UserGroupIcon, trend: 'up', color: 'text-green-500' },
+                      { title: 'Revenue', value: '$4,230', change: '+15%', icon: CreditCardIcon, trend: 'up', color: 'text-yellow-500' }
+                    ]}
+                    quickActions={[
+                      { 
+                        title: 'Upload Video', 
+                        description: 'Add new content',
+                        icon: CloudArrowUpIcon, 
+                        color: 'bg-primary', 
+                        action: () => setShowVideoUpload(true) 
+                      },
+                      { 
+                        title: 'Create Clip', 
+                        description: 'Generate short clips',
+                        icon: ScissorsIcon, 
+                        color: 'bg-accent-success', 
+                        action: () => handleCreateClip() 
+                      },
+                      { 
+                        title: 'Schedule Post', 
+                        description: 'Plan your content',
+                        icon: CalendarIcon, 
+                        color: 'bg-accent-warning', 
+                        action: () => setShowSchedulingModal(true) 
+                      },
+                      { 
+                        title: 'View Analytics', 
+                        description: 'Track performance',
+                        icon: ChartBarIcon, 
+                        color: 'bg-accent-info', 
+                        action: () => setActiveTab('analytics') 
+                      }
+                    ]}
+                    contentItems={[
+                      { 
+                        id: '1', 
+                        title: 'Morning Workout Routine', 
+                        views: 45200, 
+                        platform: 'youtube',
+                        thumbnail: '/api/placeholder/300/200',
+                        status: 'published' as const,
+                        publishDate: '2024-06-01'
+                      },
+                      { 
+                        id: '2', 
+                        title: 'Quick Recipe Tips', 
+                        views: 23100, 
+                        platform: 'tiktok',
+                        thumbnail: '/api/placeholder/300/200',
+                        status: 'published' as const,
+                        publishDate: '2024-06-02'
+                      },
+                      { 
+                        id: '3', 
+                        title: 'Travel Vlog Day 3', 
+                        views: 67800, 
+                        platform: 'youtube',
+                        thumbnail: '/api/placeholder/300/200',
+                        status: 'published' as const,
+                        publishDate: '2024-06-03'
+                      }
+                    ]}
+                    userName={session?.user?.name || undefined}
+                    onMenuToggle={() => setSidebarOpen(true)}
+                    onRefresh={() => setRefreshKey(prev => prev + 1)}
+                    onCreateContent={() => setShowVideoUpload(true)}
+                  />
+                ) : (
+                  <EnhancedDashboard
+                    stats={stats}
+                    recentMetrics={recentMetrics}
+                    quickActions={[
+                      {
+                        title: 'Upload Video',
+                        description: 'Add new content to your library',
+                        icon: CloudArrowUpIcon,
+                        color: 'from-primary to-primary/80',
+                        onClick: () => setShowVideoUpload(true)
+                      },
+                      {
+                        title: 'Create Clip',
+                        description: 'Generate clips from your videos',
+                        icon: ScissorsIcon,
+                        color: 'from-accent-success to-accent-success/80',
+                        onClick: () => handleCreateClip()
+                      },
+                      {
+                        title: 'Schedule Post',
+                        description: 'Plan your content calendar',
+                        icon: CalendarIcon,
+                        color: 'from-accent-warning to-accent-warning/80',
+                        onClick: () => setShowSchedulingModal(true)
+                      },
+                      {
+                        title: 'View Analytics',
+                        description: 'Track your performance',
+                        icon: ChartBarIcon,
+                        color: 'from-accent-info to-accent-info/80',
+                        onClick: () => setActiveTab('analytics')
+                      },
+                      {
+                        title: 'AI Enhancement',
+                        description: 'Optimize with AI tools',
+                        icon: SparklesIcon,
+                        color: 'from-purple-500 to-purple-600',
+                        onClick: () => setActiveTab('ai')
+                      },
+                      {
+                        title: 'Workflows',
+                        description: 'Automate your process',
+                        icon: Cog6ToothIcon,
+                        color: 'from-slate-500 to-slate-600',
+                        onClick: () => setActiveTab('workflows')
+                      }
+                    ]}
+                    userName={session?.user?.name || undefined}
+                  />
+                )
               )}
 
               {activeTab === 'uploads' && (
@@ -685,7 +674,19 @@ export function ModernDashboard() {
               )}
 
               {activeTab === 'analytics' && (
-                <AnalyticsDashboard />
+                isMobile ? (
+                  <AnalyticsDashboard />
+                ) : (
+                  <div className="space-y-8">
+                    <div>
+                      <h1 className="text-2xl font-semibold text-foreground">Advanced Analytics</h1>
+                      <p className="mt-1 text-sm text-muted">
+                        Deep insights into your content performance with interactive visualizations
+                      </p>
+                    </div>
+                    <AdvancedAnalytics timeRange="30d" />
+                  </div>
+                )
               )}
 
               {activeTab === 'profile' && (

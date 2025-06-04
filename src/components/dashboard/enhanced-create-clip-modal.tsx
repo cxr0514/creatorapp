@@ -569,7 +569,7 @@ export function EnhancedCreateClipModal({
                   )}
                   
                   {/* Clip Markers */}
-                  {clips.map((clip) => (
+                  {Array.isArray(clips) && clips.map((clip) => (
                     <div
                       key={clip.id}
                       className="absolute top-0 h-full border-2 border-primary bg-primary/20"
@@ -653,7 +653,7 @@ export function EnhancedCreateClipModal({
                 <CardTitle className="text-sm">Clip Configuration</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3 max-h-96 overflow-y-auto">
-                {clips.map((clip) => (
+                {Array.isArray(clips) && clips.map((clip) => (
                   <div
                     key={clip.id}
                     className={`p-3 border rounded-lg cursor-pointer transition-colors ${
