@@ -1,3 +1,4 @@
+// filepath: /Users/CXR0514/Library/CloudStorage/OneDrive-TheHomeDepot/Documents 1/creators/creatorapp/prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/prisma"

@@ -18,6 +18,13 @@ import { BatchAIProcessor } from './batch-ai-processor'
 import { EnhancedDashboard } from './enhanced-dashboard'
 import { AdvancedAnalytics } from './advanced-analytics'
 import { MobileDashboard } from './mobile-dashboard'
+import { UserPreferencesForm } from '../preferences/user-preferences-form'
+// Phase 6 Components
+import AdminDashboard from '../admin/AdminDashboard'
+import PricingPlans from '../subscription/PricingPlans'
+import WorkspaceManagement from '../workspace/WorkspaceManagement'
+import SupportTickets from '../support/SupportTickets'
+import SystemMonitoring from '../admin/SystemMonitoring'
 import { 
   HomeIcon, 
   VideoCameraIcon, 
@@ -40,7 +47,11 @@ import {
   MagnifyingGlassIcon,
   Bars3Icon,
   XMarkIcon,
-  SparklesIcon
+  SparklesIcon,
+  ShieldCheckIcon,
+  BuildingOfficeIcon,
+  LifebuoyIcon,
+  CpuChipIcon
 } from '@heroicons/react/24/outline'
 
 export function ModernDashboard() {
@@ -63,6 +74,9 @@ export function ModernDashboard() {
     { id: 'instagram', name: 'Instagram', connected: false, optimalTimes: ['11:00', '14:00', '17:00'], audience: 0 },
     { id: 'twitter', name: 'Twitter', connected: false, optimalTimes: ['09:00', '12:00', '17:00'], audience: 0 }
   ])
+
+  // Check if user is admin (you might want to get this from session or API)
+  const isAdmin = session?.user?.email === 'admin@creatorapp.com' || false
 
   // Mobile detection
   useEffect(() => {
@@ -165,11 +179,16 @@ export function ModernDashboard() {
     { name: 'Calendar', href: 'calendar', icon: CalendarIcon },
     { name: 'Analytics', href: 'analytics', icon: ChartBarIcon },
     { name: 'Workflows', href: 'workflows', icon: Cog6ToothIcon },
+    { name: 'Workspaces', href: 'workspaces', icon: BuildingOfficeIcon },
+    { name: 'Support', href: 'support', icon: LifebuoyIcon },
+    ...(isAdmin ? [{ name: 'Admin Portal', href: 'admin', icon: ShieldCheckIcon }] : []),
+    ...(isAdmin ? [{ name: 'System Monitor', href: 'monitor', icon: CpuChipIcon }] : []),
   ]
 
   const bottomNavigation = [
     { name: 'Profile', href: 'profile', icon: UserIcon },
-    { name: 'Billing', href: 'pricing', icon: CreditCardIcon },
+    { name: 'Subscription', href: 'subscription', icon: CreditCardIcon },
+    { name: 'Support', href: 'support', icon: LifebuoyIcon },
   ]
 
   const stats = [
@@ -378,6 +397,18 @@ export function ModernDashboard() {
               </div>
             </div>
             <div className="ml-4 flex items-center md:ml-6 space-x-4">
+              {isAdmin && (
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="flex items-center gap-1 text-primary"
+                  onClick={() => window.location.href = '/admin'}
+                >
+                  <ShieldCheckIcon className="h-4 w-4" />
+                  Admin
+                </Button>
+              )}
+              
               <button
                 type="button"
                 className="bg-surface p-1 rounded-full text-muted hover:text-foreground focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary"
@@ -713,6 +744,16 @@ export function ModernDashboard() {
                           Account Settings
                         </button>
                         <button
+                          onClick={() => setProfileTab('preferences')}
+                          className={`${
+                            profileTab === 'preferences'
+                              ? 'border-primary text-primary'
+                              : 'border-transparent text-muted hover:text-foreground hover:border-border'
+                          } whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors`}
+                        >
+                          Preferences
+                        </button>
+                        <button
                           onClick={() => setProfileTab('connections')}
                           className={`${
                             profileTab === 'connections'
@@ -767,6 +808,12 @@ export function ModernDashboard() {
                               </Button>
                             </div>
                           </div>
+                        </div>
+                      )}
+
+                      {profileTab === 'preferences' && session?.user?.id && (
+                        <div className="-m-6">
+                          <UserPreferencesForm userId={session.user.id} />
                         </div>
                       )}
 
@@ -837,6 +884,67 @@ export function ModernDashboard() {
                       </div>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {/* Phase 6: Advanced Features */}
+              {activeTab === 'subscription' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-foreground">Subscription Plans</h1>
+                    <p className="mt-1 text-sm text-muted">
+                      Choose the perfect plan for your content creation needs
+                    </p>
+                  </div>
+                  <PricingPlans />
+                </div>
+              )}
+
+              {activeTab === 'workspaces' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-foreground">Team Workspaces</h1>
+                    <p className="mt-1 text-sm text-muted">
+                      Collaborate with your team members and manage workspace access
+                    </p>
+                  </div>
+                  <WorkspaceManagement />
+                </div>
+              )}
+
+              {activeTab === 'support' && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-foreground">Customer Support</h1>
+                    <p className="mt-1 text-sm text-muted">
+                      Get help from our support team or browse existing tickets
+                    </p>
+                  </div>
+                  <SupportTickets />
+                </div>
+              )}
+
+              {activeTab === 'admin' && isAdmin && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-foreground">Admin Portal</h1>
+                    <p className="mt-1 text-sm text-muted">
+                      Manage users, monitor system health, and configure platform settings
+                    </p>
+                  </div>
+                  <AdminDashboard />
+                </div>
+              )}
+
+              {activeTab === 'monitor' && isAdmin && (
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold text-foreground">System Monitoring</h1>
+                    <p className="mt-1 text-sm text-muted">
+                      Monitor system performance, view metrics, and manage feature flags
+                    </p>
+                  </div>
+                  <SystemMonitoring />
                 </div>
               )}
             </div>
