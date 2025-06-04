@@ -1,31 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/app/api/auth/[...nextauth]/route';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20'
-});
+// Initialize Stripe only if we have a real key
+const isStripeConfigured = process.env.STRIPE_SECRET_KEY && 
+  !process.env.STRIPE_SECRET_KEY.includes('your_') && 
+  !process.env.STRIPE_SECRET_KEY.includes('placeholder');
 
-interface SubscriptionPlan {
-  id: string;
-  name: string;
-  displayName: string;
-  description: string;
-  price: number;
-  features: string[];
-  limits: any;
-  isActive: boolean;
-  isPopular: boolean;
-  sortOrder: number;
-  billingInterval: string;
-  stripeProductId: string;
-  stripePriceId: string;
-  _count: {
-    subscriptions: number;
-  };
-}
+const stripe = isStripeConfigured ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2025-05-28.basil'
+}) : null;
 
 // Get subscription plans
 export async function GET() {
@@ -46,10 +30,12 @@ export async function GET() {
       }
     });
 
-    // Transform the response to include subscriber count but not expose internal details
-    const formattedPlans = plans.map((plan: SubscriptionPlan) => ({
+    // Transform the response to include subscriber count and properly format pricing
+    const formattedPlans = plans.map((plan) => ({
       ...plan,
       subscriberCount: plan._count.subscriptions,
+      price: Number(plan.priceMonthly) / 100, // Convert from cents to dollars
+      priceYearly: plan.priceYearly ? Number(plan.priceYearly) / 100 : null,
       _count: undefined
     }));
 
@@ -64,66 +50,102 @@ export async function GET() {
 // Create a new subscription plan (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(authOptions);
+    // Use JWT authentication for admin endpoints
+    const { verifyAdminAuth } = await import('@/lib/auth/jwt');
+    const authResult = await verifyAdminAuth(request, ['plan_management']);
     
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    if (!authResult.isValid) {
+      return NextResponse.json({ error: authResult.error }, { status: 401 });
     }
 
-    // Check if user is admin
-    const adminProfile = await prisma.admin.findUnique({
-      where: { userId: session.user.id }
-    });
-
-    if (!adminProfile || !adminProfile.permissions.includes('plan_management')) {
-      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-    }
+    const { admin } = authResult;
 
     const planData = await request.json();
 
-    // Create product in Stripe
-    const stripeProduct = await stripe.products.create({
-      name: planData.displayName,
-      description: planData.description,
-      metadata: {
-        planId: planData.name
-      }
-    });
+    let stripeProduct = null;
+    let stripePrice = null;
 
-    // Create price in Stripe
-    const stripePrice = await stripe.prices.create({
-      product: stripeProduct.id,
-      unit_amount: Math.round(planData.price * 100), // Convert to cents
-      currency: 'usd',
-      recurring: {
-        interval: planData.billingInterval
+    // Only create Stripe product/price if Stripe is configured
+    if (stripe && isStripeConfigured) {
+      try {
+        // Create product in Stripe
+        stripeProduct = await stripe.products.create({
+          name: planData.displayName,
+          description: planData.description,
+          metadata: {
+            planId: planData.name
+          }
+        });
+
+        // Create price in Stripe
+        stripePrice = await stripe.prices.create({
+          product: stripeProduct.id,
+          unit_amount: Math.round(planData.priceMonthly * 100), // Convert to cents
+          currency: planData.currency || 'usd',
+          recurring: {
+            interval: planData.billingInterval || 'month'
+          }
+        });
+      } catch (stripeError) {
+        console.error('Stripe error:', stripeError);
+        // Continue without Stripe if there's an error
+        stripeProduct = null;
+        stripePrice = null;
       }
-    });
+    }
 
     // Create plan in database
     const plan = await prisma.subscriptionPlan.create({
       data: {
-        ...planData,
-        stripeProductId: stripeProduct.id,
-        stripePriceId: stripePrice.id
+        name: planData.name,
+        displayName: planData.displayName,
+        description: planData.description,
+        priceMonthly: planData.priceMonthly * 100, // Store in cents
+        priceYearly: planData.priceYearly ? planData.priceYearly * 100 : null,
+        currency: planData.currency || 'USD',
+        billingInterval: planData.billingInterval || 'month',
+        stripeProductId: stripeProduct?.id || null,
+        stripePriceId: stripePrice?.id || null,
+        features: planData.features || [],
+        limits: planData.limits || {},
+        maxVideos: planData.maxVideos || -1,
+        maxStorage: planData.maxStorage || -1,
+        maxClipsPerVideo: planData.maxClipsPerVideo || -1,
+        maxExportsPerMonth: planData.maxExportsPerMonth || -1,
+        hasAiEnhancement: planData.hasAiEnhancement ?? true,
+        hasScheduling: planData.hasScheduling ?? true,
+        hasAnalytics: planData.hasAnalytics ?? true,
+        hasTemplates: planData.hasTemplates ?? true,
+        hasPrioritySupport: planData.hasPrioritySupport ?? false,
+        hasWhiteLabel: planData.hasWhiteLabel ?? false,
+        hasApiAccess: planData.hasApiAccess ?? false,
+        isPopular: planData.isPopular ?? false,
+        sortOrder: planData.sortOrder ?? 0,
+        isActive: planData.isActive ?? true
       }
     });
 
     // Create audit log
     await prisma.auditLog.create({
       data: {
-        adminId: adminProfile.id,
+        adminId: admin!.adminId,
         action: 'plan_created',
         targetType: 'subscription_plan',
         targetId: plan.id,
         details: {
           planName: plan.displayName,
-          price: plan.price
+          priceMonthly: Number(plan.priceMonthly) / 100
         }
       }
     });
 
-    return NextResponse.json({ plan });
+    return NextResponse.json({ 
+      plan: {
+        ...plan,
+        price: Number(plan.priceMonthly) / 100, // Convert back to dollars for response
+        priceYearly: plan.priceYearly ? Number(plan.priceYearly) / 100 : null
+      }
+    });
 
   } catch (error) {
     console.error('Error creating subscription plan:', error);

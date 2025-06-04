@@ -10,8 +10,9 @@ async function main() {
   // Create subscription plans
   console.log('📋 Creating subscription plans...')
   
-  const freePlan = await prisma.subscriptionPlan.create({
-    data: {
+  const freePlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'free' },
+    create: {
       name: 'free',
       displayName: 'Free',
       description: 'Perfect for getting started with video content creation',
@@ -32,10 +33,16 @@ async function main() {
       sortOrder: 1,
       isActive: true,
     },
+    update: {
+      displayName: 'Free',
+      description: 'Perfect for getting started with video content creation',
+      isActive: true,
+    },
   })
 
-  const proPlan = await prisma.subscriptionPlan.create({
-    data: {
+  const proPlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'pro' },
+    create: {
       name: 'pro',
       displayName: 'Pro',
       description: 'For content creators who need more power and features',
@@ -57,10 +64,16 @@ async function main() {
       sortOrder: 2,
       isActive: true,
     },
+    update: {
+      displayName: 'Pro',
+      description: 'For content creators who need more power and features',
+      isActive: true,
+    },
   })
 
-  const businessPlan = await prisma.subscriptionPlan.create({
-    data: {
+  const businessPlan = await prisma.subscriptionPlan.upsert({
+    where: { name: 'business' },
+    create: {
       name: 'business',
       displayName: 'Business',
       description: 'For teams and agencies managing multiple clients',
@@ -81,6 +94,11 @@ async function main() {
       sortOrder: 3,
       isActive: true,
     },
+    update: {
+      displayName: 'Business',
+      description: 'For teams and agencies managing multiple clients',
+      isActive: true,
+    },
   })
 
   console.log(`✅ Created subscription plans: ${freePlan.name}, ${proPlan.name}, ${businessPlan.name}`)
@@ -89,8 +107,9 @@ async function main() {
   console.log('👤 Creating admin user...')
   const hashedPassword = await bcrypt.hash('admin123', 12)
   
-  const adminUser = await prisma.user.create({
-    data: {
+  const adminUser = await prisma.user.upsert({
+    where: { email: 'admin@creatorapp.com' },
+    create: {
       email: 'admin@creatorapp.com',
       username: 'admin',
       name: 'System Administrator',
@@ -99,19 +118,36 @@ async function main() {
       accountStatus: 'active',
       emailVerified: new Date(),
     },
-  })
-
-  // Create admin profile
-  const adminProfile = await prisma.admin.create({
-    data: {
-      userId: adminUser.id,
-      role: 'super_admin',
-      permissions: ['all'],
+    update: {
+      name: 'System Administrator',
       isActive: true,
+      accountStatus: 'active',
     },
   })
 
-  console.log(`✅ Created admin user: ${adminUser.email}`)
+  // Create admin profile
+  const adminProfile = await prisma.admin.upsert({
+    where: { userId: adminUser.id },
+    create: {
+      userId: adminUser.id,
+      role: 'super_admin',
+      permissions: ['user_management', 'plan_management', 'system_monitoring', 'support_management'],
+      canImpersonate: true,
+      canDeleteUsers: true,
+      canManageRoles: true,
+      canAccessLogs: true,
+    },
+    update: {
+      role: 'super_admin',
+      permissions: ['user_management', 'plan_management', 'system_monitoring', 'support_management'],
+      canImpersonate: true,
+      canDeleteUsers: true,
+      canManageRoles: true,
+      canAccessLogs: true,
+    },
+  })
+
+  console.log(`✅ Created admin user: ${adminUser.email} with role: ${adminProfile.role}`);
 
   // Create sample feature flags
   console.log('🚩 Creating feature flags...')

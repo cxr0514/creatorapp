@@ -26,6 +26,7 @@ export const config = {
   matcher: [
     '/dashboard/:path*',
     '/admin/:path*',
-    '/api/admin/:path*'
+    // Apply to admin API routes except the auth endpoint
+    '/api/admin/((?!auth).)*'
   ]
 }

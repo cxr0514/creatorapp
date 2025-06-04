@@ -32,7 +32,7 @@ export const OAUTH_CONFIGS: Record<string, PlatformConfig> = {
         'https://www.googleapis.com/auth/youtube.readonly',
         'https://www.googleapis.com/auth/userinfo.profile'
       ],
-      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/youtube/callback'
+      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/callback/youtube'
     },
     apiBaseUrl: 'https://www.googleapis.com/youtube/v3',
     rateLimit: {
@@ -52,7 +52,7 @@ export const OAUTH_CONFIGS: Record<string, PlatformConfig> = {
         'video.upload',
         'video.publish'
       ],
-      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/tiktok/callback'
+      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/callback/tiktok'
     },
     apiBaseUrl: 'https://open.tiktokapis.com',
     rateLimit: {
@@ -72,7 +72,7 @@ export const OAUTH_CONFIGS: Record<string, PlatformConfig> = {
         'user_media',
         'instagram_content_publish'
       ],
-      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/instagram/callback'
+      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/callback/instagram'
     },
     apiBaseUrl: 'https://graph.instagram.com',
     rateLimit: {
@@ -93,7 +93,7 @@ export const OAUTH_CONFIGS: Record<string, PlatformConfig> = {
         'users.read',
         'offline.access'
       ],
-      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/twitter/callback'
+      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/callback/twitter'
     },
     apiBaseUrl: 'https://api.twitter.com/2',
     rateLimit: {
@@ -113,7 +113,7 @@ export const OAUTH_CONFIGS: Record<string, PlatformConfig> = {
         'w_member_social',
         'w_organization_social'
       ],
-      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/linkedin/callback'
+      redirectUri: process.env.NEXTAUTH_URL + '/api/social/oauth/callback/linkedin'
     },
     apiBaseUrl: 'https://api.linkedin.com/v2',
     rateLimit: {
