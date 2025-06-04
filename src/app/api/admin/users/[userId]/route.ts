@@ -27,7 +27,7 @@ export async function PATCH(
     const { action, reason } = await request.json();
     const { userId } = params;
 
-    let updateData: any = {};
+    let updateData: Record<string, unknown> = {};
     let auditAction = '';
 
     switch (action) {

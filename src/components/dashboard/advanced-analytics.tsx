@@ -4,12 +4,8 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -17,11 +13,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
-  ResponsiveContainer,
-  RadialBarChart,
-  RadialBar,
-  ComposedChart
+  ResponsiveContainer
 } from 'recharts'
 import {
   ArrowTrendingUpIcon,
@@ -37,13 +29,6 @@ import {
   ComputerDesktopIcon,
   RectangleStackIcon
 } from '@heroicons/react/24/outline'
-
-interface MetricData {
-  name: string
-  value: number
-  change: number
-  trend: 'up' | 'down' | 'stable'
-}
 
 interface ChartData {
   name: string
@@ -181,7 +166,7 @@ function InteractiveLineChart({ data }: { data: ChartData[] }) {
       <div className="flex items-center justify-between mb-6">
         <h3 className="text-lg font-semibold text-foreground">Performance Trends</h3>
         <div className="flex items-center space-x-2">
-          {metrics.map(({ key, label, color, icon: Icon }) => (
+          {metrics.map(({ key, label, icon: Icon }) => (
             <button
               key={key}
               onClick={() => setActiveMetric(key)}
@@ -453,7 +438,7 @@ export function AdvancedAnalytics({ timeRange, className }: AdvancedAnalyticsPro
 
       {/* Metrics Overview */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {metrics.map((metric, index) => (
+        {metrics.map((metric) => (
           <AnimatedMetric key={metric.title} {...metric} />
         ))}
       </div>

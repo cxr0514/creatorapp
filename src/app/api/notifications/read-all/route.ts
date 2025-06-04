@@ -1,7 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextResponse } from 'next/server'
 
 // PUT /api/notifications/read-all - Mark all notifications as read
-export async function PUT(request: NextRequest) {
+export async function PUT() {
   try {
     // In a real implementation, update all unread notifications in the database
     // For now, we'll just return success

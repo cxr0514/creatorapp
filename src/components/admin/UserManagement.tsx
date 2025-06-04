@@ -7,12 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { 
-  Users, 
-  AlertCircle, 
-  DollarSign, 
-  Activity,
   Search,
-  Filter,
   Eye,
   UserX,
   UserCheck,
@@ -47,7 +42,7 @@ interface User {
   isActive: boolean;
   accountStatus: string;
   totalStorage: number;
-  usageStats: any;
+  usageStats: Record<string, unknown>;
   subscription?: {
     status: string;
     plan: {
@@ -68,6 +63,7 @@ interface UserAction {
 }
 
 export default function AdminUserManagement() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session } = useSession();
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,16 +86,14 @@ export default function AdminUserManagement() {
       } else {
         toast({
           title: 'Error',
-          description: 'Failed to fetch users',
-          variant: 'destructive'
+          description: 'Failed to fetch users'
         });
       }
     } catch (error) {
       console.error('Error fetching users:', error);
       toast({
         title: 'Error',
-        description: 'Failed to fetch users',
-        variant: 'destructive'
+        description: 'Failed to fetch users'
       });
     } finally {
       setLoading(false);
@@ -134,16 +128,14 @@ export default function AdminUserManagement() {
         const error = await response.json();
         toast({
           title: 'Error',
-          description: error.error || 'Failed to update user',
-          variant: 'destructive'
+          description: error.error || 'Failed to update user'
         });
       }
     } catch (error) {
       console.error('Error updating user:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update user',
-        variant: 'destructive'
+        description: 'Failed to update user'
       });
     } finally {
       setActionLoading(false);
@@ -367,7 +359,7 @@ export default function AdminUserManagement() {
             <Button
               onClick={handleUserAction}
               disabled={actionLoading || (selectedAction?.type !== 'activate' && !actionReason.trim())}
-              variant={selectedAction?.type === 'ban' ? 'destructive' : 'default'}
+              variant={selectedAction?.type === 'ban' ? 'outline' : 'default'}
             >
               {actionLoading ? 'Processing...' : 
                 selectedAction?.type === 'suspend' ? 'Suspend User' :

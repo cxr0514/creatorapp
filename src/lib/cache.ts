@@ -61,7 +61,7 @@ class SimpleCache<T> {
   }
 
   // Generate cache key from parameters
-  generateKey(params: Record<string, any>): string {
+  generateKey(params: Record<string, unknown>): string {
     return Buffer.from(JSON.stringify(params)).toString('base64')
   }
 

@@ -5,6 +5,7 @@ import { Notification } from '@/types/notifications'
 const mockNotifications: Notification[] = [
   {
     id: '1',
+    userId: 'mock-user-id',
     type: 'success' as const,
     title: 'Video Published Successfully',
     message: 'Your video "5 AI Tools for Content Creators" has been published to YouTube.',
@@ -13,7 +14,7 @@ const mockNotifications: Notification[] = [
     read: false,
     actionUrl: 'https://youtube.com/watch?v=example123',
     category: 'publishing' as const,
-    priority: 'medium' as const,
+    priority: 'normal' as const,
     contentType: 'video' as const,
     metadata: {
       postId: 'yt_post_123',
@@ -30,6 +31,7 @@ const mockNotifications: Notification[] = [
   },
   {
     id: '2',
+    userId: 'mock-user-id',
     type: 'info' as const,
     title: 'Content Scheduled Successfully',
     message: 'Your TikTok video has been scheduled for tomorrow at 3:00 PM.',
@@ -47,6 +49,7 @@ const mockNotifications: Notification[] = [
   },
   {
     id: '3',
+    userId: 'mock-user-id',
     type: 'success' as const,
     title: 'Analytics Milestone Reached',
     message: 'Your Instagram post reached 10,000 views! Engagement is up 25%.',
@@ -55,7 +58,7 @@ const mockNotifications: Notification[] = [
     read: true,
     actionUrl: 'https://instagram.com/p/example456',
     category: 'analytics' as const,
-    priority: 'medium' as const,
+    priority: 'normal' as const,
     contentType: 'image' as const,
     metadata: {
       postId: 'ig_post_789',
@@ -72,6 +75,7 @@ const mockNotifications: Notification[] = [
   },
   {
     id: '4',
+    userId: 'mock-user-id',
     type: 'warning' as const,
     title: 'Publishing Delayed',
     message: 'Your LinkedIn post was delayed due to platform maintenance. Will retry in 30 minutes.',
@@ -89,6 +93,7 @@ const mockNotifications: Notification[] = [
   },
   {
     id: '5',
+    userId: 'mock-user-id',
     type: 'error' as const,
     title: 'Authentication Error',
     message: 'Twitter connection expired. Please reconnect your account to continue publishing.',
@@ -111,6 +116,7 @@ const mockNotifications: Notification[] = [
     read: false,
     category: 'analytics' as const,
     priority: 'low' as const,
+    userId: 'mock-user-id',
     metadata: {
       views: 45200,
       engagement: 9.8,
@@ -181,6 +187,7 @@ export async function POST(request: NextRequest) {
 
     const newNotification: Notification = {
       id: Date.now().toString(),
+      userId: 'mock-user-id', // In production, get from authenticated user
       type,
       title,
       message,
@@ -189,7 +196,7 @@ export async function POST(request: NextRequest) {
       read: false,
       actionUrl,
       category: category || 'system',
-      priority: priority || 'medium',
+      priority: priority || 'normal',
       contentType,
       metadata
     }

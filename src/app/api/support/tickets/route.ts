@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const category = searchParams.get('category');
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       userId: session.user.id
     };
     
@@ -27,18 +27,6 @@ export async function GET(request: NextRequest) {
       where,
       include: {
         responses: {
-          include: {
-            admin: {
-              include: {
-                user: {
-                  select: {
-                    name: true,
-                    image: true
-                  }
-                }
-              }
-            }
-          },
           orderBy: {
             createdAt: 'asc'
           }
@@ -68,9 +56,26 @@ export async function POST(request: NextRequest) {
 
     const { subject, description, category, priority = 'medium', attachments } = await request.json();
 
+    // Get user info for required fields
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { email: true, name: true }
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+
+    // Generate ticket number
+    const ticketCount = await prisma.supportTicket.count();
+    const ticketNumber = `HELP-${new Date().getFullYear()}-${String(ticketCount + 1).padStart(3, '0')}`;
+
     const ticket = await prisma.supportTicket.create({
       data: {
         userId: session.user.id,
+        ticketNumber,
+        email: user.email || '',
+        name: user.name || '',
         subject,
         description,
         category,

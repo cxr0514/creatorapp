@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -12,8 +12,6 @@ import {
   MessageCircle,
   Clock,
   CheckCircle,
-  AlertCircle,
-  Filter,
   Search
 } from 'lucide-react';
 import {
@@ -84,6 +82,7 @@ const STATUSES = [
 ];
 
 export default function SupportTickets() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session } = useSession();
   const [tickets, setTickets] = useState<SupportTicket[]>([]);
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
@@ -99,11 +98,7 @@ export default function SupportTickets() {
     priority: 'medium' as 'low' | 'medium' | 'high' | 'urgent'
   });
 
-  useEffect(() => {
-    fetchTickets();
-  }, []);
-
-  const fetchTickets = async () => {
+  const fetchTickets = useCallback(async () => {
     try {
       const params = new URLSearchParams();
       if (filterStatus !== 'all') params.append('status', filterStatus);
@@ -112,18 +107,18 @@ export default function SupportTickets() {
       const response = await fetch(`/api/support/tickets?${params}`);
       if (response.ok) {
         const data = await response.json();
-        setTickets(data.tickets);
+        setTickets(data.tickets || []);
       }
     } catch (error) {
       console.error('Error fetching tickets:', error);
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterStatus, filterCategory]);
 
   useEffect(() => {
     fetchTickets();
-  }, [filterStatus, filterCategory]);
+  }, [fetchTickets]);
 
   const createTicket = async () => {
     try {
@@ -153,16 +148,14 @@ export default function SupportTickets() {
         const error = await response.json();
         toast({
           title: 'Error',
-          description: error.error || 'Failed to create ticket',
-          variant: 'destructive'
+          description: error.error || 'Failed to create ticket'
         });
       }
     } catch (error) {
       console.error('Error creating ticket:', error);
       toast({
         title: 'Error',
-        description: 'Failed to create ticket',
-        variant: 'destructive'
+        description: 'Failed to create ticket'
       });
     }
   };
@@ -226,7 +219,7 @@ export default function SupportTickets() {
             <DialogHeader>
               <DialogTitle>Create Support Ticket</DialogTitle>
               <DialogDescription>
-                Describe your issue and we'll get back to you as soon as possible.
+                Describe your issue and we&apos;ll get back to you as soon as possible.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">

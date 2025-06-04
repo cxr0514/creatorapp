@@ -14,15 +14,15 @@ export async function GET() {
 
     const featureFlags = await prisma.featureFlag.findMany({
       where: {
-        isActive: true
+        isEnabled: true
       }
     });
 
     // Return flags as key-value pairs for easy consumption
     const flags = featureFlags.reduce((acc, flag) => {
-      acc[flag.name] = flag.value;
+      acc[flag.name] = flag.isEnabled;
       return acc;
-    }, {} as Record<string, any>);
+    }, {} as Record<string, boolean>);
 
     return NextResponse.json({ flags });
 
@@ -50,21 +50,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { name, value, description, isActive = true } = await request.json();
+    const { name, isEnabled, description, rolloutPercent = 0, targetUsers = [], targetWorkspaces = [] } = await request.json();
 
     const featureFlag = await prisma.featureFlag.upsert({
       where: { name },
       update: {
-        value,
+        isEnabled,
         description,
-        isActive,
+        rolloutPercent,
+        targetUsers,
+        targetWorkspaces,
         updatedAt: new Date()
       },
       create: {
         name,
-        value,
+        isEnabled,
         description,
-        isActive
+        rolloutPercent,
+        targetUsers,
+        targetWorkspaces
       }
     });
 
@@ -77,8 +81,7 @@ export async function POST(request: NextRequest) {
         targetId: featureFlag.id,
         details: {
           flagName: name,
-          newValue: value,
-          isActive
+          newValue: isEnabled
         }
       }
     });

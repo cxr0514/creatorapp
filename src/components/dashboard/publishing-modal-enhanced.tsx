@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { PlatformIcon } from '@/lib/platform-icons'
 import { Calendar, Clock, AlertTriangle, CheckCircle } from 'lucide-react'
+import Image from 'next/image'
 
 interface Clip {
   id: number
@@ -20,7 +21,7 @@ interface PublishingModalEnhancedProps {
   clip: Clip
   isOpen: boolean
   onClose: () => void
-  onPublishComplete: (results: any) => void
+  onPublishComplete: (results: Record<string, unknown>) => void
 }
 
 interface PlatformStatus {
@@ -90,35 +91,13 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
   })
   const [publishing, setPublishing] = useState(false)
   const [publishingProgress, setPublishingProgress] = useState<Record<string, string>>({})
-  const [validationResults, setValidationResults] = useState<Record<string, any>>({})
+  const [validationResults, setValidationResults] = useState<Record<string, { valid: boolean; errors: string[]; warnings: string[] }>>({})
   const [isScheduled, setIsScheduled] = useState(false)
   const [scheduledDate, setScheduledDate] = useState('')
   const [scheduledTime, setScheduledTime] = useState('')
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchConnectionStatus()
-    }
-  }, [isOpen])
-
-  useEffect(() => {
-    validateContent()
-  }, [postContent, selectedPlatforms])
-
-  const fetchConnectionStatus = async () => {
-    try {
-      const response = await fetch('/api/auth/connect')
-      if (response.ok) {
-        const data = await response.json()
-        setPlatformStatuses(data.platforms || [])
-      }
-    } catch (error) {
-      console.error('Error fetching connection status:', error)
-    }
-  }
-
-  const validateContent = () => {
-    const results: Record<string, any> = {}
+  const validateContent = useCallback(() => {
+    const results: Record<string, { valid: boolean; errors: string[]; warnings: string[] }> = {}
     
     selectedPlatforms.forEach(platformId => {
       const config = PLATFORM_CONFIGS.find(p => p.id === platformId)
@@ -169,6 +148,28 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
     })
 
     setValidationResults(results)
+  }, [selectedPlatforms, postContent, isScheduled, scheduledDate, scheduledTime])
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchConnectionStatus()
+    }
+  }, [isOpen])
+
+  useEffect(() => {
+    validateContent()
+  }, [postContent, selectedPlatforms, validateContent])
+
+  const fetchConnectionStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/connect')
+      if (response.ok) {
+        const data = await response.json()
+        setPlatformStatuses(data.platforms || [])
+      }
+    } catch (error) {
+      console.error('Error fetching connection status:', error)
+    }
   }
 
   const handlePlatformToggle = (platformId: string) => {
@@ -237,10 +238,11 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
 
       if (response.ok) {
         // Update progress with results
-        Object.entries(result.results || {}).forEach(([platform, platformResult]: [string, any]) => {
+        Object.entries(result.results || {}).forEach(([platform, platformResult]) => {
+          const typedPlatformResult = platformResult as { success: boolean }
           setPublishingProgress(prev => ({
             ...prev,
-            [platform]: platformResult.success ? 'success' : 'error'
+            [platform]: typedPlatformResult.success ? 'success' : 'error'
           }))
         })
 
@@ -292,7 +294,7 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Publish Content</h2>
-              <p className="text-gray-600 mt-1">Share "{clip.title}" across your connected platforms</p>
+              <p className="text-gray-600 mt-1">Share &quot;{clip.title}&quot; across your connected platforms</p>
             </div>
             <Button variant="ghost" onClick={onClose} disabled={publishing}>
               ×
@@ -306,9 +308,11 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
             <h3 className="font-semibold text-gray-900 mb-3">Content Preview</h3>
             <div className="flex gap-4">
               {clip.thumbnailUrl && (
-                <img 
+                <Image 
                   src={clip.thumbnailUrl} 
                   alt={clip.title}
+                  width={128}
+                  height={80}
                   className="w-32 h-20 object-cover rounded-lg"
                 />
               )}

@@ -21,9 +21,9 @@ const mockClip = {
 
 export default function SocialDemoPage() {
   const [showPublishModal, setShowPublishModal] = useState(false)
-  const [publishResults, setPublishResults] = useState<any>(null)
+  const [publishResults, setPublishResults] = useState<Record<string, unknown> | null>(null)
 
-  const handlePublishComplete = (results: any) => {
+  const handlePublishComplete = (results: Record<string, unknown>) => {
     setPublishResults(results)
     console.log('Publishing results:', results)
   }
@@ -119,11 +119,11 @@ export default function SocialDemoPage() {
           <div className="space-y-4 text-sm">
             <div>
               <h3 className="font-semibold text-blue-900">1. API Credentials</h3>
-              <p className="text-blue-800">Update your .env.local file with real API credentials from each platform's developer portal.</p>
+              <p className="text-blue-800">Update your .env.local file with real API credentials from each platform&apos;s developer portal.</p>
             </div>
             <div>
               <h3 className="font-semibold text-blue-900">2. OAuth Configuration</h3>
-              <p className="text-blue-800">Configure redirect URIs in each platform's app settings to match your localhost URLs.</p>
+              <p className="text-blue-800">Configure redirect URIs in each platform&apos;s app settings to match your localhost URLs.</p>
             </div>
             <div>
               <h3 className="font-semibold text-blue-900">3. Test Connection</h3>

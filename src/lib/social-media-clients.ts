@@ -31,9 +31,31 @@ export interface PublishResponse {
   scheduledFor?: Date
 }
 
+interface NotificationData {
+  title: string
+  message: string
+  platform: string
+  postId?: string
+  actionUrl?: string
+  views?: number
+  engagement?: number
+}
+
+interface InstagramInsight {
+  name: string
+  values: Array<{ value: number }>
+}
+
+interface TweetData {
+  text: string
+  media?: { 
+    media_ids: [string] | [string, string] | [string, string, string] | [string, string, string, string]
+  }
+}
+
 // YouTube API Client
 export class YouTubeClient {
-  private youtube: any
+  private youtube: ReturnType<typeof google.youtube> | null = null
 
   constructor() {
     if (process.env.YOUTUBE_CLIENT_ID && process.env.YOUTUBE_CLIENT_SECRET) {
@@ -44,6 +66,8 @@ export class YouTubeClient {
       )
       
       this.youtube = google.youtube({ version: 'v3', auth })
+    } else {
+      this.youtube = null
     }
   }
 
@@ -54,20 +78,8 @@ export class YouTubeClient {
       }
 
       // Set access token
-      this.youtube.auth.setCredentials({ access_token: accessToken })
-
-      const videoMetadata = {
-        snippet: {
-          title: post.title || 'Untitled Video',
-          description: post.description,
-          tags: post.tags || [],
-          categoryId: '22', // People & Blogs category
-        },
-        status: {
-          privacyStatus: 'public',
-          publishAt: post.scheduledFor?.toISOString()
-        }
-      }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.youtube as any).auth.setCredentials({ access_token: accessToken })
 
       // In a real implementation, you would upload the video file here
       // For now, we'll simulate the response
@@ -113,7 +125,8 @@ export class YouTubeClient {
         throw new Error('YouTube client not configured')
       }
 
-      this.youtube.auth.setCredentials({ access_token: accessToken })
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (this.youtube as any).auth.setCredentials({ access_token: accessToken })
 
       // Get video statistics
       const response = await this.youtube.videos.list({
@@ -127,10 +140,10 @@ export class YouTubeClient {
       }
 
       return {
-        views: parseInt(video.statistics.viewCount || '0'),
-        likes: parseInt(video.statistics.likeCount || '0'),
-        comments: parseInt(video.statistics.commentCount || '0'),
-        publishedAt: video.snippet.publishedAt
+        views: parseInt(video.statistics?.viewCount || '0'),
+        likes: parseInt(video.statistics?.likeCount || '0'),
+        comments: parseInt(video.statistics?.commentCount || '0'),
+        publishedAt: video.snippet?.publishedAt
       }
     } catch (error) {
       console.error('YouTube analytics error:', error)
@@ -138,7 +151,7 @@ export class YouTubeClient {
     }
   }
 
-  private async sendNotification(type: string, data: any) {
+  private async sendNotification(type: string, data: NotificationData) {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -194,12 +207,12 @@ export class TwitterClient {
         console.log('Uploading video to Twitter:', post.videoUrl)
       }
 
-      const tweetData: any = {
+      const tweetData: TweetData = {
         text: this.formatTweetText(post.description, post.tags)
       }
 
       if (mediaId) {
-        tweetData.media = { media_ids: [mediaId] }
+        tweetData.media = { media_ids: [mediaId] as [string] }
       }
 
       const tweet = await userClient.v2.tweet(tweetData)
@@ -272,7 +285,7 @@ export class TwitterClient {
     }
   }
 
-  private async sendNotification(type: string, data: any) {
+  private async sendNotification(type: string, data: NotificationData) {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -366,11 +379,11 @@ export class InstagramClient {
 
       const insights = response.data.data
       return {
-        impressions: insights.find((i: any) => i.name === 'impressions')?.values[0]?.value || 0,
-        reach: insights.find((i: any) => i.name === 'reach')?.values[0]?.value || 0,
-        likes: insights.find((i: any) => i.name === 'likes')?.values[0]?.value || 0,
-        comments: insights.find((i: any) => i.name === 'comments')?.values[0]?.value || 0,
-        shares: insights.find((i: any) => i.name === 'shares')?.values[0]?.value || 0
+        impressions: insights.find((i: InstagramInsight) => i.name === 'impressions')?.values[0]?.value || 0,
+        reach: insights.find((i: InstagramInsight) => i.name === 'reach')?.values[0]?.value || 0,
+        likes: insights.find((i: InstagramInsight) => i.name === 'likes')?.values[0]?.value || 0,
+        comments: insights.find((i: InstagramInsight) => i.name === 'comments')?.values[0]?.value || 0,
+        shares: insights.find((i: InstagramInsight) => i.name === 'shares')?.values[0]?.value || 0
       }
     } catch (error) {
       console.error('Instagram analytics error:', error)
@@ -378,7 +391,7 @@ export class InstagramClient {
     }
   }
 
-  private async sendNotification(type: string, data: any) {
+  private async sendNotification(type: string, data: NotificationData) {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -458,7 +471,7 @@ export class LinkedInClient {
     }
   }
 
-  private async sendNotification(type: string, data: any) {
+  private async sendNotification(type: string, data: NotificationData) {
     try {
       await fetch('/api/notifications', {
         method: 'POST',
@@ -482,7 +495,12 @@ export class LinkedInClient {
 
 // TikTok API Client (simplified - TikTok API is more complex)
 export class TikTokClient {
-  async publishVideo(accessToken: string, post: SocialMediaPost): Promise<PublishResponse> {
+  async publishVideo(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    accessToken: string,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    post: SocialMediaPost
+  ): Promise<PublishResponse> {
     try {
       // TikTok API implementation would go here
       // For now, we'll simulate the response
@@ -516,7 +534,7 @@ export class TikTokClient {
     }
   }
 
-  private async sendNotification(type: string, data: any) {
+  private async sendNotification(type: string, data: NotificationData) {
     try {
       await fetch('/api/notifications', {
         method: 'POST',

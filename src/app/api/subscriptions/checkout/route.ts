@@ -5,7 +5,7 @@ import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20'
+  apiVersion: '2025-05-28.basil'
 });
 
 // Create checkout session for subscription
@@ -24,12 +24,12 @@ export async function POST(request: NextRequest) {
       where: { id: planId }
     });
 
-    if (!plan || !plan.isActive) {
-      return NextResponse.json({ error: 'Plan not found' }, { status: 404 });
+    if (!plan || !plan.isActive || !plan.stripePriceId) {
+      return NextResponse.json({ error: 'Plan not found or not configured' }, { status: 404 });
     }
 
     // Create or get Stripe customer
-    let stripeCustomerId = null;
+    let stripeCustomerId: string;
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { stripeCustomerId: true, email: true, name: true }

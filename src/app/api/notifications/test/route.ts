@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Notification } from '@/types/notifications';
 
 // Test endpoint to create sample notifications for testing
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     const sampleNotifications: Notification[] = [
       {
@@ -13,8 +13,9 @@ export async function POST(request: NextRequest) {
         category: 'social_media',
         platform: 'instagram',
         priority: 'high',
-        timestamp: new Date().toISOString(),
+        timestamp: new Date(),
         read: false,
+        userId: 'mock-user-id',
         metadata: {
           post_id: 'inst_123',
           metrics: {
@@ -36,8 +37,9 @@ export async function POST(request: NextRequest) {
         category: 'growth',
         platform: 'youtube',
         priority: 'high',
-        timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+        timestamp: new Date(Date.now() - 3600000), // 1 hour ago
         read: false,
+        userId: 'mock-user-id',
         metadata: {
           milestone_type: 'subscriber_count',
           current_count: 13000,
@@ -52,9 +54,10 @@ export async function POST(request: NextRequest) {
         type: 'reminder',
         category: 'scheduling',
         platform: 'instagram',
-        priority: 'medium',
-        timestamp: new Date(Date.now() - 1800000).toISOString(), // 30 minutes ago
+        priority: 'normal',
+        timestamp: new Date(Date.now() - 1800000), // 30 minutes ago
         read: false,
+        userId: 'mock-user-id',
         metadata: {
           scheduled_time: new Date(Date.now() + 7200000).toISOString(), // 2 hours from now
           post_type: 'carousel',
@@ -68,9 +71,10 @@ export async function POST(request: NextRequest) {
         type: 'engagement',
         category: 'interaction',
         platform: 'youtube',
-        priority: 'medium',
-        timestamp: new Date(Date.now() - 900000).toISOString(), // 15 minutes ago
+        priority: 'normal',
+        timestamp: new Date(Date.now() - 900000), // 15 minutes ago
         read: true,
+        userId: 'mock-user-id',
         metadata: {
           video_id: 'yt_456',
           comment_count: 5,
@@ -86,8 +90,9 @@ export async function POST(request: NextRequest) {
         category: 'connection',
         platform: 'twitter',
         priority: 'urgent',
-        timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+        timestamp: new Date(Date.now() - 7200000), // 2 hours ago
         read: false,
+        userId: 'mock-user-id',
         metadata: {
           error_type: 'authentication_expired',
           requires_reauth: true,
@@ -100,10 +105,11 @@ export async function POST(request: NextRequest) {
         message: 'Your weekly performance report is ready. Engagement is up 12% across all platforms!',
         type: 'system',
         category: 'analytics',
-        platform: null,
+        platform: undefined,
         priority: 'low',
-        timestamp: new Date(Date.now() - 10800000).toISOString(), // 3 hours ago
+        timestamp: new Date(Date.now() - 10800000), // 3 hours ago
         read: false,
+        userId: 'mock-user-id',
         metadata: {
           report_period: 'weekly',
           overall_growth: 12,
@@ -146,7 +152,7 @@ export async function GET(request: NextRequest) {
     const testResults = {
       timestamp: new Date().toISOString(),
       test_type: testType,
-      results: {} as any
+      results: {} as Record<string, unknown>
     };
 
     switch (testType) {

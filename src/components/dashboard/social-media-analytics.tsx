@@ -1,8 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { PlatformIcon, PlatformBadge } from '@/lib/platform-icons'
+import Image from 'next/image'
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -10,11 +11,8 @@ import {
   Heart, 
   Share2, 
   MessageCircle,
-  Calendar,
-  Filter,
   Download,
   BarChart3,
-  PieChart,
   Activity
 } from 'lucide-react'
 
@@ -69,11 +67,7 @@ export function SocialMediaAnalytics() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d'>('30d')
   const [activeTab, setActiveTab] = useState<'overview' | 'platforms' | 'content'>('overview')
 
-  useEffect(() => {
-    loadAnalytics()
-  }, [selectedPlatform, timeRange])
-
-  const loadAnalytics = async () => {
+  const loadAnalytics = useCallback(async () => {
     try {
       setLoading(true)
       const [analyticsRes, timeSeriesRes, contentRes] = await Promise.all([
@@ -101,7 +95,11 @@ export function SocialMediaAnalytics() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [selectedPlatform, timeRange])
+
+  useEffect(() => {
+    loadAnalytics()
+  }, [loadAnalytics])
 
   const getTotalMetrics = () => {
     return platformAnalytics.reduce((acc, platform) => ({
@@ -396,9 +394,11 @@ export function SocialMediaAnalytics() {
                     
                     {content.thumbnailUrl && (
                       <div className="w-16 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        <img 
+                        <Image 
                           src={content.thumbnailUrl} 
                           alt={content.title}
+                          width={64}
+                          height={64}
                           className="w-full h-full object-cover"
                         />
                       </div>
@@ -407,7 +407,7 @@ export function SocialMediaAnalytics() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-start justify-between mb-2">
                         <h4 className="font-medium text-gray-900 truncate">{content.title}</h4>
-                        <PlatformBadge platformId={content.platform} size="sm" />
+                        <PlatformBadge platformId={content.platform} />
                       </div>
                       
                       <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">

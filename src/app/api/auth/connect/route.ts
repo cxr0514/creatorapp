@@ -46,7 +46,7 @@ const mockConnections: ConnectionStatus[] = [
   }
 ]
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // In production, fetch from database based on authenticated user
     const cookieStore = await cookies()
@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
     
     // Store state and return URL in session/cookie for validation
     const response = NextResponse.json({
-      authUrl: oauthManager.getAuthorizationUrl(platform, state),
+      authUrl: oauthManager.generateAuthUrl(platform, state),
       platform,
       state
     })

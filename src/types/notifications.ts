@@ -4,7 +4,16 @@ export type NotificationType =
   | 'batch_export_success'
   | 'batch_export_failure'
   | 'new_ai_suggestion'
-  | 'system_alert';
+  | 'system_alert'
+  | 'success'
+  | 'error'
+  | 'warning'
+  | 'info'
+  | 'achievement'
+  | 'milestone'
+  | 'reminder'
+  | 'engagement'
+  | 'system';
 
 export type NotificationChannel = 'email' | 'in_app';
 
@@ -32,4 +41,12 @@ export interface NotificationPayload {
   read: boolean;
   link?: string; // Optional link to relevant content (e.g., the generated clip)
   metadata?: Record<string, unknown>; // For extra data specific to the notification type
-} 
+  priority?: 'low' | 'normal' | 'high' | 'urgent';
+  category?: string;
+  platform?: string;
+  contentType?: string;
+  actionUrl?: string;
+}
+
+// Export as Notification for backward compatibility
+export type Notification = NotificationPayload; 

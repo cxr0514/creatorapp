@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,8 +14,7 @@ import {
   UserPlus,
   Crown,
   User,
-  Shield,
-  Mail
+  Shield
 } from 'lucide-react';
 import {
   Dialog,
@@ -53,7 +52,7 @@ interface Workspace {
   name: string;
   description?: string;
   ownerId: string;
-  settings: any;
+  settings: Record<string, unknown>;
   createdAt: string;
   members: WorkspaceMember[];
   _count: {
@@ -78,11 +77,7 @@ export default function WorkspaceManagement() {
     message: ''
   });
 
-  useEffect(() => {
-    fetchWorkspaces();
-  }, []);
-
-  const fetchWorkspaces = async () => {
+  const fetchWorkspaces = useCallback(async () => {
     try {
       const response = await fetch('/api/workspaces');
       if (response.ok) {
@@ -97,7 +92,11 @@ export default function WorkspaceManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedWorkspace]);
+
+  useEffect(() => {
+    fetchWorkspaces();
+  }, [fetchWorkspaces]);
 
   const createWorkspace = async () => {
     try {
@@ -121,19 +120,11 @@ export default function WorkspaceManagement() {
         });
       } else {
         const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to create workspace',
-          variant: 'destructive'
-        });
+        toast.error(error.error || 'Failed to create workspace');
       }
     } catch (error) {
       console.error('Error creating workspace:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to create workspace',
-        variant: 'destructive'
-      });
+      toast.error('Failed to create workspace');
     }
   };
 
@@ -161,19 +152,11 @@ export default function WorkspaceManagement() {
         });
       } else {
         const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to invite user',
-          variant: 'destructive'
-        });
+        toast.error(error.error || 'Failed to invite user');
       }
     } catch (error) {
       console.error('Error inviting user:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to invite user',
-        variant: 'destructive'
-      });
+      toast.error('Failed to invite user');
     }
   };
 

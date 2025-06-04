@@ -41,18 +41,6 @@ export async function GET(
           }
         },
         responses: {
-          include: {
-            admin: {
-              include: {
-                user: {
-                  select: {
-                    name: true,
-                    image: true
-                  }
-                }
-              }
-            }
-          },
           orderBy: {
             createdAt: 'asc'
           }
@@ -85,7 +73,8 @@ export async function POST(
 
     // Check if user is admin
     const adminProfile = await prisma.admin.findUnique({
-      where: { userId: session.user.id }
+      where: { userId: session.user.id },
+      include: { user: true }
     });
 
     if (!adminProfile) {
@@ -97,9 +86,11 @@ export async function POST(
     // Create the response
     const response = await prisma.supportResponse.create({
       data: {
-        content,
+        message: content,
         ticketId: params.ticketId,
-        adminId: adminProfile.id
+        authorId: adminProfile.id,
+        authorType: 'admin',
+        authorName: adminProfile.user.name || 'Admin'
       }
     });
 

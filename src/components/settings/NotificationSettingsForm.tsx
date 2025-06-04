@@ -33,7 +33,16 @@ const TYPE_DISPLAY_NAMES: Record<NotificationType, string> = {
   batch_export_success: 'Batch Export Completed',
   batch_export_failure: 'Batch Export Failed',
   new_ai_suggestion: 'New AI Suggestions Available',
-  system_alert: 'Important System Alerts', // Though likely not user-configurable
+  system_alert: 'Important System Alerts',
+  success: 'Success Notifications',
+  error: 'Error Notifications',
+  warning: 'Warning Notifications',
+  info: 'Information Notifications',
+  achievement: 'Achievement Notifications',
+  milestone: 'Milestone Notifications',
+  reminder: 'Reminder Notifications',
+  engagement: 'Engagement Notifications',
+  system: 'System Notifications',
 };
 
 const NotificationSettingsForm: React.FC<NotificationSettingsFormProps> = ({ userId }) => {

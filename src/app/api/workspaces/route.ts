@@ -58,7 +58,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const { name, description, settings } = await request.json();
+    const { name, description } = await request.json();
 
     // Check if user has permission to create workspaces (premium feature)
     const user = await prisma.user.findUnique({
@@ -72,17 +72,34 @@ export async function POST(request: NextRequest) {
       }
     });
 
-    if (!user?.subscription || !user.subscription.plan.features.includes('workspaces')) {
+    if (!user?.subscription || !user.subscription.plan) {
       return NextResponse.json({ error: 'Workspace creation requires premium subscription' }, { status: 403 });
     }
 
+    // Check if features is an array or includes workspaces feature
+    const features = user.subscription.plan.features;
+    const hasWorkspaceFeature = Array.isArray(features) 
+      ? features.includes('workspaces')
+      : features && typeof features === 'object' && 'workspaces' in features;
+
+    if (!hasWorkspaceFeature) {
+      return NextResponse.json({ error: 'Workspace creation requires premium subscription' }, { status: 403 });
+    }
+
+    // Generate a slug from the workspace name
+    const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+    
     // Create workspace
     const workspace = await prisma.workspace.create({
       data: {
         name,
+        slug,
         description,
-        ownerId: session.user.id,
-        settings: settings || {},
+        owner: {
+          connect: {
+            id: session.user.id
+          }
+        },
         members: {
           create: {
             userId: session.user.id,

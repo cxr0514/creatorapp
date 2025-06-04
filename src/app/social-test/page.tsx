@@ -5,20 +5,14 @@ import { SocialLayout } from '@/components/layouts/social-layout'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { NotificationCenter } from '@/components/dashboard/notification-center'
 import { SocialConnectionsEnhanced } from '@/components/dashboard/social-connections-enhanced'
 import { 
-  TestTube, 
   Zap, 
-  Settings, 
   TrendingUp, 
   Bell,
-  Calendar,
   BarChart3,
-  Users,
   MessageSquare,
   Heart,
-  Share,
   Eye,
   Clock,
   CheckCircle,
@@ -69,6 +63,7 @@ export default function SocialIntegrationTestPage() {
     ]
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const mockNotifications = [
     {
       id: '1',

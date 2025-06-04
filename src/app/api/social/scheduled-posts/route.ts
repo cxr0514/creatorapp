@@ -50,7 +50,7 @@ const mockScheduledPosts = [
   }
 ]
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // In a real implementation, you would:
     // 1. Get user ID from authentication

@@ -9,9 +9,7 @@ import {
   Users, 
   Database,
   Server,
-  AlertTriangle,
   TrendingUp,
-  Clock,
   Settings
 } from 'lucide-react';
 import {
@@ -28,9 +26,7 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  ResponsiveContainer,
-  AreaChart,
-  Area
+  ResponsiveContainer
 } from 'recharts';
 
 interface SystemMetric {
@@ -39,7 +35,7 @@ interface SystemMetric {
   name: string;
   value: number;
   timestamp: string;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 interface MetricSummary {
@@ -53,13 +49,14 @@ interface FeatureFlag {
   id: string;
   name: string;
   description: string;
-  value: any;
+  value: unknown;
   isActive: boolean;
   updatedAt: string;
 }
 
 export default function SystemMonitoring() {
   const [metrics, setMetrics] = useState<SystemMetric[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [summary, setSummary] = useState<MetricSummary | null>(null);
   const [featureFlags, setFeatureFlags] = useState<FeatureFlag[]>([]);
   const [loading, setLoading] = useState(true);
@@ -69,7 +66,7 @@ export default function SystemMonitoring() {
   useEffect(() => {
     fetchMetrics();
     fetchFeatureFlags();
-  }, [timeRange, metricType]);
+  }, [timeRange, metricType]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchMetrics = async () => {
     try {
@@ -111,7 +108,7 @@ export default function SystemMonitoring() {
     }
   };
 
-  const updateFeatureFlag = async (name: string, value: any) => {
+  const updateFeatureFlag = async (name: string, value: unknown) => {
     try {
       const response = await fetch('/api/admin/feature-flags', {
         method: 'POST',
@@ -372,7 +369,7 @@ export default function SystemMonitoring() {
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {metrics.slice(-5).reverse().map((metric, index) => (
+            {metrics.slice(-5).reverse().map((metric) => (
               <div key={metric.id} className="flex items-center justify-between p-3 border-l-4 border-gray-200 bg-gray-50">
                 <div className="flex items-center space-x-3">
                   {getMetricIcon(metric.type)}

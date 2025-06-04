@@ -7,6 +7,7 @@ export async function PATCH(
 ) {
   try {
     const ruleId = params.id
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const body = await request.json()
     
     if (!ruleId) {

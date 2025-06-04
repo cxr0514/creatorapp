@@ -76,11 +76,7 @@ export default function PricingPlans() {
 
   const handleSubscribe = async (planId: string) => {
     if (!session?.user) {
-      toast({
-        title: 'Authentication Required',
-        description: 'Please sign in to subscribe to a plan.',
-        variant: 'destructive'
-      });
+      toast.error('Please sign in to subscribe to a plan.');
       return;
     }
 
@@ -103,19 +99,11 @@ export default function PricingPlans() {
         window.location.href = data.url;
       } else {
         const error = await response.json();
-        toast({
-          title: 'Error',
-          description: error.error || 'Failed to start checkout',
-          variant: 'destructive'
-        });
+        toast.error(error.error || 'Failed to start checkout');
       }
     } catch (error) {
       console.error('Error starting checkout:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to start checkout',
-        variant: 'destructive'
-      });
+      toast.error('Failed to start checkout');
     } finally {
       setCheckoutLoading(null);
     }

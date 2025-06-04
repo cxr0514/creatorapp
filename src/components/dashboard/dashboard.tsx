@@ -21,9 +21,6 @@ import {
   PlayIcon,
   ClockIcon,
   CircleStackIcon,
-  EyeIcon,
-  HeartIcon,
-  ShareIcon,
   BellIcon,
   MagnifyingGlassIcon,
 } from '@heroicons/react/24/outline'

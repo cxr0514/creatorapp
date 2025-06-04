@@ -27,7 +27,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate time range
     const now = new Date();
-    let startTime = new Date();
+    const startTime = new Date();
     
     switch (timeRange) {
       case '1h':
@@ -46,13 +46,13 @@ export async function GET(request: NextRequest) {
         startTime.setDate(now.getDate() - 1);
     }
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       timestamp: {
         gte: startTime
       }
     };
 
-    if (metricType) where.type = metricType;
+    if (metricType) where.metricType = metricType;
 
     const metrics = await prisma.systemMetric.findMany({
       where,
@@ -64,9 +64,9 @@ export async function GET(request: NextRequest) {
     // Calculate summary statistics
     const summary = {
       totalMetrics: metrics.length,
-      avgValue: metrics.length > 0 ? metrics.reduce((sum, m) => sum + m.value, 0) / metrics.length : 0,
-      maxValue: metrics.length > 0 ? Math.max(...metrics.map(m => m.value)) : 0,
-      minValue: metrics.length > 0 ? Math.min(...metrics.map(m => m.value)) : 0
+      avgValue: metrics.length > 0 ? metrics.reduce((sum, m) => sum + Number(m.value), 0) / metrics.length : 0,
+      maxValue: metrics.length > 0 ? Math.max(...metrics.map(m => Number(m.value))) : 0,
+      minValue: metrics.length > 0 ? Math.min(...metrics.map(m => Number(m.value))) : 0
     };
 
     return NextResponse.json({
@@ -103,12 +103,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
-    const { type, name, value, metadata } = await request.json();
+    const { type, value, metadata } = await request.json();
 
     const metric = await prisma.systemMetric.create({
       data: {
-        type,
-        name,
+        metricType: type,
         value,
         metadata: metadata || {}
       }

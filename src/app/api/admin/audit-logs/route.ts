@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
 
     const skip = (page - 1) * limit;
 
-    const where: any = {};
+    const where: Record<string, unknown> = {};
     if (targetType) where.targetType = targetType;
     if (action) where.action = action;
     if (adminId) where.adminId = adminId;
@@ -47,12 +47,6 @@ export async function GET(request: NextRequest) {
                   email: true
                 }
               }
-            }
-          },
-          targetUser: {
-            select: {
-              name: true,
-              email: true
             }
           }
         },

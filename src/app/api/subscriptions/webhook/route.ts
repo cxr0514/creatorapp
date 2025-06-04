@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-06-20'
+  apiVersion: '2025-05-28.basil'
 });
 
 // Stripe webhook handler
@@ -15,8 +15,8 @@ export async function POST(request: NextRequest) {
 
   try {
     event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!);
-  } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
+  } catch (err: unknown) {
+    console.error('Webhook signature verification failed:', err instanceof Error ? err.message : 'Unknown error');
     return NextResponse.json({ error: 'Invalid signature' }, { status: 400 });
   }
 
@@ -83,9 +83,12 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
       stripeSubscriptionId: stripeSubscription.id,
       stripeCustomerId: stripeSubscription.customer as string,
       status: stripeSubscription.status,
-      currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
-      cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentPeriodStart: new Date((stripeSubscription as any).current_period_start * 1000),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentPeriodEnd: new Date((stripeSubscription as any).current_period_end * 1000),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      cancelAtPeriodEnd: (stripeSubscription as any).cancel_at_period_end
     }
   });
 
@@ -94,7 +97,7 @@ async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
     data: {
       userId,
       stripePaymentIntentId: session.payment_intent as string,
-      amount: plan.price,
+      amount: Number(plan.priceMonthly),
       currency: 'usd',
       status: 'succeeded',
       description: `Subscription to ${plan.displayName}`
@@ -119,7 +122,8 @@ async function handlePaymentSucceeded(invoice: Stripe.Invoice) {
   await prisma.paymentHistory.create({
     data: {
       userId: user.id,
-      stripePaymentIntentId: invoice.payment_intent as string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      stripePaymentIntentId: (invoice as any).payment_intent || invoice.id,
       amount: invoice.amount_paid / 100, // Convert from cents
       currency: invoice.currency,
       status: 'succeeded',
@@ -142,11 +146,13 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   }
 
   // Update subscription status if needed
-  if (invoice.subscription) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if ((invoice as any).subscription) {
     await prisma.subscription.updateMany({
       where: {
         userId: user.id,
-        stripeSubscriptionId: invoice.subscription as string
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        stripeSubscriptionId: (invoice as any).subscription as string
       },
       data: {
         status: 'past_due'
@@ -158,7 +164,8 @@ async function handlePaymentFailed(invoice: Stripe.Invoice) {
   await prisma.paymentHistory.create({
     data: {
       userId: user.id,
-      stripePaymentIntentId: invoice.payment_intent as string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      stripePaymentIntentId: (invoice as any).payment_intent || invoice.id,
       amount: invoice.amount_due / 100, // Convert from cents
       currency: invoice.currency,
       status: 'failed',
@@ -174,9 +181,12 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     },
     data: {
       status: subscription.status,
-      currentPeriodStart: new Date(subscription.current_period_start * 1000),
-      currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-      cancelAtPeriodEnd: subscription.cancel_at_period_end
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      cancelAtPeriodEnd: (subscription as any).cancel_at_period_end
     }
   });
 }
@@ -188,7 +198,7 @@ async function handleSubscriptionCanceled(subscription: Stripe.Subscription) {
     },
     data: {
       status: 'canceled',
-      canceledAt: new Date()
+      cancelledAt: new Date()
     }
   });
 }

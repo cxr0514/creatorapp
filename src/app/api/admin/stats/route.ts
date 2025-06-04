@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
+import { Decimal } from '@prisma/client/runtime/library';
 
 // Get admin dashboard statistics
 export async function GET() {
@@ -34,7 +35,7 @@ export async function GET() {
       prisma.user.count(),
       prisma.user.count({
         where: { 
-          lastLogin: {
+          lastLoginAt: {
             gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) // Active in last 30 days
           }
         } 
@@ -44,7 +45,7 @@ export async function GET() {
         where: { 
           status: 'active',
           plan: {
-            price: { gt: 0 }
+            priceMonthly: { gt: 0 }
           }
         }
       }),
@@ -77,8 +78,8 @@ export async function GET() {
       }
     });
 
-    const monthlyRevenue = monthlySubscriptions.reduce((sum: number, sub: any) => {
-      return sum + sub.plan.price;
+    const monthlyRevenue = monthlySubscriptions.reduce((sum: number, sub: { plan: { priceMonthly: Decimal } }) => {
+      return sum + Number(sub.plan.priceMonthly);
     }, 0);
     
     // Calculate total all-time revenue

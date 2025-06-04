@@ -1,5 +1,6 @@
 // Social media platform icon utilities
 import React from 'react'
+import Image from 'next/image'
 
 export interface PlatformIconConfig {
   id: string
@@ -87,9 +88,11 @@ export function PlatformIcon({
 
   return (
     <div className={`relative inline-flex items-center justify-center ${className}`}>
-      <img
+      <Image
         src={config.iconPath}
         alt={`${config.displayName} icon`}
+        width={32}
+        height={32}
         className={`${sizeClasses[size]} object-contain`}
         onError={(e) => {
           if (showFallback) {

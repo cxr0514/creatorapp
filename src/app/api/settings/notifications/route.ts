@@ -14,7 +14,7 @@ interface NotificationSettings {
 // In a real application, these would be stored in a database
 let notificationSettings: NotificationSettings[] = []
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // In production, fetch from database based on authenticated user
     return NextResponse.json({

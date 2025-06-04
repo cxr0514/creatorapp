@@ -1,27 +1,13 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { useSession } from 'next-auth/react'
 import { 
-  HomeIcon, 
-  VideoCameraIcon, 
   ScissorsIcon, 
   CalendarIcon, 
   ChartBarIcon,
-  Cog6ToothIcon,
-  UserIcon,
-  CreditCardIcon,
   ArrowTrendingUpIcon,
-  PlayIcon,
   CloudArrowUpIcon,
   ClockIcon,
-  CircleStackIcon,
-  EyeIcon,
-  HeartIcon,
-  ShareIcon,
-  PlusIcon,
-  BellIcon,
-  MagnifyingGlassIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
 
@@ -301,7 +287,7 @@ export function EnhancedDashboard({ stats, recentMetrics, quickActions, userName
           </span>
         </h1>
         <p className="text-muted-foreground animate-slide-up" style={{ animationDelay: '200ms' }}>
-          Here's what's happening with your content today.
+          Here&apos;s what&apos;s happening with your content today.
         </p>
       </div>
 

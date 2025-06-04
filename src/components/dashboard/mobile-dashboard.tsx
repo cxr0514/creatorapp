@@ -1,14 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, useScroll, useTransform, PanInfo } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
+import { motion, useScroll, useTransform, PanInfo, useMotionValue } from 'framer-motion'
 import {
   Bars3Icon,
-  XMarkIcon,
   BellIcon,
   MagnifyingGlassIcon,
-  EllipsisVerticalIcon,
   ChevronRightIcon,
   PlusIcon,
   ArrowTrendingUpIcon,
@@ -16,7 +13,6 @@ import {
   HeartIcon,
   ShareIcon,
   PlayIcon,
-  PauseIcon,
   ArrowUpIcon
 } from '@heroicons/react/24/outline'
 
@@ -334,13 +330,16 @@ function FloatingActionButton({ onTap }: { onTap: () => void }) {
 function PullToRefresh({ onRefresh, children }: { onRefresh: () => void; children: React.ReactNode }) {
   const [isPulling, setIsPulling] = useState(false)
   const [pullDistance, setPullDistance] = useState(0)
+  const pullDistanceMotion = useMotionValue(0)
   const { scrollY } = useScroll()
   const pullThreshold = 100
 
   const handleDrag = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (scrollY.get() <= 0 && info.delta.y > 0) {
       setIsPulling(true)
-      setPullDistance(Math.min(info.offset.y, pullThreshold * 1.5))
+      const distance = Math.min(info.offset.y, pullThreshold * 1.5)
+      setPullDistance(distance)
+      pullDistanceMotion.set(distance)
     }
   }
 
@@ -350,10 +349,11 @@ function PullToRefresh({ onRefresh, children }: { onRefresh: () => void; childre
     }
     setIsPulling(false)
     setPullDistance(0)
+    pullDistanceMotion.set(0)
   }
 
   const refreshOpacity = useTransform(
-    () => pullDistance,
+    pullDistanceMotion,
     [0, pullThreshold],
     [0, 1]
   )

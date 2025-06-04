@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Switch } from '@/components/ui/switch'
@@ -17,10 +17,9 @@ import {
   Shield,
   Zap,
   TrendingUp,
-  Calendar,
   Globe
 } from 'lucide-react'
-import { PlatformIcon, getAllPlatformConfigs, getPlatformConfig } from '@/lib/platform-icons'
+import { PlatformIcon, getAllPlatformConfigs } from '@/lib/platform-icons'
 
 interface ConnectionStatus {
   platform: string
@@ -55,12 +54,7 @@ export default function IntegrationsPage() {
 
   const platforms = getAllPlatformConfigs()
 
-  useEffect(() => {
-    loadConnectionStatuses()
-    loadNotificationSettings()
-  }, [])
-
-  const loadConnectionStatuses = async () => {
+  const loadConnectionStatuses = useCallback(async () => {
     try {
       const response = await fetch('/api/auth/connect')
       if (response.ok) {
@@ -72,9 +66,9 @@ export default function IntegrationsPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
-  const loadNotificationSettings = async () => {
+  const loadNotificationSettings = useCallback(async () => {
     try {
       const response = await fetch('/api/settings/notifications')
       if (response.ok) {
@@ -104,7 +98,12 @@ export default function IntegrationsPage() {
         scheduledPosts: true
       })))
     }
-  }
+  }, [platforms])
+
+  useEffect(() => {
+    loadConnectionStatuses()
+    loadNotificationSettings()
+  }, [loadConnectionStatuses, loadNotificationSettings])
 
   const connectPlatform = async (platformId: string) => {
     try {
@@ -192,9 +191,9 @@ export default function IntegrationsPage() {
   const getHealthBadge = (health: string) => {
     switch (health) {
       case 'healthy':
-        return <Badge variant="success" className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Healthy</Badge>
+        return <Badge variant="default" className="bg-green-100 text-green-800"><CheckCircle className="w-3 h-3 mr-1" />Healthy</Badge>
       case 'warning':
-        return <Badge variant="warning" className="bg-yellow-100 text-yellow-800"><AlertCircle className="w-3 h-3 mr-1" />Warning</Badge>
+        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800"><AlertCircle className="w-3 h-3 mr-1" />Warning</Badge>
       case 'error':
         return <Badge variant="destructive" className="bg-red-100 text-red-800"><AlertCircle className="w-3 h-3 mr-1" />Error</Badge>
       default:

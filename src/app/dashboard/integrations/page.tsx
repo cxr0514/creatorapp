@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { NotificationCenter } from '@/components/dashboard/notification-center';
 import { SocialConnectionsEnhanced } from '@/components/dashboard/social-connections-enhanced';
 import { SocialLayout } from '@/components/layouts/social-layout';
@@ -35,7 +34,7 @@ interface AnalyticsData {
   engagement: number;
   posts: number;
   reach: number;
-  icon: React.ComponentType<any>;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   change: number;
 }
@@ -64,6 +63,7 @@ interface ScheduledPost {
 
 export default function DashboardIntegrationsPage() {
   const [activeTab, setActiveTab] = useState('overview');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);

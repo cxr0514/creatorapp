@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
         role: role || 'MEMBER',
         token,
         expiresAt,
-        inviterId: session.user.id,
+        invitedBy: session.user.id,
         status: 'PENDING'
       },
       include: {
@@ -107,10 +107,11 @@ export async function POST(request: NextRequest) {
     // Create audit log
     await prisma.auditLog.create({
       data: {
-        userId: session.user.id,
+        adminId: null, // Set to null for user actions, or lookup admin profile if needed
         action: 'invite_sent',
         targetType: 'workspace',
         targetId: workspaceId,
+        targetUserId: session.user.id,
         details: {
           workspaceName: workspace.name,
           inviteeEmail: email,

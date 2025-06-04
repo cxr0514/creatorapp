@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
-import { PlatformIcon, PlatformBadge, getAllPlatformConfigs } from '@/lib/platform-icons'
+import { PlatformIcon, PlatformBadge } from '@/lib/platform-icons'
 import { Calendar, Clock, BarChart3, Zap, CheckCircle, AlertCircle } from 'lucide-react'
+import Image from 'next/image'
 
 interface ScheduledPost {
   id: string
@@ -185,9 +186,11 @@ export function SocialScheduler() {
                     {/* Thumbnail */}
                     {post.thumbnailUrl && (
                       <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-                        <img 
+                        <Image 
                           src={post.thumbnailUrl} 
                           alt={post.title}
+                          width={80}
+                          height={80}
                           className="w-full h-full object-cover"
                         />
                       </div>

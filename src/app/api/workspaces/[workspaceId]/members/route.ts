@@ -64,7 +64,7 @@ export async function POST(
     }
 
     const { workspaceId } = params;
-    const { email, role = 'member', message } = await request.json();
+    const { email, role = 'member' } = await request.json();
 
     // Check if user is owner or admin of workspace
     const membership = await prisma.workspaceMember.findFirst({
@@ -126,8 +126,8 @@ export async function POST(
         invitedBy: session.user.id,
         email,
         role,
-        message,
-        token: generateInviteToken()
+        token: generateInviteToken(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days from now
       }
     });
 

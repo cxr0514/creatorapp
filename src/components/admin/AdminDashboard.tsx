@@ -11,7 +11,6 @@ import {
   Building, 
   MessageSquare,
   Activity,
-  Settings,
   Shield,
   BarChart3
 } from 'lucide-react';
@@ -32,6 +31,7 @@ interface AdminStats {
 }
 
 export default function AdminDashboard() {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { data: session } = useSession();
   const [stats, setStats] = useState<AdminStats | null>(null);
   const [loading, setLoading] = useState(true);

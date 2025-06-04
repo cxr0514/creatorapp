@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,16 +16,14 @@ import {
   RefreshCw,
   Bell,
   Link,
-  BarChart3,
-  Users,
-  MessageSquare
+  BarChart3
 } from 'lucide-react';
 
 interface TestResult {
   name: string;
   status: 'pending' | 'running' | 'passed' | 'failed';
   message?: string;
-  details?: any;
+  details?: Record<string, unknown>;
   duration?: number;
 }
 
@@ -47,11 +45,7 @@ export default function SystemTestPage() {
     progress: 0
   });
 
-  useEffect(() => {
-    initializeTests();
-  }, []);
-
-  const initializeTests = () => {
+  const initializeTests = useCallback(() => {
     const suites: TestSuite[] = [
       {
         name: 'Notification System',
@@ -126,7 +120,11 @@ export default function SystemTestPage() {
 
     setTestSuites(suites);
     updateOverallStats(suites);
-  };
+  }, []);
+
+  useEffect(() => {
+    initializeTests();
+  }, [initializeTests]);
 
   const updateOverallStats = (suites: TestSuite[]) => {
     const total = suites.reduce((sum, suite) => sum + suite.tests.length, 0);

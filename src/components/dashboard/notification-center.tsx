@@ -6,6 +6,24 @@ import { Bell, X, CheckCircle, AlertCircle, Clock, TrendingUp, Share2 } from 'lu
 import { PlatformIcon } from '@/lib/platform-icons'
 import { Notification } from '@/types/notifications'
 
+// Type guard for metadata properties
+interface NotificationMetadata {
+  publishStatus?: 'published' | 'failed' | 'pending' | 'scheduled';
+  views?: number;
+  engagement?: number;
+  analytics?: {
+    likes?: number;
+    comments?: number;
+  };
+  scheduledTime?: string;
+}
+
+// Helper function to safely access metadata
+const getMetadata = (metadata: Record<string, unknown> | undefined): NotificationMetadata => {
+  if (!metadata) return {};
+  return metadata as NotificationMetadata;
+};
+
 export function NotificationCenter() {
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [isOpen, setIsOpen] = useState(false)
@@ -233,65 +251,71 @@ export function NotificationCenter() {
                             </p>
                             
                             {/* Publishing Status */}
-                            {notification.metadata?.publishStatus && (
-                              <div className="flex items-center gap-2 mt-2">
-                                <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
-                                  notification.metadata.publishStatus === 'published' ? 'bg-green-100 text-green-800' :
-                                  notification.metadata.publishStatus === 'failed' ? 'bg-red-100 text-red-800' :
-                                  notification.metadata.publishStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                                  'bg-blue-100 text-blue-800'
-                                }`}>
-                                  {notification.metadata.publishStatus === 'published' && <CheckCircle className="w-3 h-3" />}
-                                  {notification.metadata.publishStatus === 'failed' && <AlertCircle className="w-3 h-3" />}
-                                  {notification.metadata.publishStatus === 'pending' && <Clock className="w-3 h-3" />}
-                                  {notification.metadata.publishStatus === 'scheduled' && <Clock className="w-3 h-3" />}
-                                  {notification.metadata.publishStatus}
-                                </span>
-                                {notification.contentType && (
-                                  <span className="text-xs text-gray-500 capitalize">
-                                    {notification.contentType}
+                            {(() => {
+                              const metadata = getMetadata(notification.metadata);
+                              return metadata.publishStatus && (
+                                <div className="flex items-center gap-2 mt-2">
+                                  <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${
+                                    metadata.publishStatus === 'published' ? 'bg-green-100 text-green-800' :
+                                    metadata.publishStatus === 'failed' ? 'bg-red-100 text-red-800' :
+                                    metadata.publishStatus === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                                    'bg-blue-100 text-blue-800'
+                                  }`}>
+                                    {metadata.publishStatus === 'published' && <CheckCircle className="w-3 h-3" />}
+                                    {metadata.publishStatus === 'failed' && <AlertCircle className="w-3 h-3" />}
+                                    {metadata.publishStatus === 'pending' && <Clock className="w-3 h-3" />}
+                                    {metadata.publishStatus === 'scheduled' && <Clock className="w-3 h-3" />}
+                                    {String(metadata.publishStatus)}
                                   </span>
-                                )}
-                              </div>
-                            )}
+                                  {notification.contentType && (
+                                    <span className="text-xs text-gray-500 capitalize">
+                                      {notification.contentType}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                             
                             {/* Enhanced Metadata */}
-                            {notification.metadata && (
-                              <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                                {notification.metadata.views && (
-                                  <span className="flex items-center gap-1">
-                                    <TrendingUp className="w-3 h-3" />
-                                    {notification.metadata.views.toLocaleString()} views
-                                  </span>
-                                )}
-                                {notification.metadata.engagement && (
-                                  <span className="flex items-center gap-1">
-                                    <Share2 className="w-3 h-3" />
-                                    {notification.metadata.engagement}% engagement
-                                  </span>
-                                )}
-                                {notification.metadata.analytics && (
-                                  <>
-                                    {notification.metadata.analytics.likes && (
-                                      <span className="flex items-center gap-1">
-                                        ❤️ {notification.metadata.analytics.likes.toLocaleString()}
-                                      </span>
-                                    )}
-                                    {notification.metadata.analytics.comments && (
-                                      <span className="flex items-center gap-1">
-                                        💬 {notification.metadata.analytics.comments.toLocaleString()}
-                                      </span>
-                                    )}
-                                  </>
-                                )}
-                                {notification.metadata.scheduledTime && (
-                                  <span className="flex items-center gap-1">
-                                    <Clock className="w-3 h-3" />
-                                    {new Date(notification.metadata.scheduledTime).toLocaleString()}
-                                  </span>
-                                )}
-                              </div>
-                            )}
+                            {(() => {
+                              const metadata = getMetadata(notification.metadata);
+                              return notification.metadata && (
+                                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
+                                  {metadata.views && (
+                                    <span className="flex items-center gap-1">
+                                      <TrendingUp className="w-3 h-3" />
+                                      {metadata.views.toLocaleString()} views
+                                    </span>
+                                  )}
+                                  {metadata.engagement && (
+                                    <span className="flex items-center gap-1">
+                                      <Share2 className="w-3 h-3" />
+                                      {metadata.engagement}% engagement
+                                    </span>
+                                  )}
+                                  {metadata.analytics && (
+                                    <>
+                                      {metadata.analytics.likes && (
+                                        <span className="flex items-center gap-1">
+                                          ❤️ {metadata.analytics.likes.toLocaleString()}
+                                        </span>
+                                      )}
+                                      {metadata.analytics.comments && (
+                                        <span className="flex items-center gap-1">
+                                          💬 {metadata.analytics.comments.toLocaleString()}
+                                        </span>
+                                      )}
+                                    </>
+                                  )}
+                                  {metadata.scheduledTime && (
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3" />
+                                      {new Date(metadata.scheduledTime).toLocaleString()}
+                                    </span>
+                                  )}
+                                </div>
+                              );
+                            })()}
                           </div>
                           
                           <div className="flex items-center gap-2 ml-2">

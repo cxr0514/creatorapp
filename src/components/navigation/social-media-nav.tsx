@@ -12,7 +12,6 @@ import {
   Globe,
   BarChart3,
   Bell,
-  Users,
   Calendar,
   Zap,
   ArrowRight

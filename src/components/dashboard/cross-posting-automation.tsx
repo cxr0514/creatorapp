@@ -3,11 +3,10 @@
 import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { PlatformIcon, PlatformBadge } from '@/lib/platform-icons'
-import { SOCIAL_PLATFORMS, formatContentForPlatform, PostContent } from '@/lib/social-publishing'
+import { PostContent } from '@/lib/social-publishing'
 import { 
   ArrowRight, 
   Copy, 
-  Settings, 
   Play, 
   Pause, 
   Edit3, 
@@ -62,7 +61,9 @@ export function CrossPostingAutomation() {
   const [rules, setRules] = useState<CrossPostRule[]>([])
   const [executions, setExecutions] = useState<CrossPostExecution[]>([])
   const [loading, setLoading] = useState(true)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [showCreateModal, setShowCreateModal] = useState(false)
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedRule, setSelectedRule] = useState<CrossPostRule | null>(null)
   const [activeTab, setActiveTab] = useState<'rules' | 'executions'>('rules')
 
@@ -282,11 +283,11 @@ export function CrossPostingAutomation() {
                         
                         {/* Platform Flow */}
                         <div className="flex items-center gap-2 mb-3">
-                          <PlatformBadge platformId={rule.sourcePlatform} size="sm" />
+                          <PlatformBadge platformId={rule.sourcePlatform} />
                           <ArrowRight className="w-4 h-4 text-gray-400" />
                           <div className="flex gap-1">
                             {rule.targetPlatforms.map(platform => (
-                              <PlatformBadge key={platform} platformId={platform} size="sm" />
+                              <PlatformBadge key={platform} platformId={platform} />
                             ))}
                           </div>
                         </div>

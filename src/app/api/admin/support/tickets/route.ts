@@ -26,7 +26,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category');
     const priority = searchParams.get('priority');
 
-    const where: any = {};
+    const where: Record<string, string> = {};
     
     if (status) where.status = status;
     if (category) where.category = category;
@@ -44,18 +44,6 @@ export async function GET(request: NextRequest) {
           }
         },
         responses: {
-          include: {
-            admin: {
-              include: {
-                user: {
-                  select: {
-                    name: true,
-                    image: true
-                  }
-                }
-              }
-            }
-          },
           orderBy: {
             createdAt: 'asc'
           }

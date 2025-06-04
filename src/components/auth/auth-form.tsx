@@ -81,7 +81,7 @@ export function AuthForm({ mode, onToggleMode, onClose }: AuthFormProps) {
           onClose()
         }
       }
-    } catch (err) {
+    } catch {
       setError('Something went wrong. Please try again.')
     } finally {
       setIsLoading(false)
