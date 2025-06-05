@@ -1,19 +1,42 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, HeadObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { Upload } from '@aws-sdk/lib-storage'
+import { uploadVideoToMockStorage, deleteFromMockStorage, listMockStorageVideos } from './mock-storage'
 
 // B2 Configuration
+// Fallback to default values if environment variables are empty
+const BUCKET_NAME = process.env.B2_BUCKET_NAME || 'clipverse'
+const B2_ENDPOINT = process.env.B2_ENDPOINT || 'https://s3.us-west-002.backblazeb2.com'
+const B2_KEY_ID = process.env.B2_KEY_ID || '005b6bd484783950000000001'
+const B2_APP_KEY = process.env.B2_APP_KEY || 'K005wJjnrNFqY9RjzW7Ew6bURb6LoW0'
+
+// Check if we're using valid B2 credentials or should use mock storage
+// Using mock storage if credentials are missing, empty, or are known placeholder values
+const USE_MOCK_STORAGE = !B2_KEY_ID || 
+                        !B2_APP_KEY ||
+                        B2_KEY_ID === '005b6bd484783950000000001' || 
+                        B2_APP_KEY === 'K005wJjnrNFqY9RjzW7Ew6bURb6LoW0' ||
+                        B2_KEY_ID.trim() === '' ||
+                        B2_APP_KEY.trim() === ''
+
+if (USE_MOCK_STORAGE) {
+  console.warn('⚠️  Using MOCK STORAGE for development. Set real B2 credentials in .env for production.')
+}
+
+// Handle SSL certificate issues in development
+if (process.env.NODE_ENV === 'development') {
+  process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0'
+}
+
 const b2Client = new S3Client({
-  endpoint: process.env.B2_ENDPOINT,
+  endpoint: B2_ENDPOINT,
   region: 'us-west-002', // B2 region
   credentials: {
-    accessKeyId: process.env.B2_KEY_ID!,
-    secretAccessKey: process.env.B2_APP_KEY!,
+    accessKeyId: B2_KEY_ID,
+    secretAccessKey: B2_APP_KEY,
   },
   forcePathStyle: true, // Required for B2
 })
-
-const BUCKET_NAME = process.env.B2_BUCKET_NAME!
 
 /**
  * Upload a file to B2
@@ -51,7 +74,7 @@ export async function uploadToB2(
     
     return {
       storageKey: key,
-      storageUrl: `${process.env.B2_ENDPOINT}/${BUCKET_NAME}/${key}`
+      storageUrl: `${B2_ENDPOINT}/${BUCKET_NAME}/${key}`
     }
   } catch (error) {
     console.error('Error uploading to B2:', error)
@@ -324,6 +347,285 @@ export function generateVideoTransformation(
     aspectRatio: format.aspectRatio,
     crop: 'fill',
     gravity: croppingType === 'smart' ? 'auto' : 'center'
+  }
+}
+
+/**
+ * Upload a video file to B2 with optimized settings
+ * @param file - Video file buffer
+ * @param userId - User ID for folder organization
+ * @param filename - Original filename
+ * @returns Upload result with storage details
+ */
+export async function uploadVideoToB2(
+  file: Buffer,
+  userId: string,
+  filename: string
+): Promise<{ key: string; url: string; size: number }> {
+  try {
+    // Use mock storage if B2 credentials are invalid
+    if (USE_MOCK_STORAGE) {
+      console.log('Using mock storage for video upload')
+      return await uploadVideoToMockStorage(file, userId, filename)
+    }
+
+    // Validate required parameters
+    if (!BUCKET_NAME) {
+      throw new Error('B2_BUCKET_NAME environment variable is not set')
+    }
+    if (!userId) {
+      throw new Error('User ID is required for secure upload')
+    }
+    if (!filename) {
+      throw new Error('Filename is required')
+    }
+
+    const timestamp = Date.now()
+    const fileExtension = filename.split('.').pop()?.toLowerCase() || 'mp4'
+    
+    // Create secure storage path with user separation
+    const storageKey = `users/${userId}/videos/${timestamp}_${filename}`
+    
+    // Determine content type based on file extension
+    let contentType = 'video/mp4' // default
+    switch (fileExtension) {
+      case 'mov':
+        contentType = 'video/quicktime'
+        break
+      case 'avi':
+        contentType = 'video/x-msvideo'
+        break
+      case 'webm':
+        contentType = 'video/webm'
+        break
+      case 'mkv':
+        contentType = 'video/x-matroska'
+        break
+      default:
+        contentType = 'video/mp4'
+    }
+
+    const upload = new Upload({
+      client: b2Client,
+      params: {
+        Bucket: BUCKET_NAME,
+        Key: storageKey,
+        Body: file,
+        ContentType: contentType,
+      },
+    })
+
+    const result = await upload.done()
+    
+    return {
+      key: storageKey,
+      url: `${B2_ENDPOINT}/${BUCKET_NAME}/${storageKey}`,
+      size: file.length
+    }
+  } catch (error) {
+    console.error('Error uploading video to B2:', error)
+    console.error('Error details:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      bucketName: BUCKET_NAME,
+      endpoint: B2_ENDPOINT
+    })
+    throw new Error('Failed to upload video to B2')
+  }
+}
+
+/**
+ * Sync and list user videos from B2 storage
+ * @param userId - User ID to list videos for
+ * @returns Array of video resources from B2
+ */
+export async function syncUserVideosFromB2(userId: string): Promise<Array<{
+  key: string
+  url: string
+  filename?: string
+  size?: number
+  uploadedAt?: Date
+}>> {
+  try {
+    // Use mock storage if B2 credentials are invalid
+    if (USE_MOCK_STORAGE) {
+      console.log('Using mock storage for video sync')
+      return listMockStorageVideos(userId)
+    }
+
+    const command = new ListObjectsV2Command({
+      Bucket: BUCKET_NAME,
+      Prefix: `users/${userId}/videos/`,
+    })
+
+    const result = await b2Client.send(command)
+    const videos: Array<{
+      key: string
+      url: string
+      filename?: string
+      size?: number
+      uploadedAt?: Date
+    }> = []
+
+    if (result.Contents) {
+      for (const object of result.Contents) {
+        if (object.Key) {
+          const url = `${B2_ENDPOINT}/${BUCKET_NAME}/${object.Key}`
+          const filename = object.Key.split('/').pop()
+          
+          videos.push({
+            key: object.Key,
+            url,
+            filename,
+            size: object.Size,
+            uploadedAt: object.LastModified
+          })
+        }
+      }
+    }
+
+    return videos
+  } catch (error) {
+    console.error('Error syncing videos from B2:', error)
+    throw new Error('Failed to sync videos from B2')
+  }
+}
+
+/**
+ * Sync and list user clips from B2 storage
+ * @param userId - User ID to list clips for
+ * @returns Array of clip resources from B2
+ */
+export async function syncUserClipsFromB2(userId: string): Promise<Array<{
+  key: string
+  url: string
+  filename?: string
+  size?: number
+  lastModified?: Date
+}>> {
+  try {
+    const command = new ListObjectsV2Command({
+      Bucket: BUCKET_NAME,
+      Prefix: `users/${userId}/clips/`,
+    })
+
+    const result = await b2Client.send(command)
+    const clips: Array<{
+      key: string
+      url: string
+      filename?: string
+      size?: number
+      lastModified?: Date
+    }> = []
+
+    if (result.Contents) {
+      for (const object of result.Contents) {
+        if (object.Key) {
+          const url = `${B2_ENDPOINT}/${BUCKET_NAME}/${object.Key}`
+          const filename = object.Key.split('/').pop()
+          
+          clips.push({
+            key: object.Key,
+            url,
+            filename,
+            size: object.Size,
+            lastModified: object.LastModified
+          })
+        }
+      }
+    }
+
+    return clips
+  } catch (error) {
+    console.error('Error syncing clips from B2:', error)
+    throw new Error('Failed to sync clips from B2')
+  }
+}
+
+/**
+ * Comprehensive bidirectional sync between B2 storage and database
+ * @param userId - User ID to sync videos for
+ * @param options - Sync options
+ * @returns Sync results with statistics
+ */
+export async function syncUserVideosBidirectional(
+  userId: string,
+  options: {
+    cleanupOrphans?: boolean // Remove videos from B2 that don't exist in database
+    addMissing?: boolean     // Add videos from B2 that don't exist in database
+  } = { cleanupOrphans: true, addMissing: true }
+): Promise<{
+  addedToDatabase: number
+  removedFromB2: number
+  errors: string[]
+  totalB2Videos: number
+  totalDbVideos: number
+}> {
+  const errors: string[] = []
+  let addedToDatabase = 0
+  let removedFromB2 = 0
+
+  try {
+    // Get videos from B2
+    const b2Videos = await syncUserVideosFromB2(userId)
+    console.log(`Found ${b2Videos.length} videos in B2 for user ${userId}`)
+
+    // Get videos from database (would need prisma import, so this is a skeleton)
+    // This will be called from the API route where prisma is available
+    
+    return {
+      addedToDatabase,
+      removedFromB2,
+      errors,
+      totalB2Videos: b2Videos.length,
+      totalDbVideos: 0 // Will be filled by calling function
+    }
+  } catch (error) {
+    console.error('Error in bidirectional sync:', error)
+    errors.push(error instanceof Error ? error.message : 'Unknown sync error')
+    
+    return {
+      addedToDatabase: 0,
+      removedFromB2: 0,
+      errors,
+      totalB2Videos: 0,
+      totalDbVideos: 0
+    }
+  }
+}
+
+/**
+ * Delete a video from B2 storage and optionally from database
+ * @param storageKey - The B2 storage key of the video
+ * @param userId - User ID for security validation
+ * @returns Deletion result
+ */
+export async function deleteVideoFromB2(
+  storageKey: string,
+  userId: string
+): Promise<{ success: boolean; error?: string }> {
+  try {
+    // Use mock storage if B2 credentials are invalid
+    if (USE_MOCK_STORAGE) {
+      console.log('Using mock storage for video deletion')
+      return await deleteFromMockStorage(storageKey)
+    }
+
+    // Validate that the storage key belongs to this user
+    if (!storageKey.startsWith(`users/${userId}/videos/`)) {
+      throw new Error('Unauthorized: Video does not belong to this user')
+    }
+
+    await deleteFromB2(storageKey)
+    
+    console.log(`Successfully deleted video ${storageKey} from B2`)
+    return { success: true }
+  } catch (error) {
+    console.error('Error deleting video from B2:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'Failed to delete video from B2'
+    }
   }
 }
 

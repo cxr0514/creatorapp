@@ -1,0 +1,55 @@
+# ── Node/npm artifacts ────────────────────────────
+node_modules/
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ── Build / Output / Cache ─────────────────────────
+.next/
+out/
+dist/
+build/
+.cache/
+.storybook/
+coverage/
+.DS_Store
+
+# ── Logs / Temp / Debug ────────────────────────────
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.tmp
+*.temp
+
+# ── Environment & Secrets ──────────────────────────
+!.env
+!.env.example
+!.env.local
+.env.development.local
+.env.production.local
+.env.test.local
+.env.*.backup
+
+# ── IDE / Editor folders ───────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── OS files ────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Docker / Containers ────────────────────────────
+docker-compose.override.yml
+docker-compose.*.yml
+
+# ── Miscellaneous heavy or irrelevant files ────────
+*.sqlite
+*.sql
+*.bak
+*.zip
+*.tar.gz
