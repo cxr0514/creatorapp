@@ -168,11 +168,11 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
             transformedUrl = await getPresignedUrl(originalStorageKey);
           }
 
-          // Generate unique storage key for export
+          // Generate unique storage key for export (using user folder structure)
           const timestamp = Date.now();
           const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
           const safeAspectRatio = formatKey.replace(':', '_');
-          const exportStorageKey = `exports/${session.user.id}/${clipId}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
+          const exportStorageKey = `users/${session.user.id}/clips/exports/${clipId}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
 
           // For now, we'll create a database record with the presigned URL
           // In a full implementation, you would process and re-upload the transformed video

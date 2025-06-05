@@ -159,10 +159,10 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchExpo
             // In full implementation, this would apply transformations
             const transformedUrl = await getPresignedUrl(clip.storageKey);
 
-            // Generate unique storage key for export
+            // Generate unique storage key for export (using user folder structure)
             const timestamp = Date.now();
             const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
-            const exportStorageKey = `exports/${session.user.id}/${clip.id}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
+            const exportStorageKey = `users/${session.user.id}/clips/exports/${clip.id}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
 
             // Create ClipExport record
             const clipExport = await prisma.clipExport.create({

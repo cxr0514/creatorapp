@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { uploadVideoToB2, syncUserVideosFromB2, deleteVideoFromB2 } from '@/lib/b2'
+import { uploadVideoToB2, syncUserVideosFromB2, syncUserVideosFromB2Enhanced, deleteVideoFromB2 } from '@/lib/b2'
 
 export async function GET(request: NextRequest) {
   try {
@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
         })
 
         if (user) {
-          // Get videos from B2
-          const b2Videos = await syncUserVideosFromB2(user.id)
+          // Get videos from B2 using enhanced sync for debugging
+          const b2Videos = await syncUserVideosFromB2Enhanced(user.id)
           console.log(`Found ${b2Videos.length} videos in B2`)
           
           // Get existing videos from database
