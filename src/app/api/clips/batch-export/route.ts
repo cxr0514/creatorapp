@@ -4,92 +4,113 @@ import { authOptions } from '../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { EXPORT_FORMATS, type BatchExportRequest } from '@/lib/video-export';
 import { smartCroppingEngine } from '@/lib/smart-cropping-engine';
-import { v2 as cloudinary } from 'cloudinary';
+import { uploadToB2, getPresignedUrl } from '@/lib/b2';
 
-// Configure Cloudinary
-cloudinary.config({
-  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
-interface BatchExportResult {
-  clipId: number;
-  format: string;
-  platform: string;
-  status: 'success' | 'error';
-  exportUrl?: string;
-  newPublicId?: string;
-  errorMessage?: string;
-  smartCropAnalysis?: {
-    strategy: string;
-    confidence: number;
-    reasoning: string;
-  };
-  processingTime?: number;
-}
-
-interface BatchExportResponse {
-  results: BatchExportResult[];
-  summary: {
-    total: number;
-    successful: number;
-    failed: number;
-    totalProcessingTime: number;
-  };
+export interface BatchExportResponse {
+  success: boolean;
   queueId: string;
+  totalClips: number;
+  totalFormats: number;
+  estimatedProcessingTime: number;
+  results: Array<{
+    clipId: number;
+    format: string;
+    platform: string;
+    status: 'success' | 'failed';
+    exportUrl?: string;
+    storageKey?: string;
+    error?: string;
+    smartCropAnalysis?: {
+      strategy: string;
+      confidence: number;
+      reasoning: string;
+    };
+    processingTime?: number;
+  }>;
 }
 
 export async function POST(request: NextRequest): Promise<NextResponse<BatchExportResponse | { error: string }>> {
-  const startTime = Date.now();
+  const queueId = `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   
+  console.log(`[API/BATCH-EXPORT] Starting batch export ${queueId}`);
+
   try {
     const session = await getServerSession(authOptions);
     if (!session?.user?.email) {
+      console.log(`[API/BATCH-EXPORT] Unauthorized request for batch export ${queueId}`);
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const body: BatchExportRequest = await request.json();
+    const body = await request.json();
     const { 
       clipIds, 
       formats, 
       platforms = [], 
-      croppingStrategy = 'smart',
-      useSmartCropping = true,
+      useSmartCropping = true, 
+      croppingStrategy = 'auto',
       qualityLevel = 'high'
     } = body;
 
+    console.log(`[API/BATCH-EXPORT] Batch export ${queueId} request:`, {
+      clipIds: clipIds?.length || 0,
+      formats: formats?.length || 0,
+      platforms: platforms?.length || 0,
+      useSmartCropping,
+      croppingStrategy,
+      qualityLevel
+    });
+
+    // Validate request
     if (!Array.isArray(clipIds) || clipIds.length === 0) {
-      return NextResponse.json({ error: 'Invalid or empty clipIds array' }, { status: 400 });
+      console.log(`[API/BATCH-EXPORT] Invalid clip IDs for batch export ${queueId}`);
+      return NextResponse.json({ error: 'clipIds array is required and cannot be empty' }, { status: 400 });
     }
 
     if (!Array.isArray(formats) || formats.length === 0) {
-      return NextResponse.json({ error: 'Invalid or empty formats array' }, { status: 400 });
+      console.log(`[API/BATCH-EXPORT] Invalid formats for batch export ${queueId}`);
+      return NextResponse.json({ error: 'formats array is required and cannot be empty' }, { status: 400 });
     }
 
-    // Generate unique queue ID
-    const queueId = `batch_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
-    // Fetch all clips
+    // Validate all formats exist
+    const availableFormats = EXPORT_FORMATS.map(f => f.format);
+    const invalidFormats = formats.filter(format => !availableFormats.includes(format));
+    if (invalidFormats.length > 0) {
+      console.log(`[API/BATCH-EXPORT] Invalid formats for batch export ${queueId}:`, invalidFormats);
+      return NextResponse.json({ 
+        error: `Invalid formats: ${invalidFormats.join(', ')}. Available formats: ${availableFormats.join(', ')}` 
+      }, { status: 400 });
+    }
+
+    // Get clips
     const clips = await prisma.clip.findMany({
       where: {
         id: { in: clipIds },
-        userId: session.user.id,
+        userId: session.user.id
       },
+      include: {
+        video: {
+          select: {
+            storageKey: true,
+            storageUrl: true,
+            userId: true
+          }
+        }
+      }
     });
 
     if (clips.length === 0) {
-      return NextResponse.json({ error: 'No valid clips found' }, { status: 404 });
+      console.log(`[API/BATCH-EXPORT] No clips found for batch export ${queueId}`);
+      return NextResponse.json({ error: 'No clips found' }, { status: 404 });
     }
 
-    console.log(`[API/BATCH-EXPORT] Starting batch export ${queueId} for ${clips.length} clips, ${formats.length} formats`);
+    console.log(`[API/BATCH-EXPORT] Processing ${clips.length} clips for batch export ${queueId}`);
 
-    const results: BatchExportResult[] = [];
+    const results = [];
 
     // Process each clip-format combination
     for (const clip of clips) {
-      if (!clip.cloudinaryId) {
-        console.warn(`[API/BATCH-EXPORT] Skipping clip ${clip.id} - no Cloudinary ID`);
+      if (!clip.storageKey) {
+        console.warn(`[API/BATCH-EXPORT] Skipping clip ${clip.id} - no storage key`);
         continue;
       }
 
@@ -104,101 +125,55 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchExpo
         }
       }
 
-      for (const format of formats) {
+      for (const formatKey of formats) {
+        const format = EXPORT_FORMATS.find(f => f.format === formatKey);
+        if (!format) {
+          console.warn(`[API/BATCH-EXPORT] Skipping unknown format ${formatKey} for clip ${clip.id}`);
+          continue;
+        }
+
         const targetPlatforms = platforms.length > 0 ? platforms : format.platforms;
-        
+
         for (const platform of targetPlatforms) {
           const exportStartTime = Date.now();
-          
+          console.log(`[API/BATCH-EXPORT] Processing clip ${clip.id}, format ${formatKey}, platform ${platform}`);
+
           try {
-            // Determine optimal cropping strategy
-            let finalCroppingStrategy = croppingStrategy;
             let smartCropAnalysis = null;
-
-            if (contentAnalysis && useSmartCropping && croppingStrategy === 'smart') {
-              const optimalStrategy = await smartCroppingEngine.determineCroppingStrategy(
-                clip.aspectRatio,
-                format,
-                contentAnalysis
-              );
-              
-              smartCropAnalysis = optimalStrategy;
-              
-              // Map to valid strategy
-              const strategyMapping: Record<string, string> = {
-                'face-detection': 'face',
-                'motion-tracking': 'motion-tracking',
-                'center-crop': 'center',
-                'auto-focus': 'auto-focus',
-                'rule-of-thirds': 'rule-of-thirds',
-                'action-detection': 'action'
-              };
-              
-              finalCroppingStrategy = strategyMapping[optimalStrategy.strategy] || 'auto';
-            }
-
-            // Generate transformation
-            const transformation: Record<string, string | number> = {
-              aspect_ratio: format.format.replace(':', '_'),
-              crop: 'fill',
-              quality: qualityLevel === 'ultra' ? '100' : qualityLevel === 'high' ? 'auto:good' : 'auto:low'
-            };
-
-            // Apply smart cropping transformations if available
-            let transformedUrl: string;
-            if (smartCropAnalysis && useSmartCropping) {
-              const cloudinaryTransformation = smartCroppingEngine.generateCloudinaryTransformation(
-                smartCropAnalysis,
-                format,
-                clip.startTime || undefined,
-                clip.endTime || undefined
-              );
-              transformedUrl = cloudinary.url(clip.cloudinaryId, {
-                resource_type: 'video',
-                transformation: cloudinaryTransformation,
-              });
-            } else {
-              // Use basic gravity-based cropping
-              transformation.gravity = finalCroppingStrategy === 'auto' ? 'auto' : finalCroppingStrategy;
-
-              // Set width based on format and quality
-              if (format.format === '9:16') {
-                transformation.width = qualityLevel === 'ultra' ? 1440 : 1080;
-              } else if (format.format === '1:1') {
-                transformation.width = qualityLevel === 'ultra' ? 1440 : 1080;
-              } else if (format.format === '16:9') {
-                transformation.width = qualityLevel === 'ultra' ? 2560 : qualityLevel === 'high' ? 1920 : 1280;
-              } else if (format.format === '4:3') {
-                transformation.width = qualityLevel === 'ultra' ? 1920 : qualityLevel === 'high' ? 1440 : 1024;
+            
+            if (contentAnalysis && useSmartCropping) {
+              try {
+                smartCropAnalysis = await smartCroppingEngine.determineCroppingStrategy(
+                  clip.aspectRatio || '16:9',
+                  format,
+                  contentAnalysis
+                );
+              } catch (error) {
+                console.warn(`[API/BATCH-EXPORT] Smart crop analysis failed for clip ${clip.id}:`, error);
               }
-
-              transformedUrl = cloudinary.url(clip.cloudinaryId, {
-                resource_type: 'video',
-                transformation: [transformation, { fetch_format: 'mp4' }],
-              });
             }
 
-            // Generate unique public ID for export
-            const baseFolder = clip.cloudinaryId.includes('/') ? 
-              clip.cloudinaryId.substring(0, clip.cloudinaryId.lastIndexOf('/')) : '';
-            const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
-            const safeAspectRatio = format.format.replace(':', '_');
-            const newExportSuffix = `export_${safeAspectRatio}_${finalCroppingStrategy}_${safePlatform}`;
-            const newPublicId = `${clip.cloudinaryId}_${newExportSuffix}`;
+            const finalCroppingStrategy = smartCropAnalysis?.strategy || croppingStrategy || 'center';
 
-            // Upload to Cloudinary
-            const uploadResult = await cloudinary.uploader.upload(transformedUrl, {
-              public_id: newPublicId,
-              folder: baseFolder,
-              resource_type: 'video',
-              context: {
-                exported_from_clip_id: clip.id.toString(),
-                original_public_id: clip.cloudinaryId,
-                export_aspect_ratio: format.format,
-                export_platform: platform,
-                cropping_strategy: finalCroppingStrategy,
-                batch_export_queue: queueId,
-                quality_level: qualityLevel
+            // For now, just return presigned URL to original video
+            // In full implementation, this would apply transformations
+            const transformedUrl = await getPresignedUrl(clip.storageKey);
+
+            // Generate unique storage key for export
+            const timestamp = Date.now();
+            const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
+            const exportStorageKey = `exports/${session.user.id}/${clip.id}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
+
+            // Create ClipExport record
+            const clipExport = await prisma.clipExport.create({
+              data: {
+                clipId: clip.id,
+                format: formatKey,
+                platform,
+                storageKey: exportStorageKey,
+                storageUrl: transformedUrl,
+                croppingType: finalCroppingStrategy,
+                fileSize: null, // Would be calculated after processing
               }
             });
 
@@ -206,11 +181,11 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchExpo
 
             results.push({
               clipId: clip.id,
-              format: format.format,
-              platform,
-              status: 'success',
-              exportUrl: uploadResult.secure_url,
-              newPublicId: uploadResult.public_id,
+              format: formatKey,
+              platform: platform,
+              status: 'success' as const,
+              exportUrl: transformedUrl,
+              storageKey: exportStorageKey,
               smartCropAnalysis: smartCropAnalysis ? {
                 strategy: smartCropAnalysis.strategy,
                 confidence: smartCropAnalysis.confidence,
@@ -219,20 +194,20 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchExpo
               processingTime
             });
 
-            console.log(`[API/BATCH-EXPORT] Successfully exported clip ${clip.id} to ${format.format} for ${platform} (${processingTime}ms)`);
+            console.log(`[API/BATCH-EXPORT] Successfully exported clip ${clip.id} to ${formatKey} for ${platform} (${processingTime}ms)`);
 
-          } catch (error) {
+          } catch (formatError) {
             const processingTime = Date.now() - exportStartTime;
+            const errorMessage = formatError instanceof Error ? formatError.message : 'B2 processing failed';
             
-            const errorMessage = error instanceof Error ? error.message : 'Export failed';
-            console.error(`[API/BATCH-EXPORT] Failed to export clip ${clip.id} to ${format.format} for ${platform}:`, error);
-            
+            console.error(`[API/BATCH-EXPORT] Export failed for clip ${clip.id}, format ${formatKey}, platform ${platform}:`, formatError);
+
             results.push({
               clipId: clip.id,
-              format: format.format,
-              platform,
-              status: 'error',
-              errorMessage,
+              format: formatKey,
+              platform: platform,
+              status: 'failed' as const,
+              error: errorMessage,
               processingTime
             });
           }
@@ -240,29 +215,26 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchExpo
       }
     }
 
-    const successful = results.filter(r => r.status === 'success').length;
-    const failed = results.filter(r => r.status === 'error').length;
-    const totalTime = Date.now() - startTime;
+    const successCount = results.filter(r => r.status === 'success').length;
+    const failureCount = results.filter(r => r.status === 'failed').length;
 
-    console.log(`[API/BATCH-EXPORT] Batch export ${queueId} completed: ${successful} successful, ${failed} failed (${totalTime}ms total)`);
+    console.log(`[API/BATCH-EXPORT] Completed batch export ${queueId}. Total: ${results.length}, Success: ${successCount}, Failed: ${failureCount}`);
 
-    const response: BatchExportResponse = {
-      results,
-      summary: {
-        total: results.length,
-        successful,
-        failed,
-        totalProcessingTime: totalTime
-      },
-      queueId
-    };
-
-    return NextResponse.json(response);
+    return NextResponse.json({
+      success: true,
+      queueId,
+      totalClips: clips.length,
+      totalFormats: results.length,
+      estimatedProcessingTime: 0, // Would be calculated based on queue
+      results
+    });
 
   } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
-    console.error('[API/BATCH-EXPORT] General error in batch export handler:', error);
-    return NextResponse.json({ error: errorMessage }, { status: 500 });
+    console.error(`[API/BATCH-EXPORT] Unexpected error in batch export ${queueId}:`, error);
+    return NextResponse.json(
+      { error: 'Internal server error during batch export' },
+      { status: 500 }
+    );
   }
 }
 

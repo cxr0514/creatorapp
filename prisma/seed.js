@@ -1,5 +1,7 @@
 // prisma/seed.js
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const { PrismaClient } = require('../src/generated/prisma')
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const bcrypt = require('bcryptjs')
 
 const prisma = new PrismaClient()

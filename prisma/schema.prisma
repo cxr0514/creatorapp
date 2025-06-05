@@ -35,48 +35,40 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
-  username      String?   @unique
-  email         String    @unique
-  password      String?
-  createdAt     DateTime  @default(now())
-  emailVerified DateTime?
-  image         String?
-  name          String?
-  accounts      Account[]
-  clips         Clip[]
-  sessions      Session[]
-  videos        Video[]
-  styleTemplates StyleTemplate[]
-  socialAccounts SocialAccount[]
-  scheduledPosts ScheduledPost[]
-  userPreferences UserPreferences?
-  userOnboarding UserOnboarding?
-
-  // Phase 6 relationships
-  subscription    Subscription?
-  paymentHistory  PaymentHistory[]
-  ownedWorkspaces Workspace[]
-  workspaceMemberships WorkspaceMember[]
+  id                       String                @id @default(cuid())
+  username                 String?               @unique
+  email                    String                @unique
+  password                 String?
+  createdAt                DateTime              @default(now())
+  emailVerified            DateTime?
+  image                    String?
+  name                     String?
+  accountStatus            String                @default("active")
+  isActive                 Boolean               @default(true)
+  lastLoginAt              DateTime?
+  suspendedAt              DateTime?
+  suspendedBy              String?
+  suspensionReason         String?
+  totalStorage             Int                   @default(0)
+  usageStats               Json?
+  stripeCustomerId         String?               @unique
+  accounts                 Account[]
+  adminProfile             Admin?
+  clips                    Clip[]
+  paymentHistory           PaymentHistory[]
+  scheduledPosts           ScheduledPost[]
+  sessions                 Session[]
+  socialAccounts           SocialAccount[]
+  styleTemplates           StyleTemplate[]
+  subscription             Subscription?
+  supportTickets           SupportTicket[]
+  feedbacks                UserFeedback[]
+  userOnboarding           UserOnboarding?
+  userPreferences          UserPreferences?
+  videos                   Video[]
+  ownedWorkspaces          Workspace[]
   workspaceInvitationsSent WorkspaceInvitation[]
-  supportTickets  SupportTicket[]
-  feedbacks       UserFeedback[]
-  adminProfile    Admin?
-  
-  // Stripe integration
-  stripeCustomerId String?   @unique
-  
-  // Enhanced user fields
-  isActive        Boolean   @default(true)
-  lastLoginAt     DateTime?
-  totalStorage    Int       @default(0) // Used storage in MB
-  usageStats      Json?     // Monthly usage statistics
-  
-  // Account status
-  accountStatus   String    @default("active") // "active", "suspended", "banned", "pending_verification"
-  suspensionReason String?
-  suspendedAt     DateTime?
-  suspendedBy     String?
+  workspaceMemberships     WorkspaceMember[]
 }
 
 model VerificationToken {
@@ -88,106 +80,99 @@ model VerificationToken {
 }
 
 model Video {
-  id            Int      @id @default(autoincrement())
-  title         String
-  uploadedAt    DateTime @default(now())
-  userId        String
-  cloudinaryId  String
-  cloudinaryUrl String
-  duration      Int?
-  fileSize      Int?
-  thumbnailUrl  String?
-  clips         Clip[]
-  user          User     @relation(fields: [userId], references: [id])
+  id           Int      @id @default(autoincrement())
+  title        String
+  uploadedAt   DateTime @default(now())
+  userId       String
+  storageKey   String
+  storageUrl   String
+  duration     Int?
+  fileSize     Int?
+  thumbnailUrl String?
+  clips        Clip[]
+  user         User     @relation(fields: [userId], references: [id])
 }
 
 model Clip {
-  id            Int      @id @default(autoincrement())
-  title         String
-  description   String?
-  hashtags      String[] @default([])
-  tags          String[] @default([])
-  createdAt     DateTime @default(now())
-  userId        String
-  videoId       Int
-  cloudinaryId  String
-  cloudinaryUrl String
-  startTime     Int?     // Start time in seconds
-  endTime       Int?     // End time in seconds
-  duration      Int?     // Calculated duration in seconds
-  aspectRatio   String   @default("16:9") // "16:9", "9:16", "1:1", "4:3"
-  thumbnailUrl  String?
-  status        String   @default("draft") // "draft", "processing", "ready", "failed"
-  processingProgress Int? @default(0) // 0-100 for processing status
-  metadata      Json?    // Additional metadata like AI suggestions
-  user          User     @relation(fields: [userId], references: [id])
-  video         Video    @relation(fields: [videoId], references: [id])
-  exports       ClipExport[]
-  scheduledPosts ScheduledPost[]
+  id                 Int             @id @default(autoincrement())
+  title              String
+  description        String?
+  hashtags           String[]        @default([])
+  tags               String[]        @default([])
+  createdAt          DateTime        @default(now())
+  userId             String
+  videoId            Int
+  storageKey         String
+  storageUrl         String
+  startTime          Int?
+  endTime            Int?
+  duration           Int?
+  aspectRatio        String          @default("16:9")
+  thumbnailUrl       String?
+  status             String          @default("draft")
+  processingProgress Int?            @default(0)
+  metadata           Json?
+  user               User            @relation(fields: [userId], references: [id])
+  video              Video           @relation(fields: [videoId], references: [id])
+  exports            ClipExport[]
+  scheduledPosts     ScheduledPost[]
 }
 
 model ClipExport {
   id            Int      @id @default(autoincrement())
   clipId        Int
-  format        String   // "9:16", "1:1", "16:9", "4:3"
-  platform      String   // "tiktok", "instagram", "youtube", "twitter", "linkedin"
-  cloudinaryId  String
-  cloudinaryUrl String
-  croppingType  String   @default("center") // "center", "face", "action", "smart"
+  format        String
+  platform      String
+  storageKey    String
+  storageUrl    String
+  croppingType  String   @default("center")
   thumbnailUrl  String?
   createdAt     DateTime @default(now())
   fileSize      Int?
   clip          Clip     @relation(fields: [clipId], references: [id], onDelete: Cascade)
-  
+
   @@unique([clipId, format, platform])
 }
 
 model StyleTemplate {
-  id              String  @id @default(cuid())
-  name            String
-  userId          String
-  user            User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  fontFamily      String? // e.g., "Arial", "Verdana"
-  primaryColor    String? // Hex color, e.g., "#FF0000"
-  secondaryColor  String? // Hex color
-  backgroundColor String? // Hex color for text backgrounds or overlays
-
-  // Cloudinary public IDs for video/image assets
-  introCloudinaryId   String? 
-  outroCloudinaryId   String?
-  logoCloudinaryId    String? // For a watermark/logo overlay
-
-  // Configuration for text overlays (lower thirds, CTAs)
-  lowerThirdText      String?
-  lowerThirdPosition  String? // e.g., "bottom_left", "bottom_right"
-
-  callToActionText    String?
-  callToActionUrl     String?
-  callToActionPosition String? // e.g., "top_right"
-  
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                   String   @id @default(cuid())
+  name                 String
+  userId               String
+  fontFamily           String?
+  primaryColor         String?
+  secondaryColor       String?
+  backgroundColor      String?
+  introStorageKey      String?
+  outroStorageKey      String?
+  logoStorageKey       String?
+  lowerThirdText       String?
+  lowerThirdPosition   String?
+  callToActionText     String?
+  callToActionUrl      String?
+  callToActionPosition String?
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model SocialAccount {
-  id                String  @id @default(cuid())
-  userId            String
-  platform          String  // "youtube", "tiktok", "instagram", "twitter", "linkedin"
-  platformUserId    String  // The user's ID on the platform
-  platformUsername  String? // The user's username/handle on the platform
-  displayName       String? // The user's display name on the platform
-  accessToken       String? // Encrypted access token
-  refreshToken      String? // Encrypted refresh token (if applicable)
-  tokenExpiresAt    DateTime? // When the access token expires
-  isActive          Boolean @default(true)
-  permissions       String[] @default([]) // Array of granted permissions
-  metadata          Json?   // Platform-specific metadata
-  connectedAt       DateTime @default(now())
-  lastUsedAt        DateTime?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id               String    @id @default(cuid())
+  userId           String
+  platform         String
+  platformUserId   String
+  platformUsername String?
+  displayName      String?
+  accessToken      String?
+  refreshToken     String?
+  tokenExpiresAt   DateTime?
+  isActive         Boolean   @default(true)
+  permissions      String[]  @default([])
+  metadata         Json?
+  connectedAt      DateTime  @default(now())
+  lastUsedAt       DateTime?
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, platform])
   @@index([userId])
@@ -195,37 +180,29 @@ model SocialAccount {
 }
 
 model ScheduledPost {
-  id              String    @id @default(cuid())
-  userId          String
-  clipId          Int?      // Optional - can schedule posts without clips
-  title           String
-  description     String?
-  hashtags        String[]  @default([])
-  platform        String    // "youtube", "tiktok", "instagram", "twitter", "linkedin"
-  scheduledFor    DateTime  // When to publish
-  status          String    @default("scheduled") // "scheduled", "publishing", "published", "failed", "cancelled"
-  publishedAt     DateTime? // When it was actually published
-  platformPostId  String?   // ID of the post on the platform after publishing
-  platformUrl     String?   // URL to the published post
-  errorMessage    String?   // Error message if publishing failed
-  retryCount      Int       @default(0)
-  maxRetries      Int       @default(3)
-  
-  // Platform-specific settings
-  platformSettings Json?    // Platform-specific options (visibility, comments, etc.)
-  
-  // Content variations for different platforms
-  content         Json?     // Platform-specific content variations
-  
-  // Workflow automation
-  workflowId      String?   // For batch/automated posting workflows
-  parentPostId    String?   // For cross-posting chains
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  clip            Clip?     @relation(fields: [clipId], references: [id], onDelete: SetNull)
+  id               String    @id @default(cuid())
+  userId           String
+  clipId           Int?
+  title            String
+  description      String?
+  hashtags         String[]  @default([])
+  platform         String
+  scheduledFor     DateTime
+  status           String    @default("scheduled")
+  publishedAt      DateTime?
+  platformPostId   String?
+  platformUrl      String?
+  errorMessage     String?
+  retryCount       Int       @default(0)
+  maxRetries       Int       @default(3)
+  platformSettings Json?
+  content          Json?
+  workflowId       String?
+  parentPostId     String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+  clip             Clip?     @relation(fields: [clipId], references: [id])
+  user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([scheduledFor])
@@ -235,313 +212,222 @@ model ScheduledPost {
 }
 
 model UserPreferences {
-  id                      String    @id @default(cuid())
-  userId                  String    @unique
-  user                    User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Default Platform Settings
-  defaultAspectRatio      String    @default("16:9") // "16:9", "9:16", "1:1", "4:3"
-  primaryPlatform         String?   // "youtube", "tiktok", "instagram", "twitter", "linkedin"
-  targetPlatforms         String[]  @default([]) // Multiple platforms user typically posts to
-  
-  // AI Enhancement Preferences
-  enableAiEnhancement     Boolean   @default(true)
-  autoGenerateCaptions    Boolean   @default(true)
-  autoGenerateHashtags    Boolean   @default(true)
-  aiTonePreference        String    @default("professional") // "professional", "casual", "energetic", "conversational"
-  customPrompts           Json?     // User-defined AI prompts and preferences
-  
-  // Export Quality Settings
-  videoQuality            String    @default("1080p") // "720p", "1080p", "1440p", "4K"
-  audioQuality            String    @default("high") // "low", "medium", "high"
-  compressionLevel        String    @default("balanced") // "high_quality", "balanced", "high_compression"
-  
-  // Scheduling & Automation Preferences
-  defaultScheduleTime     String?   // "09:00", "12:00", "18:00" etc.
-  timezone                String    @default("UTC")
-  enableAutoPosting       Boolean   @default(false)
-  crossPostingEnabled     Boolean   @default(false)
-  batchProcessingEnabled  Boolean   @default(true)
-  
-  // Content Creation Defaults
-  defaultHashtagCount     Int       @default(5)
-  defaultCaptionLength    String    @default("medium") // "short", "medium", "long"
-  enableTrendingHashtags  Boolean   @default(true)
-  
-  // Notification Preferences
-  emailNotifications      Boolean   @default(true)
-  pushNotifications       Boolean   @default(true)
-  weeklyDigest           Boolean   @default(true)
-  processingAlerts       Boolean   @default(true)
-  schedulingReminders    Boolean   @default(true)
-  
-  // Theme & UI Preferences
-  theme                  String    @default("basecom") // "basecom", "dark", "light"
-  dashboardLayout        String    @default("grid") // "grid", "list", "compact"
-  
-  createdAt              DateTime  @default(now())
-  updatedAt              DateTime  @updatedAt
-  
+  id                     String   @id @default(cuid())
+  userId                 String   @unique
+  defaultAspectRatio     String   @default("16:9")
+  primaryPlatform        String?
+  targetPlatforms        String[] @default([])
+  enableAiEnhancement    Boolean  @default(true)
+  autoGenerateCaptions   Boolean  @default(true)
+  autoGenerateHashtags   Boolean  @default(true)
+  aiTonePreference       String   @default("professional")
+  customPrompts          Json?
+  videoQuality           String   @default("1080p")
+  audioQuality           String   @default("high")
+  compressionLevel       String   @default("balanced")
+  defaultScheduleTime    String?
+  timezone               String   @default("UTC")
+  enableAutoPosting      Boolean  @default(false)
+  crossPostingEnabled    Boolean  @default(false)
+  batchProcessingEnabled Boolean  @default(true)
+  defaultHashtagCount    Int      @default(5)
+  defaultCaptionLength   String   @default("medium")
+  enableTrendingHashtags Boolean  @default(true)
+  emailNotifications     Boolean  @default(true)
+  pushNotifications      Boolean  @default(true)
+  weeklyDigest           Boolean  @default(true)
+  processingAlerts       Boolean  @default(true)
+  schedulingReminders    Boolean  @default(true)
+  theme                  String   @default("basecom")
+  dashboardLayout        String   @default("grid")
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+  user                   User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
 }
 
 model UserOnboarding {
-  id                    String    @id @default(cuid())
-  userId                String    @unique
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  // Onboarding Progress
-  isCompleted           Boolean   @default(false)
+  id                   String    @id @default(cuid())
+  userId               String    @unique
+  isCompleted          Boolean   @default(false)
   currentStep          Int       @default(1)
   totalSteps           Int       @default(5)
-  
-  // Step Completion Tracking
-  welcomeCompleted      Boolean   @default(false)
-  goalsCompleted        Boolean   @default(false)
-  platformsCompleted    Boolean   @default(false)
-  preferencesCompleted  Boolean   @default(false)
-  tutorialCompleted     Boolean   @default(false)
-  
-  // User Goals & Intentions
-  contentGoals          String[]  @default([]) // "grow_audience", "increase_engagement", "save_time", "professional_content"
-  experienceLevel       String?   // "beginner", "intermediate", "advanced"
-  contentTypes          String[]  @default([]) // "educational", "entertainment", "promotional", "lifestyle"
-  postingFrequency      String?   // "daily", "weekly", "monthly", "as_needed"
-  
-  // Platform Priorities
-  priorityPlatforms     String[]  @default([]) // Ordered list of platforms by importance
-  audienceSize         String?   // "small", "medium", "large", "enterprise"
-  
-  // Feature Interests
-  interestedFeatures    String[]  @default([]) // "ai_enhancement", "scheduling", "analytics", "templates"
-  
-  // Onboarding Metadata
+  welcomeCompleted     Boolean   @default(false)
+  goalsCompleted       Boolean   @default(false)
+  platformsCompleted   Boolean   @default(false)
+  preferencesCompleted Boolean   @default(false)
+  tutorialCompleted    Boolean   @default(false)
+  contentGoals         String[]  @default([])
+  experienceLevel      String?
+  contentTypes         String[]  @default([])
+  postingFrequency     String?
+  priorityPlatforms    String[]  @default([])
+  audienceSize         String?
+  interestedFeatures   String[]  @default([])
   skipTutorial         Boolean   @default(false)
   completedAt          DateTime?
-  timeSpent            Int?      // Total time spent in onboarding (seconds)
-  
+  timeSpent            Int?
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
-  
+  user                 User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([isCompleted])
 }
 
-// Phase 6: Advanced Features & Polish - Database Extensions
-
-// ============================================================================
-// 📊 ADMIN PORTAL & USER MANAGEMENT
-// ============================================================================
-
 model Admin {
-  id              String    @id @default(cuid())
-  userId          String    @unique
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  role            String    @default("admin") // "admin", "super_admin", "moderator"
-  permissions     String[]  @default([]) // "user_management", "content_moderation", "system_settings", "analytics_access"
-  
-  // Admin-specific settings
-  canImpersonate  Boolean   @default(false)
-  canDeleteUsers  Boolean   @default(false)
-  canManageRoles  Boolean   @default(false)
-  canAccessLogs   Boolean   @default(true)
-  
-  createdAt       DateTime  @default(now())
-  createdBy       String?   // Admin who created this admin account
-  lastActiveAt    DateTime?
-  
-  // Activity tracking
-  auditLogs       AuditLog[]
+  id                     String          @id @default(cuid())
+  userId                 String          @unique
+  role                   String          @default("admin")
+  permissions            String[]        @default([])
+  canImpersonate         Boolean         @default(false)
+  canDeleteUsers         Boolean         @default(false)
+  canManageRoles         Boolean         @default(false)
+  canAccessLogs          Boolean         @default(true)
+  createdAt              DateTime        @default(now())
+  createdBy              String?
+  lastActiveAt           DateTime?
+  user                   User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  auditLogs              AuditLog[]
   supportTicketsAssigned SupportTicket[] @relation("AssignedAdmin")
-  
+
   @@index([userId])
   @@index([role])
 }
 
 model AuditLog {
-  id              String    @id @default(cuid())
-  adminId         String?
-  admin           Admin?    @relation(fields: [adminId], references: [id], onDelete: SetNull)
-  
-  action          String    // "user_created", "user_suspended", "content_deleted", etc.
-  targetType      String    // "user", "video", "clip", "workspace", etc.
-  targetId        String    // ID of the affected entity
-  targetUserId    String?   // User who was affected (if applicable)
-  
-  details         Json?     // Additional context about the action
-  ipAddress       String?
-  userAgent       String?
-  
-  createdAt       DateTime  @default(now())
-  
+  id           String   @id @default(cuid())
+  adminId      String?
+  action       String
+  targetType   String
+  targetId     String
+  targetUserId String?
+  details      Json?
+  ipAddress    String?
+  userAgent    String?
+  createdAt    DateTime @default(now())
+  admin        Admin?   @relation(fields: [adminId], references: [id])
+
   @@index([adminId])
   @@index([targetType])
   @@index([targetUserId])
   @@index([createdAt])
 }
 
-// ============================================================================
-// 💰 MONETIZATION & PRICING SYSTEM
-// ============================================================================
-
 model Subscription {
-  id                String    @id @default(cuid())
-  userId            String    @unique
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  planId            String
-  plan              SubscriptionPlan @relation(fields: [planId], references: [id])
-  
-  status            String    @default("active") // "active", "cancelled", "expired", "past_due", "trialing"
-  currentPeriodStart DateTime
-  currentPeriodEnd   DateTime
-  cancelAtPeriodEnd  Boolean   @default(false)
-  cancelledAt        DateTime?
-  
-  // Payment details
-  stripeCustomerId   String?
+  id                   String           @id @default(cuid())
+  userId               String           @unique
+  planId               String
+  status               String           @default("active")
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean          @default(false)
+  cancelledAt          DateTime?
+  stripeCustomerId     String?
   stripeSubscriptionId String?
-  
-  // Usage tracking
-  usageThisMonth     Json?     // Track feature usage against limits
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
+  usageThisMonth       Json?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
+  plan                 SubscriptionPlan @relation(fields: [planId], references: [id])
+  user                 User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([planId])
   @@index([status])
 }
 
 model SubscriptionPlan {
-  id                String    @id @default(cuid())
-  name              String    @unique
-  displayName       String
-  description       String?
-  
-  // Pricing
-  priceMonthly      Decimal   // Price in cents
-  priceYearly       Decimal?  // Annual pricing (if applicable)
-  currency          String    @default("USD")
-  billingInterval   String    @default("month") // "month" or "year"
-  
-  // Stripe integration
-  stripeProductId   String?   // Stripe product ID
-  stripePriceId     String?   // Stripe price ID
-  
-  // Feature limits
-  maxVideos         Int       @default(-1) // -1 = unlimited
-  maxStorage        Int       @default(-1) // In MB, -1 = unlimited
-  maxClipsPerVideo  Int       @default(-1)
-  maxExportsPerMonth Int      @default(-1)
-  
-  // Feature flags (as structured JSON for better querying)
-  features          Json      @default("[]") // Array of feature names
-  limits            Json      @default("{}") // Object with limit configurations
-  
-  // Legacy feature flags (for backward compatibility)
-  hasAiEnhancement  Boolean   @default(true)
-  hasScheduling     Boolean   @default(true)
-  hasAnalytics      Boolean   @default(true)
-  hasTemplates      Boolean   @default(true)
-  hasPrioritySupport Boolean  @default(false)
-  hasWhiteLabel     Boolean   @default(false)
-  hasApiAccess      Boolean   @default(false)
-  
-  // Plan metadata
-  isPopular         Boolean   @default(false)
-  sortOrder         Int       @default(0)
-  isActive          Boolean   @default(true)
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  subscriptions     Subscription[]
-  
+  id                 String         @id @default(cuid())
+  name               String         @unique
+  displayName        String
+  description        String?
+  priceMonthly       Decimal
+  priceYearly        Decimal?
+  currency           String         @default("USD")
+  maxVideos          Int            @default(-1)
+  maxStorage         Int            @default(-1)
+  maxClipsPerVideo   Int            @default(-1)
+  maxExportsPerMonth Int            @default(-1)
+  hasAiEnhancement   Boolean        @default(true)
+  hasScheduling      Boolean        @default(true)
+  hasAnalytics       Boolean        @default(true)
+  hasTemplates       Boolean        @default(true)
+  hasPrioritySupport Boolean        @default(false)
+  hasWhiteLabel      Boolean        @default(false)
+  hasApiAccess       Boolean        @default(false)
+  isPopular          Boolean        @default(false)
+  sortOrder          Int            @default(0)
+  isActive           Boolean        @default(true)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  billingInterval    String         @default("month")
+  features           Json           @default("[]")
+  limits             Json           @default("{}")
+  stripePriceId      String?
+  stripeProductId    String?
+  subscriptions      Subscription[]
+
   @@index([isActive])
   @@index([sortOrder])
 }
 
 model PaymentHistory {
-  id                String    @id @default(cuid())
-  userId            String
-  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  amount            Decimal   // Amount in cents
-  currency          String    @default("USD")
-  status            String    // "succeeded", "failed", "pending", "refunded"
-  
-  // Payment details
+  id                    String   @id @default(cuid())
+  userId                String
+  amount                Decimal
+  currency              String   @default("USD")
+  status                String
   stripePaymentIntentId String?
-  stripeChargeId     String?
-  paymentMethod      String?   // "card", "bank_transfer", etc.
-  
-  description       String?
-  invoiceUrl        String?
-  receiptUrl        String?
-  
-  createdAt         DateTime  @default(now())
-  
+  stripeChargeId        String?
+  paymentMethod         String?
+  description           String?
+  invoiceUrl            String?
+  receiptUrl            String?
+  createdAt             DateTime @default(now())
+  user                  User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   @@index([userId])
   @@index([status])
   @@index([createdAt])
 }
 
-// ============================================================================
-// 🏢 WHITE-LABEL/AGENCY MODE
-// ============================================================================
-
 model Workspace {
-  id                String    @id @default(cuid())
-  name              String
-  slug              String    @unique
-  description       String?
-  
-  // Owner
-  ownerId           String
-  owner             User      @relation(fields: [ownerId], references: [id], onDelete: Cascade)
-  
-  // White-label branding
-  logoUrl           String?
-  primaryColor      String?   // Hex color
-  secondaryColor    String?   // Hex color
-  customDomain      String?   @unique
-  
-  // Settings
-  isPublic          Boolean   @default(false)
-  allowMemberInvites Boolean  @default(true)
-  maxMembers        Int       @default(10)
-  
-  // Subscription/billing
-  subscriptionTier  String    @default("workspace_basic") // Links to plan features
-  
-  createdAt         DateTime  @default(now())
-  updatedAt         DateTime  @updatedAt
-  
-  // Relationships
-  members           WorkspaceMember[]
-  invitations       WorkspaceInvitation[]
-  
+  id                 String                @id @default(cuid())
+  name               String
+  slug               String                @unique
+  description        String?
+  ownerId            String
+  logoUrl            String?
+  primaryColor       String?
+  secondaryColor     String?
+  customDomain       String?               @unique
+  isPublic           Boolean               @default(false)
+  allowMemberInvites Boolean               @default(true)
+  maxMembers         Int                   @default(10)
+  subscriptionTier   String                @default("workspace_basic")
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+  owner              User                  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  invitations        WorkspaceInvitation[]
+  members            WorkspaceMember[]
+
   @@index([ownerId])
   @@index([slug])
   @@index([customDomain])
 }
 
 model WorkspaceMember {
-  id              String    @id @default(cuid())
-  workspaceId     String
-  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  
-  userId          String
-  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  role            String    @default("member") // "owner", "admin", "editor", "viewer"
-  permissions     String[]  @default([]) // Specific permissions within workspace
-  
-  joinedAt        DateTime  @default(now())
-  lastActiveAt    DateTime?
-  
+  id           String    @id @default(cuid())
+  workspaceId  String
+  userId       String
+  role         String    @default("member")
+  permissions  String[]  @default([])
+  joinedAt     DateTime  @default(now())
+  lastActiveAt DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
   @@unique([workspaceId, userId])
   @@index([workspaceId])
   @@index([userId])
@@ -549,73 +435,49 @@ model WorkspaceMember {
 }
 
 model WorkspaceInvitation {
-  id              String    @id @default(cuid())
-  workspaceId     String
-  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  
-  email           String
-  role            String    @default("member")
-  
-  invitedBy       String
-  inviter         User      @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
-  
-  token           String    @unique
-  status          String    @default("pending") // "pending", "accepted", "declined", "expired"
-  
-  expiresAt       DateTime
-  acceptedAt      DateTime?
-  
-  createdAt       DateTime  @default(now())
-  
+  id          String    @id @default(cuid())
+  workspaceId String
+  email       String
+  role        String    @default("member")
+  invitedBy   String
+  token       String    @unique
+  status      String    @default("pending")
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  inviter     User      @relation(fields: [invitedBy], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
   @@unique([workspaceId, email])
   @@index([token])
   @@index([status])
   @@index([expiresAt])
 }
 
-// ============================================================================
-// 🎧 CUSTOMER SUPPORT & FEEDBACK
-// ============================================================================
-
 model SupportTicket {
-  id              String    @id @default(cuid())
-  ticketNumber    String    @unique // e.g., "HELP-2024-001"
-  
-  // User information
-  userId          String?
-  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  // Contact info (for non-authenticated users)
-  email           String
-  name            String
-  
-  // Ticket details
-  subject         String
-  description     String
-  category        String    @default("general") // "general", "billing", "technical", "feature_request", "bug_report"
-  priority        String    @default("medium") // "low", "medium", "high", "urgent"
-  status          String    @default("open") // "open", "in_progress", "resolved", "closed"
-  
-  // Assignment
-  assignedToId    String?
-  assignedTo      Admin?    @relation("AssignedAdmin", fields: [assignedToId], references: [id], onDelete: SetNull)
-  
-  // Attachments
-  attachments     String[]  @default([]) // Array of Cloudinary URLs
-  
-  // Metadata
-  browserInfo     String?
-  platformInfo    String?
-  errorDetails    Json?
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  resolvedAt      DateTime?
-  closedAt        DateTime?
-  
-  // Relationships
-  responses       SupportResponse[]
-  
+  id           String            @id @default(cuid())
+  ticketNumber String            @unique
+  userId       String?
+  email        String
+  name         String
+  subject      String
+  description  String
+  category     String            @default("general")
+  priority     String            @default("medium")
+  status       String            @default("open")
+  assignedToId String?
+  attachments  String[]          @default([])
+  browserInfo  String?
+  platformInfo String?
+  errorDetails Json?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  resolvedAt   DateTime?
+  closedAt     DateTime?
+  responses    SupportResponse[]
+  assignedTo   Admin?            @relation("AssignedAdmin", fields: [assignedToId], references: [id])
+  user         User?             @relation(fields: [userId], references: [id])
+
   @@index([userId])
   @@index([status])
   @@index([priority])
@@ -625,55 +487,42 @@ model SupportTicket {
 }
 
 model SupportResponse {
-  id              String    @id @default(cuid())
-  ticketId        String
-  ticket          SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
-  
-  // Response author (can be admin or user)
-  authorId        String?
-  authorType      String    // "admin", "user", "system"
-  authorName      String    // Display name
-  
-  message         String
-  isInternal      Boolean   @default(false) // Internal admin notes
-  attachments     String[]  @default([])
-  
-  createdAt       DateTime  @default(now())
-  
+  id          String        @id @default(cuid())
+  ticketId    String
+  authorId    String?
+  authorType  String
+  authorName  String
+  message     String
+  isInternal  Boolean       @default(false)
+  attachments String[]      @default([])
+  createdAt   DateTime      @default(now())
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
   @@index([ticketId])
   @@index([authorType])
   @@index([createdAt])
 }
 
 model UserFeedback {
-  id              String    @id @default(cuid())
-  userId          String?
-  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
-  // Feedback details
-  rating          Int       // 1-5 stars
-  title           String?
-  comment         String
-  category        String    @default("general") // "ui_ux", "performance", "features", "general"
-  
-  // Context
-  page            String?   // Which page/feature the feedback is about
-  screenshot      String?   // Cloudinary URL
-  
-  // Moderation
-  isPublic        Boolean   @default(true)
-  isApproved      Boolean   @default(false)
-  moderatedBy     String?
-  moderatedAt     DateTime?
-  
-  // Admin response
-  adminResponse   String?
-  respondedBy     String?
-  respondedAt     DateTime?
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  id            String    @id @default(cuid())
+  userId        String?
+  rating        Int
+  title         String?
+  comment       String
+  category      String    @default("general")
+  page          String?
+  screenshot    String?
+  isPublic      Boolean   @default(true)
+  isApproved    Boolean   @default(false)
+  moderatedBy   String?
+  moderatedAt   DateTime?
+  adminResponse String?
+  respondedBy   String?
+  respondedAt   DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  user          User?     @relation(fields: [userId], references: [id])
+
   @@index([userId])
   @@index([rating])
   @@index([isPublic, isApproved])
@@ -681,44 +530,31 @@ model UserFeedback {
   @@index([createdAt])
 }
 
-// ============================================================================
-// 📈 SYSTEM MONITORING & ANALYTICS
-// ============================================================================
-
 model SystemMetric {
-  id              String    @id @default(cuid())
-  
-  metricType      String    // "user_count", "video_uploads", "processing_time", "api_requests", etc.
-  value           Decimal
-  unit            String?   // "count", "seconds", "mb", "percentage", etc.
-  
-  // Time series data
-  timestamp       DateTime  @default(now())
-  period          String    @default("hour") // "minute", "hour", "day", "week", "month"
-  
-  // Additional context
-  metadata        Json?
-  
+  id         String   @id @default(cuid())
+  metricType String
+  value      Decimal
+  unit       String?
+  timestamp  DateTime @default(now())
+  period     String   @default("hour")
+  metadata   Json?
+
   @@index([metricType])
   @@index([timestamp])
   @@index([period])
 }
 
 model FeatureFlag {
-  id              String    @id @default(cuid())
-  name            String    @unique
-  description     String?
-  
-  isEnabled       Boolean   @default(false)
-  rolloutPercent  Int       @default(0) // 0-100 for gradual rollouts
-  
-  // Targeting
-  targetUsers     String[]  @default([]) // Specific user IDs
-  targetWorkspaces String[] @default([]) // Specific workspace IDs
-  
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  
+  id               String   @id @default(cuid())
+  name             String   @unique
+  description      String?
+  isEnabled        Boolean  @default(false)
+  rolloutPercent   Int      @default(0)
+  targetUsers      String[] @default([])
+  targetWorkspaces String[] @default([])
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
   @@index([name])
   @@index([isEnabled])
 }

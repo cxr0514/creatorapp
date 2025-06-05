@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { cloudinary, generateVideoThumbnail } from '@/lib/cloudinary'
+import { uploadVideoToB2, syncUserVideosFromB2 } from '@/lib/b2'
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,60 +18,48 @@ export async function GET(request: NextRequest) {
     const sync = searchParams.get('sync') === 'true'
 
     if (sync) {
-      // Sync with Cloudinary storage
+      // Sync with B2 storage
       try {
-        console.log('Syncing videos with Cloudinary...')
+        console.log('Syncing videos with B2...')
         
-        // Get user folder path
-        const userFolderPath = `creatorapp/users/${session.user.email}/videos`
-        
-        // Get videos from Cloudinary
-        const cloudinaryResult = await cloudinary.search
-          .expression(`folder:${userFolderPath}`)
-          .with_field('context')
-          .max_results(100)
-          .execute()
-        
-        console.log(`Found ${cloudinaryResult.resources.length} videos in Cloudinary`)
-        
-        // Get existing videos from database
-        const existingVideos = await prisma.video.findMany({
-          where: {
-            user: {
-              email: session.user.email
-            }
-          }
+        // Get videos from B2 for this user
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email }
         })
-        
-        const existingCloudinaryIds = new Set(existingVideos.map(v => v.cloudinaryId))
-        
-        // Add missing videos to database
-        for (const resource of cloudinaryResult.resources) {
-          if (!existingCloudinaryIds.has(resource.public_id)) {
-            console.log(`Adding missing video: ${resource.public_id}`)
-            
-            // Generate thumbnail
-            const thumbnailUrl = await generateVideoThumbnail(resource.public_id)
-            
-            await prisma.video.create({
-              data: {
-                title: resource.filename || resource.public_id.split('/').pop() || 'Untitled',
-                cloudinaryUrl: resource.secure_url,
-                cloudinaryId: resource.public_id,
-                thumbnailUrl,
-                duration: resource.duration || 0,
-                fileSize: resource.bytes,
-                user: {
-                  connect: {
-                    email: session.user.email
-                  }
+
+        if (user) {
+          const b2Videos = await syncUserVideosFromB2(user.id)
+          console.log(`Found ${b2Videos.length} videos in B2`)
+          
+          // Get existing videos from database
+          const existingVideos = await prisma.video.findMany({
+            where: { userId: user.id }
+          })
+          
+          const existingKeys = new Set(existingVideos.map(v => v.storageKey))
+          
+          // Add missing videos to database
+          for (const resource of b2Videos) {
+            if (!existingKeys.has(resource.key)) {
+              console.log(`Adding missing video: ${resource.key}`)
+              
+              const title = resource.filename?.replace(/\.[^/.]+$/, '') || 'Untitled'
+              
+              await prisma.video.create({
+                data: {
+                  title,
+                  storageUrl: resource.url,
+                  storageKey: resource.key,
+                  fileSize: resource.size,
+                  userId: user.id,
+                  uploadedAt: resource.uploadedAt || new Date()
                 }
-              }
-            })
+              })
+            }
           }
         }
       } catch (syncError) {
-        console.error('Error syncing with Cloudinary:', syncError)
+        console.error('Error syncing with B2:', syncError)
         // Continue with regular fetch even if sync fails
       }
     }
@@ -98,8 +86,8 @@ export async function GET(request: NextRequest) {
       id: video.id,
       title: video.title,
       filename: video.title, // Use title as filename since we store title based on filename
-      url: video.cloudinaryUrl,
-      publicId: video.cloudinaryId,
+      url: video.storageUrl,
+      publicId: video.storageKey,
       thumbnailUrl: video.thumbnailUrl,
       duration: video.duration,
       createdAt: video.uploadedAt.toISOString(),
@@ -161,90 +149,25 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // Convert file to buffer for Cloudinary upload
+    // Convert file to buffer for B2 upload
     const bytes = await file.arrayBuffer()
     const buffer = Buffer.from(bytes)
 
-    // Upload to Cloudinary with user-specific folder structure
-    const userFolder = `creator_uploads/videos/${user.id}`
-    
-    console.log('Uploading to Cloudinary folder:', userFolder)
-    console.log('Cloudinary config:', {
-      cloudName: process.env.CLOUDINARY_CLOUD_NAME,
-      hasApiKey: !!process.env.CLOUDINARY_API_KEY,
-      hasApiSecret: !!process.env.CLOUDINARY_API_SECRET
-    })
+    // Upload to Backblaze B2
+    console.log('Uploading to B2 for user:', user.id)
 
-    const uploadResult = await new Promise((resolve, reject) => {
-      const uploadStream = cloudinary.uploader.upload_stream(
-        {
-          resource_type: 'video',
-          folder: userFolder,
-          use_filename: true,
-          unique_filename: true,
-          chunk_size: 6000000, // 6MB chunks for large files
-          timeout: 120000, // 2 minute timeout
-        },
-        (error, result) => {
-          if (error) {
-            console.error('Cloudinary upload error:', error)
-            // More specific error handling for Cloudinary issues
-            if (error.message?.includes('timeout')) {
-              reject(new Error('Upload timed out. Please try with a smaller file.'))
-            } else if (error.message?.includes('Invalid')) {
-              reject(new Error('Invalid file format. Please upload a valid video file.'))
-            } else if (error.http_code === 401) {
-              reject(new Error('Cloudinary authentication failed. Please contact support.'))
-            } else if (error.http_code >= 500) {
-              reject(new Error('Upload service temporarily unavailable. Please try again later.'))
-            } else {
-              reject(error)
-            }
-          } else {
-            console.log('Cloudinary upload success:', result?.public_id)
-            resolve(result)
-          }
-        }
-      )
-
-      // Handle stream errors
-      uploadStream.on('error', (error) => {
-        console.error('Upload stream error:', error)
-        reject(error)
-      })
-      
-      uploadStream.end(buffer)
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const cloudinaryResult = uploadResult as any
+    const uploadResult = await uploadVideoToB2(buffer, user.id, file.name)
 
     // Create video record in database
     const fileName = file.name
     const title = fileName.replace(/\.[^/.]+$/, '') // Remove extension
     
-    // Generate thumbnail URL (with error handling)
-    let thumbnailUrl = null
-    try {
-      thumbnailUrl = generateVideoThumbnail(cloudinaryResult.public_id, {
-        width: 640,
-        height: 360,
-        quality: 'auto'
-      })
-      console.log('✅ Generated thumbnail URL:', thumbnailUrl)
-    } catch (error) {
-      console.warn('⚠️ Failed to generate thumbnail URL:', error)
-      // Continue without thumbnail - the UI will show a fallback icon
-    }
-    
     const video = await prisma.video.create({
       data: {
         title,
-        cloudinaryUrl: cloudinaryResult.secure_url,
-        cloudinaryId: cloudinaryResult.public_id,
-        thumbnailUrl,
-        duration: Math.round(cloudinaryResult.duration) || null, // Round to integer if exists
-        fileSize: file.size,
+        storageUrl: uploadResult.url,
+        storageKey: uploadResult.key,
+        fileSize: uploadResult.size,
         userId: user.id
       }
     })
@@ -257,10 +180,9 @@ export async function POST(request: NextRequest) {
       video: {
         id: video.id,
         title: video.title,
-        url: video.cloudinaryUrl,
+        url: video.storageUrl,
         thumbnailUrl: video.thumbnailUrl,
-        duration: video.duration,
-        isProcessing: !cloudinaryResult.duration // Indicate if still processing
+        fileSize: video.fileSize
       }
     })
   } catch (error) {

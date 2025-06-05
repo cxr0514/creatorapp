@@ -6,7 +6,7 @@ Transform your long videos into engaging, shareable clips with the power of AI.
 
 - 🔐 **Google OAuth Authentication** - Secure sign-in with Google
 - 📹 **Video Upload** - Drag & drop video files up to 500MB
-- ☁️ **Cloud Storage** - Videos stored securely on Cloudinary
+- ☁️ **Cloud Storage** - Videos stored securely on Backblaze B2
 - 🎯 **AI-Powered Clipping** - Create clips from your videos (coming soon)
 - 📱 **Responsive Design** - Works on desktop and mobile
 - 🗄️ **Database Integration** - PostgreSQL with Prisma ORM
@@ -16,7 +16,7 @@ Transform your long videos into engaging, shareable clips with the power of AI.
 - **Frontend**: Next.js 15, React, TypeScript, Tailwind CSS
 - **Backend**: Next.js API Routes, NextAuth.js
 - **Database**: PostgreSQL with Prisma ORM
-- **Storage**: Cloudinary for video and image storage
+- **Storage**: Backblaze B2 (S3-compatible) for video and image storage
 - **Authentication**: Google OAuth via NextAuth.js
 - **UI Components**: Shadcn/ui components
 
@@ -25,7 +25,7 @@ Transform your long videos into engaging, shareable clips with the power of AI.
 - Node.js 18+ and npm
 - PostgreSQL database
 - Google OAuth credentials
-- Cloudinary account
+- Backblaze B2 account
 
 ## Getting Started
 
@@ -55,10 +55,11 @@ Transform your long videos into engaging, shareable clips with the power of AI.
    GOOGLE_CLIENT_ID="your-google-client-id"
    GOOGLE_CLIENT_SECRET="your-google-client-secret"
    
-   # Cloudinary
-   CLOUDINARY_CLOUD_NAME="your-cloud-name"
-   CLOUDINARY_API_KEY="your-api-key"
-   CLOUDINARY_API_SECRET="your-api-secret"
+   # Backblaze B2 Storage
+   B2_BUCKET_NAME="your-bucket-name"
+   B2_KEY_ID="your-b2-key-id"
+   B2_APP_KEY="your-b2-application-key"
+   B2_ENDPOINT="https://s3.us-west-002.backblazeb2.com"
    ```
 
 4. **Set up the database**
@@ -102,6 +103,7 @@ src/
 │   └── ui/           # Reusable UI components
 └── lib/
     ├── prisma.ts     # Prisma client
+    ├── b2.ts         # Backblaze B2 storage utilities
     └── utils.ts      # Utility functions
 ```
 
@@ -115,11 +117,13 @@ src/
 4. Create OAuth 2.0 credentials
 5. Add authorized redirect URIs: `http://localhost:3000/api/auth/callback/google`
 
-### Cloudinary Setup
+### Backblaze B2 Setup
 
-1. Sign up at [Cloudinary](https://cloudinary.com/)
-2. Get your cloud name, API key, and API secret from the dashboard
-3. Add the credentials to your `.env.local` file
+1. Sign up at [Backblaze B2](https://www.backblaze.com/b2/cloud-storage.html)
+2. Create a bucket for your application
+3. Generate application keys with read/write permissions
+4. Note your endpoint URL (typically `https://s3.us-west-002.backblazeb2.com`)
+5. Add the credentials to your `.env.local` file
 
 ### Database Setup
 
@@ -134,6 +138,17 @@ src/
 - **Start production server**: `npm start`
 - **Database operations**: `npx prisma studio` (database GUI)
 - **Reset database**: `npx prisma db push --force-reset`
+
+## Storage Migration
+
+This application has been migrated from Cloudinary to Backblaze B2 for cost-effective, scalable storage. B2 provides:
+
+- S3-compatible API for easy integration
+- Significantly lower storage costs
+- High durability and availability
+- Simple pricing structure
+
+All video uploads, thumbnails, and template assets are now stored in Backblaze B2 with presigned URLs for secure access.
 
 ## Contributing
 

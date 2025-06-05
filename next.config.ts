@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'res.cloudinary.com',
+        hostname: 's3.us-west-002.backblazeb2.com',
         port: '',
         pathname: '/**',
       },

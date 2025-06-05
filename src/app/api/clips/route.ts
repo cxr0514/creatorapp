@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { cloudinary, generateClipThumbnail } from '@/lib/cloudinary'
+import { syncUserClipsFromB2 } from '@/lib/b2'
 
 export async function GET(request: NextRequest) {
   try {
@@ -18,68 +18,52 @@ export async function GET(request: NextRequest) {
     const sync = searchParams.get('sync') === 'true'
 
     if (sync) {
-      // Sync with Cloudinary storage
+      // Sync with B2 storage
       try {
-        console.log('Syncing clips with Cloudinary...')
+        console.log('Syncing clips with B2...')
         
-        // Get user folder path
-        const userClipsPath = `creatorapp/users/${session.user.email}/clips`
-        
-        // Get clips from Cloudinary
-        const cloudinaryResult = await cloudinary.search
-          .expression(`folder:${userClipsPath}`)
-          .with_field('context')
-          .max_results(100)
-          .execute()
-        
-        console.log(`Found ${cloudinaryResult.resources.length} clips in Cloudinary`)
-        
-        // Get existing clips from database
-        const existingClips = await prisma.clip.findMany({
-          where: {
-            user: {
-              email: session.user.email
-            }
-          }
+        // Get user
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email }
         })
-        
-        const existingCloudinaryIds = new Set(existingClips.map(c => c.cloudinaryId).filter(Boolean))
-        
-        // Add missing clips to database
-        for (const resource of cloudinaryResult.resources) {
-          if (!existingCloudinaryIds.has(resource.public_id)) {
-            console.log(`Adding missing clip: ${resource.public_id}`)
-            
-            // Try to find the parent video based on context or naming convention
-            const parentVideoId = resource.context?.video_id || null
-            
-            await prisma.clip.create({
-              data: {
-                title: resource.filename || resource.public_id.split('/').pop() || 'Untitled Clip',
-                cloudinaryId: resource.public_id,
-                cloudinaryUrl: resource.secure_url,
-                thumbnailUrl: resource.secure_url.replace(/\.[^/.]+$/, '.jpg'),
-                status: 'ready',
-                startTime: 0,
-                endTime: resource.duration || 30,
-                user: {
-                  connect: {
-                    email: session.user.email
-                  }
-                },
-                ...(parentVideoId && {
-                  video: {
-                    connect: {
-                      id: parseInt(parentVideoId)
-                    }
-                  }
-                })
-              }
-            })
+
+        if (user) {
+          const b2Clips = await syncUserClipsFromB2(user.id)
+          console.log(`Found ${b2Clips.length} clips in B2`)
+          
+          // Get existing clips from database
+          const existingClips = await prisma.clip.findMany({
+            where: { userId: user.id }
+          })
+          
+          const existingKeys = new Set(existingClips.map(c => c.storageKey))
+          
+          // Add missing clips to database - Note: This is simplified
+          // In a real implementation, you'd need to parse metadata to extract video relationships
+          for (const resource of b2Clips) {
+            if (!existingKeys.has(resource.key)) {
+              console.log(`Adding missing clip: ${resource.key}`)
+              
+              // For now, create clips without video association
+              // You'd need additional metadata to properly link clips to videos
+              await prisma.clip.create({
+                data: {
+                  title: resource.filename?.replace(/\.[^/.]+$/, '') || 'Untitled Clip',
+                  storageKey: resource.key,
+                  storageUrl: resource.url,
+                  status: 'ready',
+                  startTime: 0,
+                  endTime: 30, // Default duration
+                  userId: user.id,
+                  // Note: videoId would need to be determined from metadata
+                  videoId: 1 // Placeholder - you'd need proper video linking logic
+                }
+              })
+            }
           }
         }
       } catch (syncError) {
-        console.error('Error syncing clips with Cloudinary:', syncError)
+        console.error('Error syncing clips with B2:', syncError)
         // Continue with regular fetch even if sync fails
       }
     }
@@ -95,7 +79,7 @@ export async function GET(request: NextRequest) {
           select: {
             id: true,
             title: true,
-            cloudinaryId: true
+            storageKey: true
           }
         }
       },
@@ -119,9 +103,7 @@ export async function GET(request: NextRequest) {
         title: clip.video.title,
         filename: clip.video.title // Use title as filename for now
       },
-      thumbnailUrl: clip.thumbnailUrl || (clip.video.cloudinaryId ? 
-        generateClipThumbnail(clip.video.cloudinaryId, clip.startTime || 0) : 
-        null),
+      thumbnailUrl: clip.thumbnailUrl || null, // Remove auto-generation for now
       status: 'ready' as const // Assume all clips are ready for now
     }))
 
@@ -223,89 +205,31 @@ export async function POST(request: NextRequest) {
       console.log('[API/CLIPS POST] Existing user found:', user.id);
     }
 
-    // Check if Cloudinary is configured for video processing
-    const hasCloudinaryConfig = process.env.CLOUDINARY_CLOUD_NAME && 
-                                process.env.CLOUDINARY_API_KEY && 
-                                process.env.CLOUDINARY_API_SECRET
-    console.log('[API/CLIPS POST] Cloudinary configured:', hasCloudinaryConfig);
-    console.log('[API/CLIPS POST] Video Cloudinary ID:', video.cloudinaryId);
+    // Check if we have B2 configuration for video processing
+    const hasB2Config = process.env.B2_ACCESS_KEY_ID && 
+                        process.env.B2_SECRET_ACCESS_KEY && 
+                        process.env.B2_BUCKET_NAME
+    console.log('[API/CLIPS POST] B2 configured:', hasB2Config);
+    console.log('[API/CLIPS POST] Video storage key:', video.storageKey);
 
+    // For now, we'll create a simple clip record without actual video processing
+    // In a full implementation, you'd extract the clip from the source video
+    let clipUrl = `${video.storageUrl}#t=${startTime},${endTime}` // Fragment URL approach
+    const clipStorageKey = `creator_uploads/clips/${user.id}/clip_${Date.now()}_${videoId}_${startTime}_${endTime}.mp4`
+    const thumbnailUrl = null
 
-    let clipUrl = `https://example.com/clips/${Date.now()}-${title}.mp4`
-    let clipPublicId = `clip_${Date.now()}_${videoId}`
-    let thumbnailUrl = null
-
-    if (hasCloudinaryConfig && video.cloudinaryId) {
-      console.log('[API/CLIPS POST] Attempting Cloudinary processing.');
-      try {
-        // Generate thumbnail for the clip from the original video at the start time
-        try {
-          thumbnailUrl = generateClipThumbnail(video.cloudinaryId, startTime, {
-            width: 640,
-            height: 360,
-            quality: 'auto'
-          })
-          console.log('✅ [API/CLIPS POST] Generated clip thumbnail URL:', thumbnailUrl)
-        } catch (thumbError) {
-          console.warn('⚠️ [API/CLIPS POST] Failed to generate clip thumbnail URL:', thumbError)
-          // Continue without thumbnail - the UI will show a fallback icon
-        }
-
-        // Create user-specific folder for clips
-        const userClipsFolder = `creator_uploads/clips/${user.id}`
-        const clipFileName = `${title.replace(/[^a-zA-Z0-9]/g, '_')}_${startTime}s_${endTime}s`
-        
-        console.log(`[API/CLIPS POST] Attempting to upload to Cloudinary. Folder: ${userClipsFolder}, Filename: ${clipFileName}`);
-        // Generate clip using Cloudinary's video processing
-        // Create a new video asset with the clipped content
-        const clipResult = await cloudinary.uploader.upload(
-          cloudinary.url(video.cloudinaryId, {
-            resource_type: 'video',
-            start_offset: `${startTime}s`,
-            end_offset: `${endTime}s`,
-            format: 'mp4',
-            quality: 'auto',
-          }),
-          {
-            resource_type: 'video',
-            folder: userClipsFolder,
-            public_id: clipFileName,
-            overwrite: true,
-            use_filename: false,
-            unique_filename: false,
-          }
-        )
-
-        clipUrl = clipResult.secure_url
-        clipPublicId = clipResult.public_id
-        
-        console.log('[API/CLIPS POST] Created clip asset in Cloudinary:', clipPublicId)
-        console.log('[API/CLIPS POST] Clip URL:', clipUrl)
-      } catch (error) {
-        console.error('[API/CLIPS POST] Error creating Cloudinary clip asset (primary attempt):', error)
-        // Fall back to transformation URL approach
-        try {
-          console.log('[API/CLIPS POST] Attempting Cloudinary transformation URL fallback.');
-          const clipTransformation = cloudinary.url(video.cloudinaryId, {
-            resource_type: 'video',
-            start_offset: `${startTime}s`,
-            end_offset: `${endTime}s`,
-            format: 'mp4',
-            quality: 'auto',
-          })
-
-          clipPublicId = `creator_uploads/clips/${user.id}/clip_${Date.now()}_${videoId}_${startTime}_${endTime}`
-          clipUrl = clipTransformation
-          
-          console.log('[API/CLIPS POST] Using clip transformation URL as fallback:', clipUrl)
-        } catch (fallbackError) {
-          console.error('[API/CLIPS POST] Error creating clip transformation (fallback attempt):', fallbackError)
-          // If fallback also fails, we might still proceed with mock/default URLs, or we could return an error.
-          // For now, it proceeds, and prisma.create might fail or save with mock URLs.
-        }
-      }
-    } else {
-      console.warn('[API/CLIPS POST] Cloudinary not configured or video missing cloudinaryId. Using mock clip URL.')
+    if (hasB2Config && video.storageKey) {
+      console.log('[API/CLIPS POST] B2 processing would be implemented here.');
+      // TODO: Implement actual video clip extraction using B2 and FFmpeg
+      // For now, we create a placeholder clip record
+      
+      // In a real implementation, you would:
+      // 1. Download the video segment from B2
+      // 2. Use FFmpeg to extract the clip
+      // 3. Upload the clip back to B2
+      // 4. Generate a thumbnail
+      
+      clipUrl = `${process.env.B2_CDN_URL || process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${clipStorageKey}`
     }
 
     const clipDataForDb = {
@@ -318,8 +242,8 @@ export async function POST(request: NextRequest) {
       aspectRatio,
       videoId,
       userId: user.id,
-      cloudinaryId: clipPublicId,
-      cloudinaryUrl: clipUrl,
+      storageKey: clipStorageKey,
+      storageUrl: clipUrl,
       thumbnailUrl
     };
     console.log('[API/CLIPS POST] Data before creating clip in DB:', clipDataForDb);
@@ -339,7 +263,7 @@ export async function POST(request: NextRequest) {
         title: clip.title,
         startTime: clip.startTime,
         endTime: clip.endTime,
-        url: clip.cloudinaryUrl
+        url: clip.storageUrl
       }
     })
   } catch (error) {

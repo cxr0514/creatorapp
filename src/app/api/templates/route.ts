@@ -9,9 +9,9 @@ interface CreateTemplateRequest {
   primaryColor?: string;
   secondaryColor?: string;
   backgroundColor?: string;
-  introCloudinaryId?: string;
-  outroCloudinaryId?: string;
-  logoCloudinaryId?: string;
+  introStorageKey?: string;
+  outroStorageKey?: string;
+  logoStorageKey?: string;
   lowerThirdText?: string;
   lowerThirdPosition?: string;
   callToActionText?: string;

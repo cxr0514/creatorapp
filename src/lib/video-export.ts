@@ -247,53 +247,29 @@ function parseAspectRatio(aspectRatio: string): number {
   return 16 / 9; // Default fallback
 }
 
-export function generateCloudinaryTransformation(
+export function generateVideoTransformation(
   format: ExportFormat,
   cropSettings: CropSettings,
   startTime?: number,
   endTime?: number
-): string {
-  const transformations: string[] = [];
-
-  // Video trimming
-  if (startTime !== undefined && endTime !== undefined) {
-    transformations.push(`so_${startTime},eo_${endTime}`);
-  }
-
-  // Aspect ratio and cropping
-  transformations.push(`ar_${format.aspectRatio.replace(':', ':')}`);
-  transformations.push(`c_fill`);
-  transformations.push(`w_${format.width},h_${format.height}`);
-
-  // Cropping strategy
-  switch (cropSettings.type) {
-    case 'face':
-      transformations.push('g_face');
-      break;
-    case 'action':
-      transformations.push('g_auto:subject');
-      break;
-    case 'smart':
-      transformations.push('g_auto');
-      break;
-    case 'rule-of-thirds':
-      transformations.push('g_auto:classic');
-      break;
-    case 'motion-tracking':
-      transformations.push('g_auto:subject');
-      break;
-    case 'auto-focus':
-      transformations.push('g_auto:subject');
-      break;
-    default:
-      transformations.push('g_center');
-  }
-
-  // Quality and format
-  transformations.push('q_auto');
-  transformations.push('f_mp4');
-
-  return transformations.join(',');
+): {
+  width: number;
+  height: number;
+  aspectRatio: string;
+  crop: string;
+  gravity: string;
+  startTime?: number;
+  endTime?: number;
+} {
+  return {
+    width: format.width,
+    height: format.height,
+    aspectRatio: format.aspectRatio,
+    crop: 'fill',
+    gravity: cropSettings.type === 'smart' ? 'auto' : cropSettings.type === 'center' ? 'center' : 'auto',
+    ...(startTime !== undefined && { startTime }),
+    ...(endTime !== undefined && { endTime })
+  };
 }
 
 export function getPlatformRecommendations(format: ExportFormat): string[] {

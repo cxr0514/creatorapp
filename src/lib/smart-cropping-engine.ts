@@ -144,64 +144,66 @@ export class SmartCroppingEngine {
   }
 
   /**
-   * Generates Cloudinary transformation parameters for smart cropping
+   * Generates video transformation parameters for smart cropping
    */
-  generateCloudinaryTransformation(
+  generateVideoTransformation(
     smartCropAnalysis: SmartCropAnalysis,
     targetFormat: ExportFormat,
     startTime?: number,
     endTime?: number
-  ): string {
-    const transformations: string[] = [];
-
-    // Video trimming
-    if (startTime !== undefined && endTime !== undefined) {
-      transformations.push(`so_${startTime},eo_${endTime}`);
-    }
-
-    // Base transformation
-    transformations.push(`c_fill`);
-    transformations.push(`w_${targetFormat.width},h_${targetFormat.height}`);
-    transformations.push(`ar_${targetFormat.aspectRatio}`);
+  ): {
+    width: number;
+    height: number;
+    aspectRatio: string;
+    crop: string;
+    gravity: string;
+    focusArea?: { x: number; y: number; width: number; height: number };
+    startTime?: number;
+    endTime?: number;
+  } {
+    const transformation: {
+      width: number;
+      height: number;
+      aspectRatio: string;
+      crop: string;
+      gravity: string;
+      focusArea?: { x: number; y: number; width: number; height: number };
+      startTime?: number;
+      endTime?: number;
+    } = {
+      width: targetFormat.width,
+      height: targetFormat.height,
+      aspectRatio: targetFormat.aspectRatio,
+      crop: 'fill',
+      gravity: 'center',
+      ...(startTime !== undefined && { startTime }),
+      ...(endTime !== undefined && { endTime })
+    };
 
     // Apply smart cropping strategy
     switch (smartCropAnalysis.strategy) {
       case 'face':
-        transformations.push('g_face');
-        if (smartCropAnalysis.confidence < 0.8 && smartCropAnalysis.fallbackStrategy) {
-          transformations.push(`g_${smartCropAnalysis.fallbackStrategy}`);
-        }
+        transformation.gravity = 'face';
         break;
-
       case 'motion-tracking':
-        transformations.push('g_auto:subject');
+      case 'action':
+        transformation.gravity = 'auto';
         break;
-
       case 'smart':
-        transformations.push('g_auto');
+        transformation.gravity = 'auto';
         break;
-
       case 'rule-of-thirds':
-        transformations.push('g_auto:classic');
+        transformation.gravity = 'auto';
         break;
-
       case 'custom':
-        // Use custom focus area
-        const { x, y } = smartCropAnalysis.focusArea;
-        transformations.push(`g_xy_center`);
-        transformations.push(`x_${Math.round(x * targetFormat.width)}`);
-        transformations.push(`y_${Math.round(y * targetFormat.height)}`);
+        transformation.gravity = 'custom';
+        transformation.focusArea = smartCropAnalysis.focusArea;
         break;
-
       default:
-        transformations.push('g_center');
+        transformation.gravity = 'center';
     }
 
-    // Quality and format optimization
-    transformations.push('q_auto:good');
-    transformations.push('f_mp4');
-
-    return transformations.join(',');
+    return transformation;
   }
 
   /**

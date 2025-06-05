@@ -1,6 +1,6 @@
 import { Queue, Worker } from 'bullmq'
 import Redis from 'ioredis'
-import { cloudinary } from '@/lib/cloudinary'
+import { getPresignedUrl, uploadToB2 } from '@/lib/b2'
 import { generateCaptions } from '@/lib/ai'
 
 interface CaptionJob {
@@ -10,80 +10,81 @@ interface CaptionJob {
   userId: string
 }
 
-const connection = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
-  maxRetriesPerRequest: null
-})
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
 
-export const captionQueue = new Queue<CaptionJob>('video-captions', {
-  connection,
+export const captionQueue = new Queue('caption-processing', {
+  connection: redis,
   defaultJobOptions: {
+    removeOnComplete: 10,
+    removeOnFail: 5,
     attempts: 3,
     backoff: {
       type: 'exponential',
-      delay: 1000
-    }
-  }
+      delay: 2000,
+    },
+  },
 })
 
-// Process caption generation jobs
-const worker = new Worker<CaptionJob>('video-captions', async (job) => {
-  try {
-    const { videoId, format = 'srt', language } = job.data
+export const captionWorker = new Worker(
+  'caption-processing',
+  async (job) => {
+    const { videoId, format = 'srt', language = 'en', userId } = job.data as CaptionJob
 
-    // Get video URL from Cloudinary
-    const videoUrl = cloudinary.url(videoId, {
-      resource_type: 'video',
-      format: 'mp4'
-    })
+    try {
+      console.log(`[CAPTION-WORKER] Processing captions for video ${videoId}`)
 
-    // Generate captions
-    const captions = await generateCaptions(videoUrl, { format, language })
+      // Get video URL from B2 using presigned URL
+      const videoUrl = await getPresignedUrl(videoId)
 
-    // Upload captions to Cloudinary
-    const captionUploadResult = await cloudinary.uploader.upload(
-      `data:text/plain;base64,${Buffer.from(captions).toString('base64')}`,
-      {
-        resource_type: 'raw',
-        public_id: `captions/${videoId}/${format}`,
-        format: format,
-        overwrite: true
+      // Generate captions using AI
+      const captions = await generateCaptions(videoUrl, {
+        format,
+        language,
+      })
+
+      // Upload captions to B2
+      const captionBuffer = Buffer.from(captions, 'utf-8')
+      const captionKey = `captions/${userId}/${videoId}.${format}`
+      const captionUploadResult = await uploadToB2(
+        captionBuffer,
+        captionKey,
+        `text/${format}`
+      )
+
+      console.log(`[CAPTION-WORKER] Captions uploaded for video ${videoId}: ${captionUploadResult.storageUrl}`)
+
+      return {
+        videoId,
+        captionUrl: captionUploadResult.storageUrl,
+        captionKey: captionUploadResult.storageKey,
+        format,
+        language,
       }
-    )
-
-    // Update video with caption URL
-    await cloudinary.api.update(videoId, {
-      resource_type: 'video',
-      raw_transformation: `co_${format},l_captions:${videoId}/${format}`
-    })
-
-    // Store the job result
-    return {
-      success: true,
-      captionUrl: captionUploadResult.secure_url,
-      format
+    } catch (error) {
+      console.error(`[CAPTION-WORKER] Error processing captions for video ${videoId}:`, error)
+      throw error
     }
-
-  } catch (error) {
-    console.error(`Error processing caption job for video ${job.data.videoId}:`, error)
-    throw error // This will trigger a retry based on the job options
+  },
+  {
+    connection: redis,
+    concurrency: 3,
   }
-}, { 
-  connection,
-  concurrency: 5 // Process 5 jobs simultaneously
-})
+)
+
+export async function addCaptionJob(data: CaptionJob) {
+  return captionQueue.add('generate-captions', data, {
+    priority: 1,
+  })
+}
 
 // Handle worker events
-worker.on('completed', (job) => {
+captionWorker.on('completed', (job) => {
   console.log(`Caption job completed for video ${job.data.videoId}`)
 })
 
-worker.on('failed', (job, error) => {
+captionWorker.on('failed', (job, error) => {
   console.error(`Caption job failed for video ${job?.data?.videoId}:`, error)
 })
-
-export async function addToCaptionQueue(job: CaptionJob) {
-  return captionQueue.add(`caption-${job.videoId}`, job)
-}
 
 export async function getCaptionJobStatus(jobId: string) {
   const job = await captionQueue.getJob(jobId)
