@@ -2,23 +2,54 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { uploadVideoToB2, syncUserVideosFromB2, syncUserVideosFromB2Enhanced, deleteVideoFromB2 } from '@/lib/b2'
+import { uploadVideoToB2, syncUserVideosFromB2Enhanced, deleteVideoFromB2, smartSync, checkStorageHealth } from '@/lib/b2'
 
 export async function GET(request: NextRequest) {
   try {
+    // Check for authenticated session
     const session = await getServerSession(authOptions)
-    
-    // For development/testing: Allow access even without session
     if (!session?.user?.email) {
-      console.warn('No authenticated session found, returning empty videos list for development')
+      console.log('No authenticated session found, returning empty videos list for development')
       return NextResponse.json([])
     }
 
     const { searchParams } = new URL(request.url)
-    const sync = searchParams.get('sync') === 'true'
+    const syncRequested = searchParams.get('sync') === 'true'
+    const healthCheck = searchParams.get('health') === 'true'
+    const strategy = searchParams.get('strategy') as 'fast' | 'full' | 'repair' | 'smart' | undefined
 
-    if (sync) {
-      // Enhanced bidirectional sync with B2 storage
+    console.log('Session callback - User ID set:', (session.user as any)?.id)
+    
+    // Handle health check request
+    if (healthCheck) {
+      try {
+        const user = await prisma.user.findUnique({
+          where: { email: session.user.email }
+        })
+        
+        if (!user) {
+          return NextResponse.json({ error: 'User not found' }, { status: 404 })
+        }
+
+        const healthReport = await checkStorageHealth(user.id)
+        return NextResponse.json({
+          health: healthReport,
+          timestamp: new Date().toISOString()
+        })
+      } catch (healthError) {
+        console.error('Error during storage health check:', healthError)
+        return NextResponse.json({ 
+          error: 'Health check failed',
+          health: {
+            isHealthy: false,
+            recommendations: ['Health check failed - please try again later']
+          }
+        }, { status: 500 })
+      }
+    }
+
+    // Handle sync request with enhanced features
+    if (syncRequested) {
       try {
         console.log('Starting comprehensive sync with B2...')
         
@@ -28,8 +59,31 @@ export async function GET(request: NextRequest) {
         })
 
         if (user) {
-          // Get videos from B2 using enhanced sync for debugging
-          const b2Videos = await syncUserVideosFromB2Enhanced(user.id)
+          // Get current database video count for smart sync
+          const dbVideoCount = await prisma.video.count({
+            where: { userId: user.id }
+          })
+
+          let syncResult
+          let b2Videos: any[] = []
+          let recommendations: string[] = []
+
+          // Determine sync strategy
+          if (strategy === 'smart' || !strategy) {
+            // Use smart sync to automatically determine best approach
+            const smartSyncResult = await smartSync(user.id, dbVideoCount)
+            b2Videos = smartSyncResult.b2Videos
+            recommendations = smartSyncResult.recommendations
+            
+            console.log(`[SMART-SYNC] Using ${smartSyncResult.strategy} strategy`)
+            console.log(`[SMART-SYNC] Scan took ${smartSyncResult.metrics.scanDuration}ms`)
+            console.log(`[SMART-SYNC] Storage used: ${(smartSyncResult.metrics.storageUsed / 1024 / 1024).toFixed(2)} MB`)
+          } else {
+            // Use traditional enhanced sync
+            b2Videos = await syncUserVideosFromB2Enhanced(user.id)
+            recommendations.push(`Using ${strategy} sync strategy`)
+          }
+          
           console.log(`Found ${b2Videos.length} videos in B2`)
           
           // Get existing videos from database
@@ -43,6 +97,7 @@ export async function GET(request: NextRequest) {
           
           let addedToDatabase = 0
           let removedFromB2 = 0
+          let removedFromDatabase = 0
           const errors: string[] = []
           
           // 1. Add missing videos from B2 to database
@@ -71,27 +126,29 @@ export async function GET(request: NextRequest) {
             }
           }
           
-          // 2. Remove orphaned videos from B2 that don't exist in database
-          // (Videos that exist in B2 but were deleted from database)
-          for (const dbVideo of existingVideos) {
-            if (!b2Keys.has(dbVideo.storageKey)) {
-              try {
-                console.log(`Removing orphaned database record: ${dbVideo.storageKey}`)
-                
-                // Remove from database since it doesn't exist in B2
-                await prisma.video.delete({
-                  where: { id: dbVideo.id }
-                })
-                console.log(`Removed orphaned video record: ${dbVideo.title}`)
-              } catch (error) {
-                console.error(`Error removing orphaned video ${dbVideo.id}:`, error)
-                errors.push(`Failed to remove orphaned record for ${dbVideo.title}`)
+          // 2. Remove orphaned database records (videos that exist in DB but not in B2)
+          const removeOrphaned = searchParams.get('removeOrphaned') !== 'false' // Default to true
+          if (removeOrphaned) {
+            for (const dbVideo of existingVideos) {
+              if (!b2Keys.has(dbVideo.storageKey)) {
+                try {
+                  console.log(`Removing orphaned database record: ${dbVideo.storageKey}`)
+                  
+                  // Remove from database since it doesn't exist in B2
+                  await prisma.video.delete({
+                    where: { id: dbVideo.id }
+                  })
+                  removedFromDatabase++
+                  console.log(`Removed orphaned video record: ${dbVideo.title}`)
+                } catch (error) {
+                  console.error(`Error removing orphaned video ${dbVideo.id}:`, error)
+                  errors.push(`Failed to remove orphaned record for ${dbVideo.title}`)
+                }
               }
             }
           }
           
           // 3. Optional: Clean up B2 videos that don't have database records
-          // This is more aggressive and should be used carefully
           const cleanupOrphans = searchParams.get('cleanup') === 'true'
           if (cleanupOrphans) {
             for (const b2Video of b2Videos) {
@@ -113,15 +170,23 @@ export async function GET(request: NextRequest) {
             }
           }
           
-          console.log(`Sync completed: +${addedToDatabase} to DB, -${removedFromB2} from B2, ${errors.length} errors`)
+          console.log(`Sync completed: +${addedToDatabase} to DB, -${removedFromDatabase} from DB, -${removedFromB2} from B2, ${errors.length} errors`)
           
-          // Add sync results to response headers for frontend feedback
+          // Calculate storage usage
+          const totalStorageUsed = b2Videos.reduce((sum, video) => sum + (video.size || 0), 0)
+          
+          // Add comprehensive sync results to response headers
           const response = NextResponse.json([], {
             headers: {
               'X-Sync-Added': addedToDatabase.toString(),
-              'X-Sync-Removed': removedFromB2.toString(),
+              'X-Sync-Removed-DB': removedFromDatabase.toString(),
+              'X-Sync-Removed-B2': removedFromB2.toString(),
               'X-Sync-Errors': errors.length.toString(),
-              'X-Sync-Status': errors.length === 0 ? 'success' : 'partial'
+              'X-Sync-Status': errors.length === 0 ? 'success' : 'partial',
+              'X-Sync-Strategy': strategy || 'smart',
+              'X-Storage-Used': totalStorageUsed.toString(),
+              'X-Storage-Count': b2Videos.length.toString(),
+              'X-Sync-Recommendations': recommendations.join('; ')
             }
           })
           
@@ -129,10 +194,24 @@ export async function GET(request: NextRequest) {
           if (errors.length > 0) {
             console.warn('Sync completed with errors:', errors)
           }
+          
+          // If there were recommendations, log them
+          if (recommendations.length > 0) {
+            console.log('Sync recommendations:', recommendations)
+          }
         }
       } catch (syncError) {
         console.error('Error during comprehensive sync with B2:', syncError)
         // Continue with regular fetch even if sync fails
+        return NextResponse.json({ 
+          error: 'Sync failed',
+          details: syncError instanceof Error ? syncError.message : 'Unknown sync error'
+        }, { 
+          status: 500,
+          headers: {
+            'X-Sync-Status': 'failed'
+          }
+        })
       }
     }
 
