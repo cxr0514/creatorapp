@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { uploadVideoToB2 } from '@/lib/b2'
+import { uploadToB2 } from '@/lib/b2'
 
 export async function POST(request: NextRequest) {
   try {
@@ -43,18 +43,18 @@ export async function POST(request: NextRequest) {
     const buffer = Buffer.from(bytes)
 
     // Upload to Backblaze B2
-    const uploadResult = await uploadVideoToB2(buffer, user.id, file.name)
-
-    // Create video record in database
     const fileName = file.name
     const title = fileName.replace(/\.[^/.]+$/, '') // Remove extension
+    const storageKey = `videos/${user.id}/${Date.now()}-${fileName}`
+    
+    const uploadResult = await uploadToB2(buffer, storageKey, file.type)
     
     const video = await prisma.video.create({
       data: {
         title,
-        storageUrl: uploadResult.url,
-        storageKey: uploadResult.key,
-        fileSize: uploadResult.size,
+        storageUrl: uploadResult.storageUrl,
+        storageKey: uploadResult.storageKey,
+        fileSize: file.size,
         userId: user.id
       }
     })

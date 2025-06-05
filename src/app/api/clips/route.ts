@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { syncUserClipsFromB2, uploadClipToB2, processAndUploadClip } from '@/lib/b2'
+import { syncUserClipsFromB2 } from '@/lib/b2'
 
 export async function GET(request: NextRequest) {
   try {
@@ -212,32 +212,22 @@ export async function POST(request: NextRequest) {
     console.log('[API/CLIPS POST] B2 configured:', hasB2Config);
     console.log('[API/CLIPS POST] Video storage key:', video.storageKey);
 
-    // Create proper clip storage key using the new folder structure
-    const timestamp = Date.now()
-    const clipFilename = `clip_${videoId}_${Math.round(startTime)}s_${Math.round(endTime)}s.mp4`
-    const clipStorageKey = `users/${user.id}/clips/${timestamp}_${clipFilename}`
-    
-    // For now, we'll create a clip record with the proper storage structure
+    // For now, we'll create a simple clip record without actual video processing
     // In a full implementation, you'd extract the clip from the source video
     let clipUrl = `${video.storageUrl}#t=${startTime},${endTime}` // Fragment URL approach
+    const clipStorageKey = `creator_uploads/clips/${user.id}/clip_${Date.now()}_${videoId}_${startTime}_${endTime}.mp4`
     const thumbnailUrl = null
 
     if (hasB2Config && video.storageKey) {
       console.log('[API/CLIPS POST] B2 processing would be implemented here.');
       // TODO: Implement actual video clip extraction using B2 and FFmpeg
-      // For now, we create a placeholder clip record with proper storage path
+      // For now, we create a placeholder clip record
       
       // In a real implementation, you would:
       // 1. Download the video segment from B2
       // 2. Use FFmpeg to extract the clip
-      // 3. Upload the clip back to B2 using uploadClipToB2()
+      // 3. Upload the clip back to B2
       // 4. Generate a thumbnail
-      
-      // Example of how the actual upload would work:
-      // const extractedClipBuffer = await extractVideoClip(video.storageKey, startTime, endTime)
-      // const uploadResult = await uploadClipToB2(extractedClipBuffer, user.id, clipFilename, videoId, startTime, endTime)
-      // clipUrl = uploadResult.url
-      // clipStorageKey = uploadResult.key
       
       clipUrl = `${process.env.B2_CDN_URL || process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${clipStorageKey}`
     }

@@ -89,10 +89,7 @@ export function AuthForm({ mode, onToggleMode, onClose }: AuthFormProps) {
   }
 
   const handleGoogleSignIn = () => {
-    signIn('google', { 
-      callbackUrl: '/dashboard',
-      redirect: true 
-    })
+    signIn('google')
   }
 
   return (
