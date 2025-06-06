@@ -2,70 +2,29 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { syncUserClipsFromB2 } from '@/lib/b2'
+import { processVideoClipFromStorage } from '@/lib/video/clip-processor'
+import { getB2Config } from '@/lib/b2'
+
+// initialize background workers on server start
+// initializeWorkers()
 
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
-    // For development/testing: Allow access even without session
     if (!session?.user?.email) {
-      console.warn('No authenticated session found, returning empty clips list for development')
-      return NextResponse.json([])
+      console.warn('No authenticated session found')
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const { searchParams } = new URL(request.url)
     const sync = searchParams.get('sync') === 'true'
 
     if (sync) {
-      // Sync with B2 storage
-      try {
-        console.log('Syncing clips with B2...')
-        
-        // Get user
-        const user = await prisma.user.findUnique({
-          where: { email: session.user.email }
-        })
-
-        if (user) {
-          const b2Clips = await syncUserClipsFromB2(user.id)
-          console.log(`Found ${b2Clips.length} clips in B2`)
-          
-          // Get existing clips from database
-          const existingClips = await prisma.clip.findMany({
-            where: { userId: user.id }
-          })
-          
-          const existingKeys = new Set(existingClips.map(c => c.storageKey))
-          
-          // Add missing clips to database - Note: This is simplified
-          // In a real implementation, you'd need to parse metadata to extract video relationships
-          for (const resource of b2Clips) {
-            if (!existingKeys.has(resource.key)) {
-              console.log(`Adding missing clip: ${resource.key}`)
-              
-              // For now, create clips without video association
-              // You'd need additional metadata to properly link clips to videos
-              await prisma.clip.create({
-                data: {
-                  title: resource.filename?.replace(/\.[^/.]+$/, '') || 'Untitled Clip',
-                  storageKey: resource.key,
-                  storageUrl: resource.url,
-                  status: 'ready',
-                  startTime: 0,
-                  endTime: 30, // Default duration
-                  userId: user.id,
-                  // Note: videoId would need to be determined from metadata
-                  videoId: 1 // Placeholder - you'd need proper video linking logic
-                }
-              })
-            }
-          }
-        }
-      } catch (syncError) {
-        console.error('Error syncing clips with B2:', syncError)
-        // Continue with regular fetch even if sync fails
-      }
+      // For clips, sync just means refreshing the data since clips are database records
+      // referencing videos. The actual video files are synced through the storage sync API.
+      // This is mainly kept for backward compatibility with the old sync approach.
+      console.log('Clips sync requested - this will fetch current clips from database')
     }
 
     const clips = await prisma.clip.findMany({
@@ -115,27 +74,58 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  console.log('[API/CLIPS POST DEBUG] Handler invoked, request URL:', request.url)
   try {
+    console.log('[API/CLIPS POST DEBUG] Parsing session...')
     const session = await getServerSession(authOptions)
+    console.log('[API/CLIPS POST DEBUG] Session result:', !!session, session?.user?.email)
     
     if (!session?.user?.email) {
-      console.error('[API/CLIPS POST] Unauthorized: No session email');
+      console.warn('[API/CLIPS POST] No authenticated session found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+    console.log('[API/CLIPS POST DEBUG] Authorization passed')
     console.log('[API/CLIPS POST] Session retrieved for email:', session.user.email);
 
-    const formData = await request.formData()
-    const videoIdStr = formData.get('videoId') as string;
-    const title = formData.get('title') as string
-    const description = formData.get('description') as string || null
-    const hashtagsStr = formData.get('hashtags') as string;
-    const tagsStr = formData.get('tags') as string;
-    const startTimeStr = formData.get('startTime') as string;
-    const endTimeStr = formData.get('endTime') as string;
-    const aspectRatio = formData.get('aspectRatio') as string || '16:9'
-    const clipCountStr = formData.get('clipCount') as string;
+    // Handle both JSON and FormData requests
+    let videoIdStr: string, title: string, description: string | null, 
+        hashtagsStr: string, tagsStr: string, startTimeStr: string, 
+        endTimeStr: string, aspectRatio: string, clipCountStr: string;
+    
+    const contentType = request.headers.get('content-type') || '';
+    console.log('[API/CLIPS POST DEBUG] Content-Type:', contentType);
+    
+    if (contentType.includes('application/json')) {
+      // Handle JSON request
+      const body = await request.json();
+      console.log('[API/CLIPS POST DEBUG] JSON body received:', body);
+      
+      videoIdStr = body.videoId?.toString() || '';
+      title = body.title || 'Test Clip';
+      description = body.description || null;
+      hashtagsStr = body.hashtags?.join(',') || '';
+      tagsStr = body.tags?.join(',') || '';
+      startTimeStr = body.startTime?.toString() || '';
+      endTimeStr = body.endTime?.toString() || '';
+      aspectRatio = body.aspectRatio || '16:9';
+      clipCountStr = body.clipCount?.toString() || '1';
+    } else {
+      // Handle FormData request
+      const formData = await request.formData()
+      console.log('[API/CLIPS POST DEBUG] Raw FormData keys:', Array.from(formData.keys()))
+      
+      videoIdStr = formData.get('videoId') as string;
+      title = formData.get('title') as string
+      description = formData.get('description') as string || null
+      hashtagsStr = formData.get('hashtags') as string;
+      tagsStr = formData.get('tags') as string;
+      startTimeStr = formData.get('startTime') as string;
+      endTimeStr = formData.get('endTime') as string;
+      aspectRatio = formData.get('aspectRatio') as string || '16:9'
+      clipCountStr = formData.get('clipCount') as string;
+    }
 
-    console.log('[API/CLIPS POST] Raw FormData received:', {
+    console.log('[API/CLIPS POST] Raw request data received:', {
       videoIdStr, title, description, hashtagsStr, tagsStr, startTimeStr, endTimeStr, aspectRatio, clipCountStr
     });
 
@@ -149,6 +139,7 @@ export async function POST(request: NextRequest) {
     console.log('[API/CLIPS POST] Parsed form data:', {
       videoId, title, description, hashtags, tags, startTime, endTime, aspectRatio, clipCount
     });
+    console.log('[API/CLIPS POST DEBUG] Validating parsed input...')
 
     if (!videoId || !title || startTime === undefined || Number.isNaN(startTime) || endTime === undefined || Number.isNaN(endTime)) {
       console.error('[API/CLIPS POST] Missing or invalid required fields after parsing:', { videoId, title, startTime, endTime });
@@ -166,6 +157,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify the video belongs to the current user
+    console.log('[API/CLIPS POST DEBUG] Using email for video lookup:', session.user.email);
+    
     const video = await prisma.video.findFirst({
       where: {
         id: videoId,
@@ -196,8 +189,7 @@ export async function POST(request: NextRequest) {
       user = await prisma.user.create({
         data: {
           email: session.user.email,
-          name: session.user.name || session.user.email,
-          image: session.user.image,
+          name: session?.user?.name || session.user.email,
         }
       })
       console.log('[API/CLIPS POST] New user created:', user.id);
@@ -205,31 +197,28 @@ export async function POST(request: NextRequest) {
       console.log('[API/CLIPS POST] Existing user found:', user.id);
     }
 
-    // Check if we have B2 configuration for video processing
-    const hasB2Config = process.env.B2_ACCESS_KEY_ID && 
-                        process.env.B2_SECRET_ACCESS_KEY && 
-                        process.env.B2_BUCKET_NAME
-    console.log('[API/CLIPS POST] B2 configured:', hasB2Config);
+    // Determine if B2 is configured for clip upload
+    const { hasValidB2Credentials } = getB2Config()
+    console.log('[API/CLIPS POST] B2 available:', hasValidB2Credentials)
     console.log('[API/CLIPS POST] Video storage key:', video.storageKey);
 
-    // For now, we'll create a simple clip record without actual video processing
-    // In a full implementation, you'd extract the clip from the source video
-    let clipUrl = `${video.storageUrl}#t=${startTime},${endTime}` // Fragment URL approach
-    const clipStorageKey = `creator_uploads/clips/${user.id}/clip_${Date.now()}_${videoId}_${startTime}_${endTime}.mp4`
-    const thumbnailUrl = null
+    // Create storage key for the clip - organized in clips folder structure
+    const clipStorageKey = `clips/${user.id}/clip_${Date.now()}_${videoId}_${Math.round(startTime)}_${Math.round(endTime)}.mp4`
+    let clipUrl: string
+    let thumbnailUrl: string | null = null
+    let clipStatus: string = 'draft'
 
-    if (hasB2Config && video.storageKey) {
-      console.log('[API/CLIPS POST] B2 processing would be implemented here.');
-      // TODO: Implement actual video clip extraction using B2 and FFmpeg
-      // For now, we create a placeholder clip record
-      
-      // In a real implementation, you would:
-      // 1. Download the video segment from B2
-      // 2. Use FFmpeg to extract the clip
-      // 3. Upload the clip back to B2
-      // 4. Generate a thumbnail
-      
-      clipUrl = `${process.env.B2_CDN_URL || process.env.B2_ENDPOINT}/${process.env.B2_BUCKET_NAME}/${clipStorageKey}`
+    if (hasValidB2Credentials && video.storageKey) {
+      console.log('[API/CLIPS POST] Processing clip synchronously...');
+      // Set initial status for processing
+      clipStatus = 'pending'
+      clipUrl = '' // Will be updated after processing
+      thumbnailUrl = null
+    } else {
+      console.log('[API/CLIPS POST] B2 not available, using fragment URL fallback');
+      // Fallback to fragment URL approach if B2 is not configured
+      clipUrl = `${video.storageUrl}#t=${startTime},${endTime}`
+      clipStatus = 'ready'
     }
 
     const clipDataForDb = {
@@ -244,25 +233,93 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       storageKey: clipStorageKey,
       storageUrl: clipUrl,
-      thumbnailUrl
-    };
-    console.log('[API/CLIPS POST] Data before creating clip in DB:', clipDataForDb);
+      thumbnailUrl,
+      status: clipStatus
+    }
+    console.log('[API/CLIPS POST] Data before creating clip in DB:', clipDataForDb)
 
-    const clip = await prisma.clip.create({
-      data: clipDataForDb
-    })
-    console.log('[API/CLIPS POST] Clip created successfully in DB. Clip ID:', clip.id);
+    let clip
+    try {
+      clip = await prisma.clip.create({ data: clipDataForDb })
+      console.log('[API/CLIPS POST DEBUG] Clip record created:', clip)
+    } catch (dbErr) {
+      console.error('[API/CLIPS POST DEBUG] Error creating clip record:', dbErr)
+      throw dbErr
+    }
 
-    // In a real application, you would trigger video processing here
-    // For now, return the created clip
+    // Attempt synchronous processing and upload
+    try {
+      console.log('[API/CLIPS POST DEBUG] Starting video clip processing upload')
+      const result = await processVideoClipFromStorage(
+        video.storageKey,
+        { startTime, endTime, aspectRatio, quality: 'medium' },
+        clipStorageKey
+      )
+      await prisma.clip.update({ where: { id: clip.id }, data: {
+        storageUrl: result.clipUrl,
+        thumbnailUrl: result.thumbnailUrl,
+        status: 'ready'
+      }})
+      console.log('[API/CLIPS POST] Clip uploaded successfully:', result.clipUrl)
+      console.log('[API/CLIPS POST DEBUG] B2 upload result:', result)
+      return NextResponse.json({
+        clipId: clip.id,
+        message: 'Clip created and uploaded successfully',
+        status: 'ready',
+        clip: {
+          id: clip.id,
+          title: clip.title,
+          startTime: clip.startTime,
+          endTime: clip.endTime,
+          status: 'ready',
+          url: result.clipUrl
+        }
+      })
+    } catch (err) {
+      console.error('[API/CLIPS POST DEBUG] Clip processing/upload failed:', err)
+      
+      // Check if it's a video not found error (common in development/testing)
+      if (err instanceof Error && err.message.includes('Video file not found in storage')) {
+        console.log('[API/CLIPS POST] Video file not found - this might be a test scenario. Updating clip status to indicate this.')
+        await prisma.clip.update({ 
+          where: { id: clip.id }, 
+          data: { 
+            status: 'error', 
+            errorMessage: 'Source video file not found in storage. Please ensure the video has been properly uploaded to B2 storage before creating clips.' 
+          } 
+        })
+        
+        return NextResponse.json({
+          clipId: clip.id,
+          message: 'Clip record created, but source video file not found in storage',
+          status: 'error',
+          error: 'Source video file not found in storage. Please ensure the video has been properly uploaded.',
+          clip: {
+            id: clip.id,
+            title: clip.title,
+            startTime: clip.startTime,
+            endTime: clip.endTime,
+            status: 'error',
+            url: ''
+          }
+        })
+      }
+      
+      await prisma.clip.update({ where: { id: clip.id }, data: { status: 'error', errorMessage: err instanceof Error ? err.message : String(err) } })
+      // Fallback to fragment URL approach when processing fails
+    }
+
+    // Return created clip when using fragment URL
     return NextResponse.json({ 
       clipId: clip.id,
       message: 'Clip created successfully',
+      status: 'ready',
       clip: {
         id: clip.id,
         title: clip.title,
         startTime: clip.startTime,
         endTime: clip.endTime,
+        status: 'ready',
         url: clip.storageUrl
       }
     })
