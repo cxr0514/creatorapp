@@ -3,7 +3,32 @@ import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
 import { processVideoClipFromStorage } from '@/lib/video/clip-processor'
-import { getB2Config } from '@/lib/b2'
+import { getB2Config, getPresignedUrl } from '@/lib/b2'
+
+// Helper function to generate presigned URLs for thumbnails
+async function generatePresignedThumbnailUrl(thumbnailUrl: string | null): Promise<string | null> {
+  if (!thumbnailUrl) return null;
+  
+  try {
+    // Check if this is a B2 URL that needs a presigned URL
+    if (thumbnailUrl.includes('s3.us-east-005.backblazeb2.com') || thumbnailUrl.includes('Clipverse')) {
+      // Extract the storage key from the URL
+      const urlParts = thumbnailUrl.split('/');
+      const bucketIndex = urlParts.findIndex(part => part === 'Clipverse');
+      if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+        const storageKey = urlParts.slice(bucketIndex + 1).join('/');
+        console.log('[THUMBNAIL] Generating presigned URL for storage key:', storageKey);
+        return await getPresignedUrl(storageKey, 3600); // 1 hour expiry
+      }
+    }
+    
+    // If it's not a B2 URL, return as-is (might be Cloudinary or other CDN)
+    return thumbnailUrl;
+  } catch (error) {
+    console.error('[THUMBNAIL] Failed to generate presigned URL:', error);
+    return null; // Return null if we can't generate presigned URL
+  }
+}
 
 // initialize background workers on server start
 // initializeWorkers()
@@ -47,24 +72,29 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    const formattedClips = clips.map(clip => ({
-      id: clip.id,
-      title: clip.title,
-      description: clip.description,
-      hashtags: clip.hashtags,
-      tags: clip.tags,
-      startTime: clip.startTime || 0,
-      endTime: clip.endTime || 0,
-      aspectRatio: clip.aspectRatio || '16:9',
-      createdAt: clip.createdAt.toISOString(),
-      video: {
-        id: clip.video.id,
-        title: clip.video.title,
-        filename: clip.video.title // Use title as filename for now
-      },
-      thumbnailUrl: clip.thumbnailUrl || null, // Remove auto-generation for now
-      status: 'ready' as const // Assume all clips are ready for now
-    }))
+    // Generate presigned URLs for thumbnails
+    const formattedClips = await Promise.all(clips.map(async clip => {
+      const presignedThumbnailUrl = await generatePresignedThumbnailUrl(clip.thumbnailUrl);
+      
+      return {
+        id: clip.id,
+        title: clip.title,
+        description: clip.description,
+        hashtags: clip.hashtags,
+        tags: clip.tags,
+        startTime: clip.startTime || 0,
+        endTime: clip.endTime || 0,
+        aspectRatio: clip.aspectRatio || '16:9',
+        createdAt: clip.createdAt.toISOString(),
+        video: {
+          id: clip.video.id,
+          title: clip.video.title,
+          filename: clip.video.title // Use title as filename for now
+        },
+        thumbnailUrl: presignedThumbnailUrl, // Use presigned URL
+        status: 'ready' as const // Assume all clips are ready for now
+      };
+    }));
 
     return NextResponse.json(formattedClips)
   } catch (error) {
