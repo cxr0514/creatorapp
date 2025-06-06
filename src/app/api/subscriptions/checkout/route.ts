@@ -4,13 +4,22 @@ import { authOptions } from '@/app/api/auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil'
-});
+function getStripeClient(): Stripe {
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  
+  if (!apiKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+  }
+
+  return new Stripe(apiKey, {
+    apiVersion: '2025-05-28.basil'
+  });
+}
 
 // Create checkout session for subscription
 export async function POST(request: NextRequest) {
   try {
+    const stripe = getStripeClient();
     const session = await getServerSession(authOptions);
     
     if (!session?.user?.id) {

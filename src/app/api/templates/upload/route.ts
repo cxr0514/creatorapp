@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const result = await uploadTemplateAsset(file, assetType, userId)
+    const result = await uploadTemplateAsset(file, userId, assetType)
 
     return NextResponse.json(result, { status: 201 })
   } catch (error) {

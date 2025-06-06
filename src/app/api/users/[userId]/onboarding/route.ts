@@ -53,9 +53,18 @@ export async function POST(
 
     const { onboardingData, preferences } = await request.json()
 
-    if (!onboardingData) {
-      return NextResponse.json({ error: 'Onboarding data required' }, { status: 400 })
+    // Provide default values if onboardingData is missing (for skip scenario)
+    const defaultOnboardingData = {
+      contentGoals: [],
+      experienceLevel: 'beginner',
+      contentTypes: [],
+      postingFrequency: 'weekly',
+      priorityPlatforms: [],
+      audienceSize: 'under-1k',
+      interestedFeatures: []
     }
+
+    const finalOnboardingData = onboardingData || defaultOnboardingData
 
     // Create or update onboarding record
     const onboarding = await prisma.userOnboarding.upsert({
@@ -68,13 +77,13 @@ export async function POST(
         platformsCompleted: true,
         preferencesCompleted: true,
         tutorialCompleted: true,
-        contentGoals: onboardingData.contentGoals,
-        experienceLevel: onboardingData.experienceLevel,
-        contentTypes: onboardingData.contentTypes,
-        postingFrequency: onboardingData.postingFrequency,
-        priorityPlatforms: onboardingData.priorityPlatforms,
-        audienceSize: onboardingData.audienceSize,
-        interestedFeatures: onboardingData.interestedFeatures,
+        contentGoals: finalOnboardingData.contentGoals,
+        experienceLevel: finalOnboardingData.experienceLevel,
+        contentTypes: finalOnboardingData.contentTypes,
+        postingFrequency: finalOnboardingData.postingFrequency,
+        priorityPlatforms: finalOnboardingData.priorityPlatforms,
+        audienceSize: finalOnboardingData.audienceSize,
+        interestedFeatures: finalOnboardingData.interestedFeatures,
         completedAt: new Date(),
         updatedAt: new Date()
       },
@@ -88,13 +97,13 @@ export async function POST(
         platformsCompleted: true,
         preferencesCompleted: true,
         tutorialCompleted: true,
-        contentGoals: onboardingData.contentGoals,
-        experienceLevel: onboardingData.experienceLevel,
-        contentTypes: onboardingData.contentTypes,
-        postingFrequency: onboardingData.postingFrequency,
-        priorityPlatforms: onboardingData.priorityPlatforms,
-        audienceSize: onboardingData.audienceSize,
-        interestedFeatures: onboardingData.interestedFeatures,
+        contentGoals: finalOnboardingData.contentGoals,
+        experienceLevel: finalOnboardingData.experienceLevel,
+        contentTypes: finalOnboardingData.contentTypes,
+        postingFrequency: finalOnboardingData.postingFrequency,
+        priorityPlatforms: finalOnboardingData.priorityPlatforms,
+        audienceSize: finalOnboardingData.audienceSize,
+        interestedFeatures: finalOnboardingData.interestedFeatures,
         completedAt: new Date()
       }
     })
@@ -106,7 +115,7 @@ export async function POST(
         update: {
           defaultAspectRatio: preferences.defaultAspectRatio,
           primaryPlatform: preferences.primaryPlatform,
-          targetPlatforms: onboardingData.priorityPlatforms,
+          targetPlatforms: finalOnboardingData.priorityPlatforms,
           enableAiEnhancement: preferences.enableAiEnhancement,
           autoGenerateCaptions: preferences.enableAiEnhancement,
           autoGenerateHashtags: preferences.enableAiEnhancement,
@@ -121,7 +130,7 @@ export async function POST(
           userId: params.userId,
           defaultAspectRatio: preferences.defaultAspectRatio || '16:9',
           primaryPlatform: preferences.primaryPlatform,
-          targetPlatforms: onboardingData.priorityPlatforms || [],
+          targetPlatforms: finalOnboardingData.priorityPlatforms || [],
           enableAiEnhancement: preferences.enableAiEnhancement ?? true,
           autoGenerateCaptions: preferences.enableAiEnhancement ?? true,
           autoGenerateHashtags: preferences.enableAiEnhancement ?? true,

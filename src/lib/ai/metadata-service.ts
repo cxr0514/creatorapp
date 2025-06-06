@@ -28,8 +28,9 @@ export class AIMetadataService {
   ): Promise<string[]> {
     try {
       const prompt = this.buildTitlePrompt(videoDescription, options);
+      const client = openai();
       
-      const response = await openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: AI_CONFIG.models.text,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: AI_CONFIG.maxTokens.title,
@@ -58,8 +59,9 @@ export class AIMetadataService {
   ): Promise<string> {
     try {
       const prompt = this.buildDescriptionPrompt(videoTitle, videoDescription, options);
+      const client = openai();
       
-      const response = await openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: AI_CONFIG.models.text,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: AI_CONFIG.maxTokens.description,
@@ -83,8 +85,9 @@ export class AIMetadataService {
   ): Promise<string[]> {
     try {
       const prompt = this.buildHashtagPrompt(videoTitle, videoDescription, options);
+      const client = openai();
       
-      const response = await openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: AI_CONFIG.models.text,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: AI_CONFIG.maxTokens.hashtags,
@@ -110,8 +113,9 @@ export class AIMetadataService {
   ): Promise<{ categories: string[]; keywords: string[] }> {
     try {
       const prompt = this.buildCategoriesPrompt(videoTitle, videoDescription);
+      const client = openai();
       
-      const response = await openai.chat.completions.create({
+      const response = await client.chat.completions.create({
         model: AI_CONFIG.models.analysis,
         messages: [{ role: 'user', content: prompt }],
         max_tokens: AI_CONFIG.maxTokens.categories,

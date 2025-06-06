@@ -10,7 +10,9 @@ interface CaptionJob {
   userId: string
 }
 
-const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379')
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379', {
+  maxRetriesPerRequest: null,
+})
 
 export const captionQueue = new Queue('caption-processing', {
   connection: redis,
@@ -71,11 +73,14 @@ export const captionWorker = new Worker(
   }
 )
 
-export async function addCaptionJob(data: CaptionJob) {
+export async function addToCaptionQueue(data: CaptionJob) {
   return captionQueue.add('generate-captions', data, {
     priority: 1,
   })
 }
+
+// Alias for backward compatibility
+export const addCaptionJob = addToCaptionQueue
 
 // Handle worker events
 captionWorker.on('completed', (job) => {

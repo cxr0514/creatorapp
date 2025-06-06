@@ -58,33 +58,37 @@ export function VideoList({ onCreateClip, onRefresh, onUploadClick }: VideoListP
   const syncVideos = async () => {
     setSyncing(true)
     try {
-      // Call the sync endpoint to refresh from Cloudinary with credentials
-      const response = await fetch('/api/videos?sync=true', {
-        credentials: 'include', // Include session cookies
+      // Call the new storage sync API to synchronize with B2
+      const response = await fetch('/api/storage/sync', {
+        method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          strategy: 'smart',
+          options: {
+            addMissing: true,
+            removeOrphaned: true,
+            cleanupOrphans: false
+          },
+          dryRun: false
+        })
       })
       
       if (response.ok) {
-        const data = await response.json()
-        // Ensure data is an array, handle different response formats
-        if (Array.isArray(data)) {
-          setVideos(data)
-        } else if (data && Array.isArray(data.data)) {
-          // Handle wrapped response format
-          setVideos(data.data)
-        } else {
-          // Fallback to empty array if unexpected format
-          console.warn('Unexpected sync API response format:', data)
-          setVideos([])
-        }
+        const syncResult = await response.json()
+        console.log('Storage sync completed:', syncResult)
+        
+        // Refresh the videos list after sync
+        await fetchVideos()
         onRefresh?.()
       } else if (response.status === 401) {
         console.error('Authentication required for sync')
         // Could add a toast notification here
       } else {
-        throw new Error(`Sync failed with status ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(`Sync failed with status ${response.status}: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error syncing videos:', error)

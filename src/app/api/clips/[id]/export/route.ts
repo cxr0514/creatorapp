@@ -3,7 +3,7 @@ import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
 import { EXPORT_FORMATS } from '@/lib/video-export';
-import { applyStyleTemplate, uploadToB2, getPresignedUrl } from '@/lib/b2';
+import { getPresignedUrl } from '@/lib/b2';
 import { smartCroppingEngine } from '@/lib/smart-cropping-engine';
 
 export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
@@ -144,24 +144,9 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           let transformedUrl: string;
 
           if (template) {
-            // Use template transformation
-            transformedUrl = await applyStyleTemplate(originalStorageKey, {
-              fontFamily: template.fontFamily || undefined,
-              primaryColor: template.primaryColor || undefined,
-              secondaryColor: template.secondaryColor || undefined,
-              backgroundColor: template.backgroundColor || undefined,
-              logoStorageKey: template.logoStorageKey || undefined,
-              introStorageKey: template.introStorageKey || undefined,
-              outroStorageKey: template.outroStorageKey || undefined,
-              lowerThirdText: template.lowerThirdText || undefined,
-              lowerThirdPosition: template.lowerThirdPosition || undefined,
-              callToActionText: template.callToActionText || undefined,
-              callToActionUrl: template.callToActionUrl || undefined,
-              callToActionPosition: template.callToActionPosition || undefined
-            }, {
-              aspectRatio,
-              quality: 'auto'
-            });
+            // Template transformation not yet implemented - using original URL
+            console.log(`[API/CLIP-EXPORT] Template transformation requested but not implemented yet`);
+            transformedUrl = await getPresignedUrl(originalStorageKey);
           } else {
             // For now, just return presigned URL to original video
             // In full implementation, this would apply transformations
@@ -171,14 +156,13 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
           // Generate unique storage key for export (using user folder structure)
           const timestamp = Date.now();
           const safePlatform = platform.replace(/[^a-zA-Z0-9_]/g, '_');
-          const safeAspectRatio = formatKey.replace(':', '_');
           const exportStorageKey = `users/${session.user.id}/clips/exports/${clipId}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
 
           // For now, we'll create a database record with the presigned URL
           // In a full implementation, you would process and re-upload the transformed video
 
           // Create ClipExport record
-          const clipExport = await prisma.clipExport.create({
+          await prisma.clipExport.create({
             data: {
               clipId: clip.id,
               format: formatKey,

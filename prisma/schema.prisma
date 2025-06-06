@@ -111,6 +111,7 @@ model Clip {
   thumbnailUrl       String?
   status             String          @default("draft")
   processingProgress Int?            @default(0)
+  errorMessage       String?
   metadata           Json?
   user               User            @relation(fields: [userId], references: [id])
   video              Video           @relation(fields: [videoId], references: [id])

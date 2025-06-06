@@ -6,8 +6,7 @@ import {
   checkStorageHealth, 
   syncStorageWithProgress,
   type SyncOptions,
-  type SyncProgress,
-  type StorageHealthReport
+  type SyncProgress
 } from '@/lib/b2'
 import { prisma } from '@/lib/prisma'
 
@@ -26,7 +25,6 @@ export async function GET(request: NextRequest) {
 
     const { searchParams } = new URL(request.url)
     const action = searchParams.get('action') || 'status'
-    const strategy = searchParams.get('strategy') as 'fast' | 'full' | 'repair' | 'smart' | undefined
 
     // Get user
     const user = await prisma.user.findUnique({
@@ -165,10 +163,10 @@ export async function POST(request: NextRequest) {
       ...options
     }
 
-    let syncResult: any
+    let syncResult: Record<string, unknown>
     let addedToDatabase = 0
     let removedFromDatabase = 0
-    let removedFromB2 = 0
+    const removedFromB2 = 0
     const errors: string[] = []
 
     if (strategy === 'smart') {
@@ -286,7 +284,7 @@ export async function POST(request: NextRequest) {
 /**
  * DELETE /api/storage/sync - Clear sync cache or reset sync state
  */
-export async function DELETE(request: NextRequest) {
+export async function DELETE() {
   try {
     const session = await getServerSession(authOptions)
     if (!session?.user?.email) {

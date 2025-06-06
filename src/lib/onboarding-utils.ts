@@ -57,19 +57,43 @@ export async function checkUserOnboardingStatus(userId: string): Promise<UserOnb
  */
 export async function completeUserOnboarding(userId: string, data?: unknown): Promise<void> {
   try {
+    // Provide default onboarding data when none is provided (skip scenario)
+    const defaultOnboardingData = {
+      contentGoals: [],
+      experienceLevel: 'beginner',
+      contentTypes: [],
+      postingFrequency: 'weekly',
+      priorityPlatforms: [],
+      audienceSize: 'under-1k',
+      interestedFeatures: []
+    }
+
+    const onboardingData = data || defaultOnboardingData
+    const preferences = data || {
+      defaultAspectRatio: '16:9',
+      primaryPlatform: 'youtube',
+      enableAiEnhancement: true,
+      aiTonePreference: 'professional',
+      videoQuality: '1080p',
+      timezone: 'UTC',
+      enableNotifications: true
+    }
+
     const response = await fetch(`/api/users/${userId}/onboarding`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        onboardingData: data,
-        preferences: data // The API expects both onboardingData and preferences
+        onboardingData,
+        preferences
       })
     })
     
     if (!response.ok) {
-      throw new Error('Failed to complete onboarding')
+      const errorText = await response.text()
+      console.error('Onboarding API error:', response.status, errorText)
+      throw new Error(`Failed to complete onboarding: ${response.status} ${errorText}`)
     }
   } catch (error) {
     console.error('Error completing onboarding:', error)

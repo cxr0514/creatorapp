@@ -1,9 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
-import { authOptions } from '../../auth/[...nextauth]/route'
-import { listAllB2Objects, uploadToB2, BUCKET_NAME } from '@/lib/b2'
+import { NextResponse } from 'next/server'
+import { listAllB2Objects, uploadToB2 } from '@/lib/b2'
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // Temporarily remove auth for debugging
     // const session = await getServerSession(authOptions)
@@ -17,7 +15,7 @@ export async function GET(request: NextRequest) {
     console.log(`[DEBUG-B2] B2_BUCKET_NAME from env: ${process.env.B2_BUCKET_NAME}`)
     console.log(`[DEBUG-B2] B2_KEY_ID from env: ${process.env.B2_KEY_ID}`)
     console.log(`[DEBUG-B2] B2_APP_KEY from env: ${process.env.B2_APP_KEY ? process.env.B2_APP_KEY.substring(0,8) + '...' : 'NOT SET'}`)
-    console.log(`[DEBUG-B2] BUCKET_NAME constant: ${BUCKET_NAME}`)
+    console.log(`[DEBUG-B2] BUCKET_NAME constant: ${process.env.B2_BUCKET_NAME}`)
     
     // Get all objects in the bucket
     const allObjects = await listAllB2Objects()
@@ -26,7 +24,7 @@ export async function GET(request: NextRequest) {
     
     return NextResponse.json({
       success: true,
-      bucketName: BUCKET_NAME,
+      bucketName: process.env.B2_BUCKET_NAME,
       environment: {
         B2_BUCKET_NAME: process.env.B2_BUCKET_NAME,
         B2_KEY_ID: process.env.B2_KEY_ID ? process.env.B2_KEY_ID.substring(0,8) + '...' : 'NOT SET',
@@ -35,7 +33,7 @@ export async function GET(request: NextRequest) {
       },
       totalObjects: allObjects.length,
       objects: allObjects.slice(0, 50), // Limit to first 50 for readability
-      message: `Found ${allObjects.length} objects in B2 bucket '${BUCKET_NAME}'`,
+      message: `Found ${allObjects.length} objects in B2 bucket '${process.env.B2_BUCKET_NAME}'`,
       // userEmail: session.user.email
     })
   } catch (error) {
@@ -43,13 +41,13 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      bucketName: BUCKET_NAME
+      bucketName: process.env.B2_BUCKET_NAME
     }, { status: 500 })
   }
 }
 
 // POST method for test upload
-export async function POST(request: NextRequest) {
+export async function POST() {
   try {
     // Temporarily remove auth for debugging
     // const session = await getServerSession(authOptions)
@@ -82,7 +80,7 @@ export async function POST(request: NextRequest) {
       testFileVisible: !!uploadedFile,
       testFileDetails: uploadedFile || null,
       totalObjectsAfterUpload: allObjects.length,
-      bucketName: BUCKET_NAME,
+      bucketName: process.env.B2_BUCKET_NAME,
       message: uploadedFile 
         ? 'Upload successful and file is visible in bucket' 
         : 'Upload completed but file not visible in bucket listing'
@@ -92,7 +90,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      bucketName: BUCKET_NAME
+      bucketName: process.env.B2_BUCKET_NAME
     }, { status: 500 })
   }
 } 

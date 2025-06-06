@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Session Debug Test</title>
+</head>
+<body>
+    <h1>Session Debug Test</h1>
+    <button onclick="testSession()">Test Session</button>
+    <button onclick="testUpload()">Test Upload</button>
+    <pre id="output"></pre>
+
+    <script>
+        function log(message) {
+            document.getElementById('output').textContent += message + '\n';
+        }
+
+        async function testSession() {
+            log('Testing session...');
+            try {
+                const response = await fetch('/api/auth/session', {
+                    credentials: 'include'
+                });
+                const session = await response.json();
+                log('Session response: ' + JSON.stringify(session, null, 2));
+            } catch (error) {
+                log('Session error: ' + error.message);
+            }
+        }
+
+        async function testUpload() {
+            log('Testing upload...');
+            try {
+                // Create a small test file
+                const blob = new Blob(['test video content'], { type: 'video/mp4' });
+                const formData = new FormData();
+                formData.append('file', blob, 'test.mp4');
+
+                const response = await fetch('/api/videos', {
+                    method: 'POST',
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                log('Upload response status: ' + response.status);
+                const result = await response.json();
+                log('Upload response: ' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                log('Upload error: ' + error.message);
+            }
+        }
+    </script>
+</body>
+</html>

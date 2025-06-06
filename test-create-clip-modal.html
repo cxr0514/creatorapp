@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Clip Modal Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .test-button:hover {
+            background: #2563eb;
+        }
+        .test-result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            border-left: 4px solid #3b82f6;
+        }
+        .success { border-left-color: #10b981; background: #f0fdf4; }
+        .error { border-left-color: #ef4444; background: #fef2f2; }
+        .warning { border-left-color: #f59e0b; background: #fffbeb; }
+        #results {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            background: #f9fafb;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎬 Create Clip Modal Test Suite</h1>
+    
+    <div class="test-container">
+        <h2>Test Instructions</h2>
+        <p>Use this page to test the Create Clip Modal functionality. Open your dashboard in another tab and use these test functions.</p>
+        
+        <h3>Quick Test Actions</h3>
+        <button class="test-button" onclick="openDashboard()">Open Dashboard</button>
+        <button class="test-button" onclick="runBasicTests()">Run Basic Tests</button>
+        <button class="test-button" onclick="testModalOpening()">Test Modal Opening</button>
+        <button class="test-button" onclick="testModalFields()">Test Modal Fields</button>
+        <button class="test-button" onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <div class="test-container">
+        <h2>Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <div class="test-container">
+        <h2>Manual Test Checklist</h2>
+        <div id="checklist">
+            <label><input type="checkbox" id="check1"> 1. Dashboard loads without errors</label><br>
+            <label><input type="checkbox" id="check2"> 2. Create Clip button is visible</label><br>
+            <label><input type="checkbox" id="check3"> 3. Create Clip button is clickable</label><br>
+            <label><input type="checkbox" id="check4"> 4. Modal opens when button is clicked</label><br>
+            <label><input type="checkbox" id="check5"> 5. Video selection dropdown works</label><br>
+            <label><input type="checkbox" id="check6"> 6. Title input field accepts text</label><br>
+            <label><input type="checkbox" id="check7"> 7. Description field accepts text</label><br>
+            <label><input type="checkbox" id="check8"> 8. AI enhancement buttons are functional</label><br>
+            <label><input type="checkbox" id="check9"> 9. Aspect ratio selection works</label><br>
+            <label><input type="checkbox" id="check10"> 10. Time controls are responsive</label><br>
+            <label><input type="checkbox" id="check11"> 11. Clip count selection works</label><br>
+            <label><input type="checkbox" id="check12"> 12. Create clips button submits form</label><br>
+        </div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const results = document.getElementById('results');
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong>: ${message}`;
+            results.appendChild(div);
+            results.scrollTop = results.scrollHeight;
+        }
+
+        function openDashboard() {
+            log('Opening dashboard in new tab...');
+            window.open('http://localhost:3001/dashboard', '_blank');
+        }
+
+        function runBasicTests() {
+            log('🚀 Starting basic tests...', 'info');
+            
+            // Test if we can access the dashboard window
+            const dashboardWindow = window.open('http://localhost:3001/dashboard', 'dashboard');
+            
+            setTimeout(() => {
+                try {
+                    if (dashboardWindow && dashboardWindow.document) {
+                        log('✅ Dashboard window accessible', 'success');
+                        
+                        // Test for Create Clip buttons
+                        const buttons = Array.from(dashboardWindow.document.querySelectorAll('button'))
+                            .filter(btn => btn.textContent.includes('Create Clip'));
+                        
+                        if (buttons.length > 0) {
+                            log(`✅ Found ${buttons.length} Create Clip buttons`, 'success');
+                        } else {
+                            log('❌ No Create Clip buttons found', 'error');
+                        }
+                        
+                    } else {
+                        log('❌ Cannot access dashboard window (CORS or security restriction)', 'warning');
+                        log('💡 Use browser developer tools console for testing', 'info');
+                    }
+                } catch (error) {
+                    log(`❌ Error accessing dashboard: ${error.message}`, 'error');
+                    log('💡 Copy test scripts to dashboard console', 'info');
+                }
+            }, 2000);
+        }
+
+        function testModalOpening() {
+            log('🔍 Testing modal opening functionality...', 'info');
+            log('📋 Instructions:', 'info');
+            log('1. Go to dashboard', 'info');
+            log('2. Look for "Create Clip" button', 'info');
+            log('3. Click the button', 'info');
+            log('4. Verify modal opens', 'info');
+            log('5. Check all form fields are present', 'info');
+        }
+
+        function testModalFields() {
+            log('📝 Testing modal form fields...', 'info');
+            log('Check for these elements in the modal:', 'info');
+            log('• Video selection dropdown', 'info');
+            log('• Title input field', 'info');
+            log('• Description textarea', 'info');
+            log('• AI enhancement buttons', 'info');
+            log('• Aspect ratio selection', 'info');
+            log('• Time range controls', 'info');
+            log('• Clip count selection', 'info');
+            log('• Create clips submit button', 'info');
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+            log('Test results cleared', 'info');
+        }
+
+        // Copy test scripts to clipboard
+        function copyTestScript() {
+            const script = `
+// Create Clip Modal Test Script
+console.log('🎬 Testing Create Clip Modal...');
+
+// Find Create Clip buttons
+const createClipButtons = Array.from(document.querySelectorAll('button'))
+  .filter(btn => btn.textContent.includes('Create Clip'));
+
+console.log('Found Create Clip buttons:', createClipButtons.length);
+
+if (createClipButtons.length > 0) {
+  console.log('Clicking first Create Clip button...');
+  createClipButtons[0].click();
+  
+  setTimeout(() => {
+    const modal = document.querySelector('[role="dialog"]');
+    if (modal) {
+      console.log('✅ Modal opened successfully!');
+      console.log('Modal element:', modal);
+      
+      // Check form fields
+      const inputs = modal.querySelectorAll('input');
+      const selects = modal.querySelectorAll('select, [role="combobox"]');
+      const textareas = modal.querySelectorAll('textarea');
+      const buttons = modal.querySelectorAll('button');
+      
+      console.log('Form fields found:');
+      console.log('- Inputs:', inputs.length);
+      console.log('- Selects:', selects.length);
+      console.log('- Textareas:', textareas.length);
+      console.log('- Buttons:', buttons.length);
+      
+    } else {
+      console.log('❌ Modal did not open');
+    }
+  }, 1000);
+} else {
+  console.log('❌ No Create Clip buttons found');
+}
+            `;
+            
+            navigator.clipboard.writeText(script).then(() => {
+                log('📋 Test script copied to clipboard! Paste in dashboard console.', 'success');
+            }).catch(() => {
+                log('❌ Failed to copy script. Copy manually from browser console.', 'error');
+            });
+        }
+
+        // Auto-run initial setup
+        log('🎯 Create Clip Modal Test Suite Ready', 'success');
+        log('Click "Run Basic Tests" to start testing', 'info');
+        
+        // Add copy button
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'test-button';
+        copyBtn.textContent = 'Copy Test Script';
+        copyBtn.onclick = copyTestScript;
+        document.querySelector('.test-container').appendChild(copyBtn);
+    </script>
+</body>
+</html>

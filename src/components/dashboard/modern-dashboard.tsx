@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { VideoUpload } from './video-upload'
 import { VideoList } from './video-list'
 import { ClipList } from './clip-list'
-import { EnhancedCreateClipModal } from './enhanced-create-clip-modal'
+import { RedesignedCreateClipModal } from './redesigned-create-clip-modal'
 import { SocialConnections } from './social-connections'
 import { CalendarWidget } from '../calendar/calendar-widget'
 import { SchedulingModal } from '../calendar/scheduling-modal'
@@ -952,7 +952,7 @@ export function ModernDashboard() {
         </main>
       </div>
 
-      <EnhancedCreateClipModal
+      <RedesignedCreateClipModal
         isOpen={showCreateClipModal}
         onClose={() => setShowCreateClipModal(false)}
         video={selectedVideo}

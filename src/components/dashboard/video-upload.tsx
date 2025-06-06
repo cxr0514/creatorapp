@@ -93,9 +93,17 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
           errorMessage = errorData.error || errorMessage
         } catch (parseError) {
           console.warn('Failed to parse error response:', parseError)
-          // If we can't parse the response, it might be a network issue
-          if (response.status === 0 || response.status >= 500) {
-            errorMessage = 'Upload connection failed. Please check your internet connection and try again.'
+          // Provide more specific error messages based on status code
+          if (response.status === 0) {
+            errorMessage = 'Network connection failed. Please check your internet connection and try again.'
+          } else if (response.status >= 500) {
+            errorMessage = 'Server error occurred. Please try again later.'
+          } else if (response.status === 403) {
+            errorMessage = 'Access denied. Please ensure you have permission to upload videos.'
+          } else if (response.status === 413) {
+            errorMessage = 'File too large. Please upload a smaller video file.'
+          } else {
+            errorMessage = `Upload failed (Error ${response.status}). Please try again.`
           }
         }
         throw new Error(errorMessage)
@@ -158,19 +166,20 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
       {/* Authentication Status */}
       {status === 'loading' && (
         <div className="mb-4 p-3 bg-primary/10 border border-primary/20 rounded-lg">
-          <p className="text-primary text-sm">Loading authentication...</p>
+          <p className="text-primary text-sm">🔄 Loading authentication...</p>
         </div>
       )}
       
       {status === 'unauthenticated' && (
         <div className="mb-4 p-3 bg-accent-warning/10 border border-accent-warning/20 rounded-lg">
-          <p className="text-accent-warning text-sm">Please log in to upload videos</p>
+          <p className="text-accent-warning text-sm font-medium">🔒 Authentication Required</p>
+          <p className="text-accent-warning text-xs mt-1">Please log in with Google to upload videos. Click the &quot;Sign In&quot; button at the top of the page.</p>
         </div>
       )}
       
       {status === 'authenticated' && session && (
         <div className="mb-4 p-3 bg-accent-success/10 border border-accent-success/20 rounded-lg">
-          <p className="text-accent-success text-sm">Logged in as {session.user?.email}</p>
+          <p className="text-accent-success text-sm">✅ Logged in as {session.user?.email}</p>
         </div>
       )}
 

@@ -2,9 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth/next';
 import { authOptions } from '../../auth/[...nextauth]/route';
 import { prisma } from '@/lib/prisma';
-import { EXPORT_FORMATS, type BatchExportRequest } from '@/lib/video-export';
+import { EXPORT_FORMATS } from '@/lib/video-export';
 import { smartCroppingEngine } from '@/lib/smart-cropping-engine';
-import { uploadToB2, getPresignedUrl } from '@/lib/b2';
+import { getPresignedUrl } from '@/lib/b2';
 
 export interface BatchExportResponse {
   success: boolean;
@@ -165,7 +165,7 @@ export async function POST(request: NextRequest): Promise<NextResponse<BatchExpo
             const exportStorageKey = `users/${session.user.id}/clips/exports/${clip.id}/${formatKey}_${safePlatform}_${timestamp}.mp4`;
 
             // Create ClipExport record
-            const clipExport = await prisma.clipExport.create({
+            await prisma.clipExport.create({
               data: {
                 clipId: clip.id,
                 format: formatKey,

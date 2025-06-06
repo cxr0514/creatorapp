@@ -49,18 +49,12 @@ export async function DELETE(
 
     try {
       // Delete from B2 storage first
-      const deleteResult = await deleteVideoFromB2(video.storageKey, user.id)
-      b2DeleteSuccess = deleteResult.success
-      
-      if (!deleteResult.success) {
-        b2DeleteError = deleteResult.error
-        console.warn(`Failed to delete video from B2: ${deleteResult.error}`)
-      } else {
-        console.log(`Successfully deleted video from B2: ${video.storageKey}`)
-      }
+      await deleteVideoFromB2(video.storageKey)
+      b2DeleteSuccess = true
+      console.log(`Successfully deleted video from B2: ${video.storageKey}`)
     } catch (error) {
-      console.error('Error deleting from B2:', error)
-      b2DeleteError = error instanceof Error ? error.message : 'Unknown B2 error'
+      b2DeleteError = error instanceof Error ? error.message : 'Unknown error'
+      console.warn(`Failed to delete video from B2: ${b2DeleteError}`)
     }
 
     try {

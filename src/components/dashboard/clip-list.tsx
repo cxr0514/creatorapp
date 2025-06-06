@@ -7,6 +7,8 @@ import { ExportModal } from './export-modal'
 import { EnhancedBatchExportModal } from '../export/enhanced-batch-export-modal'
 import { PublishingModal } from './publishing-modal'
 import { WorkflowApplyModal } from './workflow-apply-modal'
+import VideoJSPlayer from './video-js-player'
+import { Play } from 'lucide-react'
 
 interface Clip {
   id: number
@@ -43,6 +45,7 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
   const [selectedClip, setSelectedClip] = useState<Clip | null>(null)
   const [selectedClips, setSelectedClips] = useState<Set<number>>(new Set())
   const [selectionMode, setSelectionMode] = useState(false)
+  const [playingClipId, setPlayingClipId] = useState<number | null>(null)
 
   useEffect(() => {
     fetchClips()
@@ -76,33 +79,37 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
   const syncClips = async () => {
     setSyncing(true)
     try {
-      // Call the sync endpoint to refresh from Cloudinary with credentials
-      const response = await fetch('/api/clips?sync=true', {
-        credentials: 'include', // Include session cookies
+      // Call the new storage sync API to synchronize with B2
+      const response = await fetch('/api/storage/sync', {
+        method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
-        }
+        },
+        body: JSON.stringify({
+          strategy: 'smart',
+          options: {
+            addMissing: true,
+            removeOrphaned: true,
+            cleanupOrphans: false
+          },
+          dryRun: false
+        })
       })
       
       if (response.ok) {
-        const data = await response.json()
-        // Ensure data is an array, handle different response formats
-        if (Array.isArray(data)) {
-          setClips(data)
-        } else if (data && Array.isArray(data.data)) {
-          // Handle wrapped response format
-          setClips(data.data)
-        } else {
-          // Fallback to empty array if unexpected format
-          console.warn('Unexpected sync API response format:', data)
-          setClips([])
-        }
+        const syncResult = await response.json()
+        console.log('Storage sync completed:', syncResult)
+        
+        // Refresh the clips list after sync
+        await fetchClips()
         onRefresh?.()
       } else if (response.status === 401) {
         console.error('Authentication required for sync')
         // Could add a toast notification here
       } else {
-        throw new Error(`Sync failed with status ${response.status}`)
+        const errorData = await response.json().catch(() => ({}))
+        throw new Error(`Sync failed with status ${response.status}: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
       console.error('Error syncing clips:', error)
@@ -124,6 +131,11 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
       month: 'short',
       day: 'numeric'
     })
+  }
+
+  const getClipUrl = (clip: Clip): string => {
+    // Construct the clip URL based on the video ID and clip timing
+    return `/api/clips/${clip.id}/stream`
   }
 
   const openExportModal = (clip: Clip) => {
@@ -466,31 +478,53 @@ export function ClipList({ onRefresh, onCreateClip }: ClipListProps = {}) {
           )}
           
           <div className="aspect-video bg-gradient-to-br from-muted/10 to-muted/20 relative overflow-hidden">
-            {clip.thumbnailUrl ? (
-              <Image
-                src={clip.thumbnailUrl}
-                alt={clip.title}
-                fill
-                className="object-cover group-hover:scale-105 transition-transform duration-300"
-                onError={(e) => {
-                  // If thumbnail fails to load, hide the image and show the fallback icon
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  const fallback = target.nextElementSibling as HTMLElement;
-                  if (fallback) fallback.style.display = 'flex';
-                }}
+            {playingClipId === clip.id ? (
+              <VideoJSPlayer
+                src={getClipUrl(clip)}
+                className="w-full h-full object-cover"
+                onPlay={() => setPlayingClipId(clip.id)}
+                onPause={() => setPlayingClipId(null)}
               />
-            ) : null}
-            <div 
-              className={`w-full h-full flex items-center justify-center ${clip.thumbnailUrl ? 'hidden' : 'flex'}`}
-              style={{ display: clip.thumbnailUrl ? 'none' : 'flex' }}
-            >
-              <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-full p-4">
-                <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
-                </svg>
-              </div>
-            </div>
+            ) : (
+              <>
+                {clip.thumbnailUrl ? (
+                  <Image
+                    src={clip.thumbnailUrl}
+                    alt={clip.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+                    onClick={() => setPlayingClipId(clip.id)}
+                    onError={(e) => {
+                      // If thumbnail fails to load, hide the image and show the fallback icon
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const fallback = target.nextElementSibling as HTMLElement;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
+                  />
+                ) : null}
+                <div 
+                  className={`w-full h-full flex items-center justify-center cursor-pointer ${clip.thumbnailUrl ? 'hidden' : 'flex'}`}
+                  style={{ display: clip.thumbnailUrl ? 'none' : 'flex' }}
+                  onClick={() => setPlayingClipId(clip.id)}
+                >
+                  <div className="bg-gradient-to-br from-primary/10 to-primary/20 rounded-full p-4">
+                    <svg className="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h8m2-10v12a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h8l4 4z" />
+                    </svg>
+                  </div>
+                </div>
+                {/* Play button overlay */}
+                <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <button
+                    onClick={() => setPlayingClipId(clip.id)}
+                    className="bg-white/90 hover:bg-white rounded-full p-4 transform hover:scale-110 transition-all duration-200 shadow-lg"
+                  >
+                    <Play className="h-8 w-8 text-primary ml-1" />
+                  </button>
+                </div>
+              </>
+            )}
             <div className={`absolute top-3 right-3 ${selectionMode ? 'top-3' : 'top-3'}`}>
               <span className={`px-2.5 py-1 rounded-full text-xs font-semibold ${getStatusColor(clip.status)}`}>
                 {getStatusText(clip.status)}

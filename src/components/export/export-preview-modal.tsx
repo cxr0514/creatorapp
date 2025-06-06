@@ -90,15 +90,17 @@ export function ExportPreviewModal({
           contentAnalysis
         )
 
-        // Generate preview URL with Cloudinary transformation
-        const transformation = smartCroppingEngine.generateCloudinaryTransformation(
+        // Generate transformation parameters for smart cropping
+        const transformation = smartCroppingEngine.generateVideoTransformation(
           smartCropAnalysis,
           format,
           clip.startTime,
           clip.endTime
         )
 
-        const previewUrl = `https://res.cloudinary.com/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/video/upload/${transformation}/${clip.video.publicId}.mp4`
+        // For now, use the original video URL as preview since we're using B2 storage
+        // In a full implementation, we would generate a preview with the transformation applied
+        const previewUrl = clip.video.url
 
         setPreviews(prev => prev.map((p, index) => 
           index === i ? {
@@ -106,6 +108,7 @@ export function ExportPreviewModal({
             previewUrl,
             smartCropAnalysis,
             contentAnalysis,
+            transformation,
             isLoading: false
           } : p
         ))
@@ -116,7 +119,7 @@ export function ExportPreviewModal({
         ))
       }
     }
-  }, [selectedFormats, clip.video.url, clip.video.publicId, clip.aspectRatio, clip.startTime, clip.endTime])
+  }, [selectedFormats, clip.video.url, clip.aspectRatio, clip.startTime, clip.endTime])
 
   useEffect(() => {
     if (isOpen && selectedFormats.length > 0) {

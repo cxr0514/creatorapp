@@ -19,7 +19,8 @@ import {
   Trash2,
   Clock,
   Wand2,
-  X
+  X,
+  Video
 } from 'lucide-react'
 import ClipTrimmer from '@/components/video/ClipTrimmer'
 import AISuggestionList from '@/components/suggestions/AISuggestionList'
@@ -50,10 +51,30 @@ interface EnhancedCreateClipModalProps {
 }
 
 const ASPECT_RATIOS = [
-  { value: '16:9', label: '16:9 (Landscape)', platforms: ['YouTube', 'LinkedIn'] },
-  { value: '9:16', label: '9:16 (Portrait)', platforms: ['TikTok', 'Instagram Reels', 'YouTube Shorts'] },
-  { value: '1:1', label: '1:1 (Square)', platforms: ['Instagram Post', 'Twitter'] },
-  { value: '4:3', label: '4:3 (Classic)', platforms: ['Facebook'] }
+  { 
+    value: '16:9', 
+    label: '16:9 (Landscape)', 
+    platforms: ['YouTube', 'LinkedIn', 'Facebook', 'Twitter'],
+    description: 'Best for traditional video content and presentations'
+  },
+  { 
+    value: '9:16', 
+    label: '9:16 (Portrait)', 
+    platforms: ['TikTok', 'Instagram Reels', 'YouTube Shorts', 'Pinterest'],
+    description: 'Optimized for mobile-first platforms and short-form content'
+  },
+  { 
+    value: '1:1', 
+    label: '1:1 (Square)', 
+    platforms: ['Instagram Feed', 'Twitter', 'Facebook Feed'],
+    description: 'Perfect for social media feeds and profile content'
+  },
+  { 
+    value: '4:3', 
+    label: '4:3 (Classic)', 
+    platforms: ['Facebook Video', 'Older Platforms'],
+    description: 'Traditional aspect ratio for general video content'
+  }
 ]
 
 export function EnhancedCreateClipModal({ 

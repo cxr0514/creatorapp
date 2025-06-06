@@ -2,12 +2,21 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-05-28.basil'
-});
+function getStripeClient(): Stripe {
+  const apiKey = process.env.STRIPE_SECRET_KEY;
+  
+  if (!apiKey) {
+    throw new Error('STRIPE_SECRET_KEY environment variable is not set');
+  }
+
+  return new Stripe(apiKey, {
+    apiVersion: '2025-05-28.basil'
+  });
+}
 
 // Stripe webhook handler
 export async function POST(request: NextRequest) {
+  const stripe = getStripeClient();
   const body = await request.text();
   const sig = request.headers.get('stripe-signature')!;
 
@@ -54,6 +63,7 @@ export async function POST(request: NextRequest) {
 }
 
 async function handleCheckoutCompleted(session: Stripe.Checkout.Session) {
+  const stripe = getStripeClient();
   const userId = session.metadata?.userId;
   const planId = session.metadata?.planId;
 

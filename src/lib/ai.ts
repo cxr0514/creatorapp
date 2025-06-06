@@ -1,9 +1,14 @@
 import OpenAI from 'openai'
 import { extractAudioFromVideo } from './video/audio-extractor'
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-})
+// Initialize OpenAI client only when API key is available
+const getOpenAIClient = () => {
+  const apiKey = process.env.OPENAI_API_KEY
+  if (!apiKey) {
+    throw new Error('OPENAI_API_KEY environment variable is required for AI features')
+  }
+  return new OpenAI({ apiKey })
+}
 
 // Time format for captions/subtitles
 const formatTimestamp = (seconds: number): string => {
@@ -86,6 +91,7 @@ Respond in JSON format:
 }
 `
 
+    const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
@@ -139,6 +145,7 @@ Respond in JSON format:
 }
 `
 
+    const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
@@ -185,6 +192,7 @@ Respond in JSON format:
 }
 `
 
+    const openai = getOpenAIClient()
     const response = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [{ role: 'user', content: prompt }],
@@ -214,6 +222,7 @@ export async function generateCaptions(audioUrl: string, options: CaptionOptions
     })
 
     // Send to Whisper API
+    const openai = getOpenAIClient()
     const transcription = await openai.audio.transcriptions.create({
       file: audioFile,
       model: 'whisper-1',

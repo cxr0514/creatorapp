@@ -1,17 +1,21 @@
 // OpenAI client configuration and initialization
 import OpenAI from 'openai';
 
-// Initialize OpenAI client
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Lazy initialization of OpenAI client
+let openaiClient: OpenAI | null = null;
 
-// Validate API key exists
-if (!process.env.OPENAI_API_KEY) {
-  console.warn('OPENAI_API_KEY is not set. AI features will be disabled.');
+function getOpenAIClient(): OpenAI {
+  if (!openaiClient) {
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw new AIServiceError('OPENAI_API_KEY is not set. AI features are disabled.', 'MISSING_API_KEY');
+    }
+    openaiClient = new OpenAI({ apiKey });
+  }
+  return openaiClient;
 }
 
-export { openai };
+export { getOpenAIClient as openai };
 
 // AI service configuration
 export const AI_CONFIG = {

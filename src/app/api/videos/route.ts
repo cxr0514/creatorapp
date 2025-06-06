@@ -136,7 +136,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    let session = await getServerSession(authOptions)
+    const session = await getServerSession(authOptions)
     console.log('Video upload - Session check:', { 
       hasSession: !!session, 
       userEmail: session?.user?.email,
@@ -144,10 +144,12 @@ export async function POST(request: NextRequest) {
       userId: (session?.user as any)?.id 
     })
     
-    // TEMPORARY: Allow testing without authentication
+    // Require authentication for video uploads
     if (!session?.user?.email) {
-      console.warn('No session found, using test session for upload testing')
-      session = { user: { email: 'test@example.com', name: 'Test User' } } as typeof session
+      console.warn('Upload attempt without authentication - returning 401')
+      return NextResponse.json({ 
+        error: 'Authentication required. Please log in to upload videos.' 
+      }, { status: 401 })
     }
 
     const formData = await request.formData()

@@ -36,12 +36,16 @@ export async function GET(
     }
 
     // In a real application, you would:
-    // 1. Generate a signed URL for the clip file from Cloudinary
+    // 1. Generate a signed URL for the clip file from B2 storage
     // 2. Stream the file content
     // 3. Handle proper file headers
 
-    // For demo purposes, we'll redirect to the Cloudinary URL
-    return NextResponse.redirect(clip.cloudinaryUrl)
+    // For demo purposes, we'll redirect to the storage URL
+    if (clip.storageUrl) {
+      return NextResponse.redirect(clip.storageUrl)
+    } else {
+      return NextResponse.json({ error: 'Clip file not available' }, { status: 404 })
+    }
   } catch (error) {
     console.error('Error downloading clip:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })

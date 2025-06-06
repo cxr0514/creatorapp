@@ -1,7 +1,7 @@
 import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import crypto from 'crypto';
-import https from 'https';
+import * as crypto from 'crypto';
+import * as https from 'https';
 
 // B2 Configuration - read environment variables at runtime
 export function getB2Config() {
@@ -29,11 +29,11 @@ if (process.env.NODE_ENV === 'development') {
 
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 
-// Create B2 client factory function
+// Create B2 client factory function with permanent checksum header removal
 export function createB2Client() {
   const { endpoint, keyId, appKey } = getB2Config();
   
-  return new S3Client({
+  const client = new S3Client({
     endpoint: endpoint,
     region: 'us-east-005',
     credentials: {
@@ -46,9 +46,47 @@ export function createB2Client() {
       connectionTimeout: 30000,
       requestTimeout: 300000,
     },
-    // Disable flexible checksums
+    // Disable S3 Express session auth (not relevant but doesn't hurt)
     disableS3ExpressSessionAuth: true,
   });
+
+  // PERMANENT FIX: Add middleware to remove ALL checksum headers before sending requests
+  client.middlewareStack.add(
+    (next) => async (args) => {
+      // Remove checksum headers from the request
+      if (args.request && typeof args.request === 'object' && 'headers' in args.request && args.request.headers) {
+        const headers = args.request.headers as Record<string, string>;
+        
+        // Remove all x-amz-checksum-* headers that Backblaze B2 doesn't support
+        const checksumHeaders = Object.keys(headers).filter(header => 
+          header.toLowerCase().startsWith('x-amz-checksum-')
+        );
+        
+        checksumHeaders.forEach(header => {
+          delete headers[header];
+        });
+        
+        // Also remove Content-MD5 if present (another potential issue)
+        if ('content-md5' in headers) {
+          delete headers['content-md5'];
+        }
+        if ('Content-MD5' in headers) {
+          delete headers['Content-MD5'];
+        }
+
+        console.log(`[B2-MIDDLEWARE] Removed ${checksumHeaders.length} checksum headers:`, checksumHeaders);
+      }
+      
+      return next(args);
+    },
+    {
+      step: 'build',
+      name: 'removeChecksumHeaders',
+      priority: 'high',
+    }
+  );
+
+  return client;
 }
 
 // Configuration logging will happen when functions are called
@@ -162,30 +200,98 @@ async function uploadViaAwsSdk(
   key: string,
   contentType: string
 ): Promise<void> {
-  console.log(`[UPLOAD-AWS-SDK] Starting AWS SDK upload...`);
+  console.log(`[UPLOAD-AWS-SDK] Starting AWS SDK upload with PERMANENT checksum fix...`);
   console.log(`[UPLOAD-AWS-SDK] Bucket: ${bucket}, Key: ${key}, Size: ${file.length} bytes`);
   
   const b2Client = createB2Client();
   
   try {
+    // PERMANENT FIX: Create command without ANY checksum-related parameters
     const putCommand = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       Body: file,
       ContentType: contentType,
-      // Explicitly disable all checksum options
+      // CRITICAL: Explicitly disable ALL AWS checksum options
       ChecksumAlgorithm: undefined,
       ChecksumCRC32: undefined,
       ChecksumCRC32C: undefined,
       ChecksumSHA1: undefined,
       ChecksumSHA256: undefined,
+      // Additional AWS-specific parameters to disable
+      ServerSideEncryption: undefined,
+      SSECustomerAlgorithm: undefined,
+      SSECustomerKey: undefined,
+      SSECustomerKeyMD5: undefined,
+      SSEKMSKeyId: undefined,
+      RequestPayer: undefined,
+      ExpectedBucketOwner: undefined,
+      ObjectLockMode: undefined,
+      ObjectLockRetainUntilDate: undefined,
+      ObjectLockLegalHoldStatus: undefined,
     });
     
-    console.log(`[UPLOAD-AWS-SDK] Sending PutObjectCommand...`);
+    // PERMANENT FIX: Override the command's input to remove any auto-added checksum properties
+    const commandInput = putCommand.input as unknown as Record<string, unknown>;
+    delete commandInput.ChecksumAlgorithm;
+    delete commandInput.ChecksumCRC32;
+    delete commandInput.ChecksumCRC32C;
+    delete commandInput.ChecksumSHA1;
+    delete commandInput.ChecksumSHA256;
+    
+    console.log(`[UPLOAD-AWS-SDK] Command input after checksum removal:`, Object.keys(commandInput));
+    console.log(`[UPLOAD-AWS-SDK] Sending PutObjectCommand with B2-compatible headers only...`);
+    
     const result = await b2Client.send(putCommand);
-    console.log(`[UPLOAD-AWS-SDK] Upload successful:`, result);
+    console.log(`[UPLOAD-AWS-SDK] ✅ Upload successful with permanent checksum fix:`, result);
   } catch (error) {
-    console.error(`[UPLOAD-AWS-SDK] Upload failed:`, error);
+    console.error(`[UPLOAD-AWS-SDK] ❌ Upload failed even with permanent checksum fix:`, error);
+    throw error;
+  }
+}
+
+async function uploadViaPresignedUrl(
+  file: Buffer,
+  bucket: string,
+  key: string,
+  contentType: string
+): Promise<void> {
+  console.log(`[UPLOAD-PRESIGNED] Starting presigned URL upload...`);
+  console.log(`[UPLOAD-PRESIGNED] Bucket: ${bucket}, Key: ${key}, Size: ${file.length} bytes`);
+  
+  const b2Client = createB2Client();
+  
+  try {
+    // Step 1: Generate presigned URL using AWS SDK (this works fine for URL generation)
+    const putCommand = new PutObjectCommand({
+      Bucket: bucket,
+      Key: key,
+      ContentType: contentType,
+    });
+    
+    const presignedUrl = await getSignedUrl(b2Client, putCommand, { expiresIn: 3600 });
+    console.log(`[UPLOAD-PRESIGNED] Generated presigned URL`);
+    
+    // Step 2: Upload directly via fetch (bypasses all AWS middleware)
+    const response = await fetch(presignedUrl, {
+      method: 'PUT',
+      body: file,
+      headers: {
+        'Content-Type': contentType,
+        'Content-Length': file.length.toString(),
+      },
+    });
+    
+    if (!response.ok) {
+      const responseText = await response.text();
+      console.error(`[UPLOAD-PRESIGNED] Upload failed with status ${response.status}`);
+      console.error(`[UPLOAD-PRESIGNED] Response:`, responseText);
+      throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${responseText}`);
+    }
+    
+    console.log(`[UPLOAD-PRESIGNED] Upload successful!`);
+  } catch (error) {
+    console.error(`[UPLOAD-PRESIGNED] Upload failed:`, error);
     throw error;
   }
 }
@@ -232,23 +338,53 @@ export async function uploadToB2(
   console.log(`[B2-UPLOAD] Calling uploadDirectToB2 with buffer size: ${fileBuffer.length}`);
   
   try {
-    console.log(`[B2-UPLOAD] Using native HTTP upload method (no checksum headers)...`);
-    await uploadViaNativeHttp(fileBuffer, bucketName, key, contentType);
+    console.log(`[B2-UPLOAD] Using presigned URL upload method (completely bypasses AWS SDK middleware)...`);
+    await uploadViaPresignedUrl(fileBuffer, bucketName, key, contentType);
     const result = { storageKey: key, storageUrl: `${endpoint}/${bucketName}/${key}` };
-    console.log(`[B2-UPLOAD] Success! Result:`, result);
+    console.log(`[B2-UPLOAD] Presigned URL upload successful! Result:`, result);
     return result;
-  } catch (error) {
-    console.error(`[B2-UPLOAD] Native HTTP upload failed, trying AWS SDK:`, error);
+  } catch (presignedError) {
+    console.error(`[B2-UPLOAD] Presigned URL upload failed:`, presignedError);
     
     try {
-      console.log(`[B2-UPLOAD] Using AWS SDK direct upload method as fallback...`);
-      await uploadViaAwsSdk(fileBuffer, bucketName, key, contentType);
+      console.log(`[B2-UPLOAD] Fallback to native HTTP upload method...`);
+      await uploadViaNativeHttp(fileBuffer, bucketName, key, contentType);
       const result = { storageKey: key, storageUrl: `${endpoint}/${bucketName}/${key}` };
-      console.log(`[B2-UPLOAD] Success! Result:`, result);
+      console.log(`[B2-UPLOAD] Native HTTP upload successful! Result:`, result);
       return result;
-    } catch (sdkError) {
-      console.error(`[B2-UPLOAD] Both upload methods failed:`, sdkError);
-      throw sdkError;
+    } catch (nativeError) {
+      console.error(`[B2-UPLOAD] Native HTTP upload also failed:`, nativeError);
+      
+      // Check if either error is specifically about checksum headers
+      const isChecksumError = (error: unknown) => error instanceof Error && 
+        (error.message.includes('x-amz-checksum') || 
+         error.message.includes('checksum') ||
+         error.message.includes('Unsupported header'));
+      
+      if (isChecksumError(presignedError) || isChecksumError(nativeError)) {
+        const presignedMsg = presignedError instanceof Error ? presignedError.message : 'Unknown presigned error';
+        const nativeMsg = nativeError instanceof Error ? nativeError.message : 'Unknown native error';
+        console.log(`[B2-UPLOAD] Checksum error detected, this suggests AWS SDK middleware issue persists...`);
+        throw new Error(`Backblaze B2 compatibility issue: AWS SDK is still sending unsupported checksum headers. Original errors: ${presignedMsg} | ${nativeMsg}`);
+      }
+      
+      try {
+        console.log(`[B2-UPLOAD] Final fallback: AWS SDK method with all checksum options disabled...`);
+        await uploadViaAwsSdk(fileBuffer, bucketName, key, contentType);
+        const result = { storageKey: key, storageUrl: `${endpoint}/${bucketName}/${key}` };
+        console.log(`[B2-UPLOAD] AWS SDK upload successful! Result:`, result);
+        return result;
+      } catch (sdkError) {
+        console.error(`[B2-UPLOAD] All upload methods failed:`, sdkError);
+        
+        // Provide detailed error information
+        const errorMessage = sdkError instanceof Error ? sdkError.message : 'Unknown error';
+        if (errorMessage.includes('x-amz-checksum') || errorMessage.includes('Unsupported header')) {
+          throw new Error(`Backblaze B2 checksum compatibility issue. All upload methods failed due to AWS SDK sending headers that B2 doesn't support. Please contact support with this error: ${errorMessage}`);
+        }
+        
+        throw new Error(`All upload methods failed. Last error: ${errorMessage}`);
+      }
     }
   }
 }
