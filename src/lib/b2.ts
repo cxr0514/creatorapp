@@ -29,7 +29,7 @@ if (process.env.NODE_ENV === 'development') {
 
 process.env.AWS_SDK_JS_SUPPRESS_MAINTENANCE_MODE_MESSAGE = '1';
 
-// Create B2 client factory function with permanent checksum header removal
+// Create B2 client factory function with AGGRESSIVE checksum header removal
 export function createB2Client() {
   const { endpoint, keyId, appKey } = getB2Config();
   
@@ -41,14 +41,57 @@ export function createB2Client() {
       secretAccessKey: appKey,
     },
     forcePathStyle: true,
-    maxAttempts: 3,
+    maxAttempts: 5, // Increased retries for large files
     requestHandler: {
-      connectionTimeout: 30000,
-      requestTimeout: 300000,
+      connectionTimeout: 60000, // 60 seconds for connection
+      requestTimeout: 600000,   // 10 minutes for large file uploads
+      httpsAgent: {
+        keepAlive: true,
+        maxSockets: 50,
+        timeout: 600000, // 10 minutes socket timeout
+      }
     },
     // Disable S3 Express session auth (not relevant but doesn't hurt)
     disableS3ExpressSessionAuth: true,
+    // RUNTIME SAFEGUARDS: Add checksum calculation controls for future AWS SDK upgrades
+    requestChecksumCalculation: process.env.AWS_S3_REQUEST_CHECKSUM_CALCULATION as "WHEN_REQUIRED" || "WHEN_REQUIRED",
+    responseChecksumValidation: process.env.AWS_S3_RESPONSE_CHECKSUM_VALIDATION as "WHEN_REQUIRED" || "WHEN_REQUIRED",
   });
+
+  // AGGRESSIVE FIX: Add multiple middleware layers to remove ALL checksum headers
+  client.middlewareStack.add(
+    (next) => async (args) => {
+      // Remove checksum headers from the request at serializeStep
+      if (args.request && typeof args.request === 'object' && 'headers' in args.request && args.request.headers) {
+        const headers = args.request.headers as Record<string, string>;
+        
+        // Remove ALL possible checksum-related headers
+        const checksumHeaders = Object.keys(headers).filter(header => {
+          const lowerHeader = header.toLowerCase();
+          return lowerHeader.startsWith('x-amz-checksum-') ||
+                 lowerHeader.startsWith('x-amz-sdk-checksum-') ||
+                 lowerHeader === 'content-md5' ||
+                 lowerHeader === 'x-amz-content-sha256' && headers[header] !== 'UNSIGNED-PAYLOAD';
+        });
+        
+        checksumHeaders.forEach(header => {
+          delete headers[header];
+        });
+        
+        // Force UNSIGNED-PAYLOAD for B2 compatibility
+        headers['x-amz-content-sha256'] = 'UNSIGNED-PAYLOAD';
+
+        console.log(`[B2-SERIALIZE-MIDDLEWARE] Removed ${checksumHeaders.length} checksum headers:`, checksumHeaders);
+      }
+      
+      return next(args);
+    },
+    {
+      step: 'serialize',
+      name: 'removeChecksumHeadersSerialize',
+      priority: 'high',
+    }
+  );
 
   // PERMANENT FIX: Add middleware to remove ALL checksum headers before sending requests
   client.middlewareStack.add(
@@ -57,30 +100,27 @@ export function createB2Client() {
       if (args.request && typeof args.request === 'object' && 'headers' in args.request && args.request.headers) {
         const headers = args.request.headers as Record<string, string>;
         
-        // Remove all x-amz-checksum-* headers that Backblaze B2 doesn't support
-        const checksumHeaders = Object.keys(headers).filter(header => 
-          header.toLowerCase().startsWith('x-amz-checksum-')
-        );
+        // Remove ALL x-amz-checksum-* and x-amz-sdk-checksum-* headers that Backblaze B2 doesn't support
+        const checksumHeaders = Object.keys(headers).filter(header => {
+          const lowerHeader = header.toLowerCase();
+          return lowerHeader.startsWith('x-amz-checksum-') ||
+                 lowerHeader.startsWith('x-amz-sdk-checksum-');
+        });
         
         checksumHeaders.forEach(header => {
           delete headers[header];
         });
         
-        // Also remove Content-MD5 if present (another potential issue)
-        if ('content-md5' in headers) {
-          delete headers['content-md5'];
-        }
-        if ('Content-MD5' in headers) {
-          delete headers['Content-MD5'];
-        }
+        // Also remove Content-MD5 if present
+        ['content-md5','Content-MD5'].forEach(h => { delete headers[h]; });
 
-        console.log(`[B2-MIDDLEWARE] Removed ${checksumHeaders.length} checksum headers:`, checksumHeaders);
+        console.log(`[B2-FINALIZE-MIDDLEWARE] Removed ${checksumHeaders.length} checksum headers:`, checksumHeaders);
       }
       
       return next(args);
     },
     {
-      step: 'build',
+      step: 'finalizeRequest', // ensure header removal after any checksum injection
       name: 'removeChecksumHeaders',
       priority: 'high',
     }
@@ -100,39 +140,49 @@ async function uploadViaNativeHttp(
   key: string,
   contentType: string
 ): Promise<void> {
-  console.log(`[UPLOAD-NATIVE] Starting native HTTP upload...`);
+  console.log(`[UPLOAD-NATIVE] Starting pure HTTP upload (no AWS SDK)...`);
   console.log(`[UPLOAD-NATIVE] Bucket: ${bucket}, Key: ${key}, Size: ${file.length} bytes`);
   
   const { endpoint, keyId, appKey } = getB2Config();
   
   return new Promise((resolve, reject) => {
     const url = new URL(`/${bucket}/${key}`, endpoint);
-    const dateStr = new Date().toISOString().replace(/[:-]|\.\d{3}/g, '');
     
-    // Create AWS signature version 4
+    // Use current date for AWS4 signature
+    const now = new Date();
+    const dateStr = now.toISOString().replace(/[:-]|\.\d{3}/g, '');
+    const dateStamp = dateStr.substring(0, 8);
+    
+    // AWS4 Signature parameters
     const region = 'us-east-005';
     const service = 's3';
     const algorithm = 'AWS4-HMAC-SHA256';
     
+    // Canonical headers (sorted)
     const canonicalHeaders = [
+      `content-type:${contentType}`,
       `host:${url.host}`,
       `x-amz-content-sha256:UNSIGNED-PAYLOAD`,
       `x-amz-date:${dateStr}`
     ].join('\n');
     
-    const signedHeaders = 'host;x-amz-content-sha256;x-amz-date';
+    const signedHeaders = 'content-type;host;x-amz-content-sha256;x-amz-date';
     
+    // Create canonical request
     const canonicalRequest = [
       'PUT',
       url.pathname,
-      '',
+      '', // query string
       canonicalHeaders,
-      '',
+      '', // empty line
       signedHeaders,
       'UNSIGNED-PAYLOAD'
     ].join('\n');
     
-    const credentialScope = `${dateStr.substr(0, 8)}/${region}/${service}/aws4_request`;
+    console.log(`[UPLOAD-NATIVE] Canonical request:`, canonicalRequest);
+    
+    // Create string to sign
+    const credentialScope = `${dateStamp}/${region}/${service}/aws4_request`;
     const stringToSign = [
       algorithm,
       dateStr,
@@ -140,30 +190,40 @@ async function uploadViaNativeHttp(
       crypto.createHash('sha256').update(canonicalRequest).digest('hex')
     ].join('\n');
     
-    const dateKey = crypto.createHmac('sha256', `AWS4${appKey}`).update(dateStr.substr(0, 8)).digest();
-    const dateRegionKey = crypto.createHmac('sha256', dateKey).update(region).digest();
-    const dateRegionServiceKey = crypto.createHmac('sha256', dateRegionKey).update(service).digest();
-    const signingKey = crypto.createHmac('sha256', dateRegionServiceKey).update('aws4_request').digest();
-    const signature = crypto.createHmac('sha256', signingKey).update(stringToSign).digest('hex');
+    console.log(`[UPLOAD-NATIVE] String to sign:`, stringToSign);
     
+    // Create signing key
+    const kDate = crypto.createHmac('sha256', `AWS4${appKey}`).update(dateStamp).digest();
+    const kRegion = crypto.createHmac('sha256', kDate).update(region).digest();
+    const kService = crypto.createHmac('sha256', kRegion).update(service).digest();
+    const kSigning = crypto.createHmac('sha256', kService).update('aws4_request').digest();
+    
+    // Create signature
+    const signature = crypto.createHmac('sha256', kSigning).update(stringToSign).digest('hex');
+    
+    // Create authorization header
     const authHeader = `${algorithm} Credential=${keyId}/${credentialScope}, SignedHeaders=${signedHeaders}, Signature=${signature}`;
+    
+    const requestHeaders = {
+      'Authorization': authHeader,
+      'Content-Type': contentType,
+      'Content-Length': file.length.toString(),
+      'x-amz-content-sha256': 'UNSIGNED-PAYLOAD',
+      'x-amz-date': dateStr,
+      'Host': url.host
+    };
+    
+    console.log(`[UPLOAD-NATIVE] Request headers:`, Object.keys(requestHeaders));
+    console.log(`[UPLOAD-NATIVE] URL: ${url.toString()}`);
     
     const options = {
       hostname: url.hostname,
       port: 443,
       path: url.pathname,
       method: 'PUT',
-      headers: {
-        'Authorization': authHeader,
-        'Content-Type': contentType,
-        'Content-Length': file.length,
-        'x-amz-content-sha256': 'UNSIGNED-PAYLOAD',
-        'x-amz-date': dateStr,
-        'Host': url.host
-      }
+      headers: requestHeaders,
+      timeout: 600000, // 10 minute timeout for large files
     };
-    
-    console.log(`[UPLOAD-NATIVE] Sending HTTP PUT request...`);
     
     const req = https.request(options, (res) => {
       let responseData = '';
@@ -184,9 +244,23 @@ async function uploadViaNativeHttp(
       });
     });
     
+    // Improved error handling and timeouts
     req.on('error', (error) => {
       console.error(`[UPLOAD-NATIVE] Request failed:`, error);
       reject(error);
+    });
+    
+    req.on('timeout', () => {
+      console.error(`[UPLOAD-NATIVE] Request timed out after 10 minutes`);
+      req.destroy();
+      reject(new Error('Upload timed out after 10 minutes'));
+    });
+    
+    // Set socket timeout
+    req.setTimeout(600000, () => {
+      console.error(`[UPLOAD-NATIVE] Socket timeout after 10 minutes`);
+      req.destroy();
+      reject(new Error('Socket timeout after 10 minutes'));
     });
     
     req.write(file);
@@ -272,25 +346,42 @@ async function uploadViaPresignedUrl(
     const presignedUrl = await getSignedUrl(b2Client, putCommand, { expiresIn: 3600 });
     console.log(`[UPLOAD-PRESIGNED] Generated presigned URL`);
     
-    // Step 2: Upload directly via fetch (bypasses all AWS middleware)
-    const response = await fetch(presignedUrl, {
-      method: 'PUT',
-      body: file,
-      headers: {
-        'Content-Type': contentType,
-        'Content-Length': file.length.toString(),
-      },
-    });
+    // Step 2: Upload directly via fetch (bypasses all AWS middleware) with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+      console.error(`[UPLOAD-PRESIGNED] Upload timed out after 10 minutes`);
+      controller.abort();
+    }, 600000); // 10 minute timeout for large files
     
-    if (!response.ok) {
-      const responseText = await response.text();
-      console.error(`[UPLOAD-PRESIGNED] Upload failed with status ${response.status}`);
-      console.error(`[UPLOAD-PRESIGNED] Response:`, responseText);
-      throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${responseText}`);
+    try {
+      const response = await fetch(presignedUrl, {
+        method: 'PUT',
+        body: file,
+        headers: {
+          'Content-Type': contentType,
+          'Content-Length': file.length.toString(),
+        },
+        signal: controller.signal,
+      });
+      
+      clearTimeout(timeoutId);
+    
+      if (!response.ok) {
+        const responseText = await response.text();
+        console.error(`[UPLOAD-PRESIGNED] Upload failed with status ${response.status}`);
+        console.error(`[UPLOAD-PRESIGNED] Response:`, responseText);
+        throw new Error(`Upload failed: ${response.status} ${response.statusText} - ${responseText}`);
+      }
+      
+      console.log(`[UPLOAD-PRESIGNED] Upload successful!`);
+    } catch (fetchError: unknown) {
+      clearTimeout(timeoutId);
+      if (fetchError && typeof fetchError === 'object' && 'name' in fetchError && fetchError.name === 'AbortError') {
+        throw new Error('Upload timed out after 10 minutes');
+      }
+      throw fetchError;
     }
-    
-    console.log(`[UPLOAD-PRESIGNED] Upload successful!`);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error(`[UPLOAD-PRESIGNED] Upload failed:`, error);
     throw error;
   }
@@ -314,6 +405,10 @@ export async function uploadToB2(
   console.log(`[B2-RUNTIME] App Key: ${appKey ? appKey.substring(0, 8) + '...' : 'NOT SET'}`);
   console.log(`[B2-RUNTIME] Valid Credentials: ${hasValidB2Credentials}`);
   
+  if (!hasValidB2Credentials) {
+    throw new Error('B2 credentials not configured. Please check your environment variables.');
+  }
+  
   console.log(`[B2-UPLOAD] File parameter type: ${typeof file}`);
   console.log(`[B2-UPLOAD] File parameter constructor: ${file?.constructor?.name}`);
   console.log(`[B2-UPLOAD] File size: ${Buffer.isBuffer(file) ? file.length : (file as File).size || 'unknown'} bytes`);
@@ -335,55 +430,60 @@ export async function uploadToB2(
     throw new Error(error);
   }
   
-  console.log(`[B2-UPLOAD] Calling uploadDirectToB2 with buffer size: ${fileBuffer.length}`);
+  console.log(`[B2-UPLOAD] Converted to buffer size: ${fileBuffer.length} bytes`);
   
+  // PRIORITY 1: Native HTTP upload (completely bypasses AWS SDK)
   try {
-    console.log(`[B2-UPLOAD] Using presigned URL upload method (completely bypasses AWS SDK middleware)...`);
-    await uploadViaPresignedUrl(fileBuffer, bucketName, key, contentType);
+    console.log(`[B2-UPLOAD] 🚀 PRIORITY METHOD: Native HTTP upload (no AWS SDK dependency)...`);
+    await uploadViaNativeHttp(fileBuffer, bucketName, key, contentType);
     const result = { storageKey: key, storageUrl: `${endpoint}/${bucketName}/${key}` };
-    console.log(`[B2-UPLOAD] Presigned URL upload successful! Result:`, result);
+    console.log(`[B2-UPLOAD] ✅ Native HTTP upload successful! Result:`, result);
     return result;
-  } catch (presignedError) {
-    console.error(`[B2-UPLOAD] Presigned URL upload failed:`, presignedError);
+  } catch (nativeError) {
+    console.error(`[B2-UPLOAD] ❌ Native HTTP upload failed:`, nativeError);
+    console.error(`[B2-UPLOAD] Native error details:`, nativeError instanceof Error ? nativeError.message : nativeError);
     
+    // PRIORITY 2: Presigned URL with Fetch (bypasses most AWS SDK middleware)
     try {
-      console.log(`[B2-UPLOAD] Fallback to native HTTP upload method...`);
-      await uploadViaNativeHttp(fileBuffer, bucketName, key, contentType);
+      console.log(`[B2-UPLOAD] 🔄 Fallback to presigned URL + fetch method...`);
+      await uploadViaPresignedUrl(fileBuffer, bucketName, key, contentType);
       const result = { storageKey: key, storageUrl: `${endpoint}/${bucketName}/${key}` };
-      console.log(`[B2-UPLOAD] Native HTTP upload successful! Result:`, result);
+      console.log(`[B2-UPLOAD] ✅ Presigned URL upload successful! Result:`, result);
       return result;
-    } catch (nativeError) {
-      console.error(`[B2-UPLOAD] Native HTTP upload also failed:`, nativeError);
+    } catch (presignedError) {
+      console.error(`[B2-UPLOAD] ❌ Presigned URL upload failed:`, presignedError);
+      console.error(`[B2-UPLOAD] Presigned error details:`, presignedError instanceof Error ? presignedError.message : presignedError);
       
-      // Check if either error is specifically about checksum headers
-      const isChecksumError = (error: unknown) => error instanceof Error && 
-        (error.message.includes('x-amz-checksum') || 
-         error.message.includes('checksum') ||
-         error.message.includes('Unsupported header'));
-      
-      if (isChecksumError(presignedError) || isChecksumError(nativeError)) {
-        const presignedMsg = presignedError instanceof Error ? presignedError.message : 'Unknown presigned error';
-        const nativeMsg = nativeError instanceof Error ? nativeError.message : 'Unknown native error';
-        console.log(`[B2-UPLOAD] Checksum error detected, this suggests AWS SDK middleware issue persists...`);
-        throw new Error(`Backblaze B2 compatibility issue: AWS SDK is still sending unsupported checksum headers. Original errors: ${presignedMsg} | ${nativeMsg}`);
-      }
-      
+      // PRIORITY 3: AWS SDK with aggressive middleware (last resort)
       try {
-        console.log(`[B2-UPLOAD] Final fallback: AWS SDK method with all checksum options disabled...`);
+        console.log(`[B2-UPLOAD] 🔄 Final fallback: AWS SDK method with aggressive checksum removal...`);
         await uploadViaAwsSdk(fileBuffer, bucketName, key, contentType);
         const result = { storageKey: key, storageUrl: `${endpoint}/${bucketName}/${key}` };
-        console.log(`[B2-UPLOAD] AWS SDK upload successful! Result:`, result);
+        console.log(`[B2-UPLOAD] ✅ AWS SDK upload successful! Result:`, result);
         return result;
       } catch (sdkError) {
-        console.error(`[B2-UPLOAD] All upload methods failed:`, sdkError);
+        console.error(`[B2-UPLOAD] ❌ All upload methods failed. Final error:`, sdkError);
         
-        // Provide detailed error information
-        const errorMessage = sdkError instanceof Error ? sdkError.message : 'Unknown error';
-        if (errorMessage.includes('x-amz-checksum') || errorMessage.includes('Unsupported header')) {
-          throw new Error(`Backblaze B2 checksum compatibility issue. All upload methods failed due to AWS SDK sending headers that B2 doesn't support. Please contact support with this error: ${errorMessage}`);
+        // Provide comprehensive error details
+        const nativeMsg = nativeError instanceof Error ? nativeError.message : 'Unknown native error';
+        const presignedMsg = presignedError instanceof Error ? presignedError.message : 'Unknown presigned error';
+        const sdkMsg = sdkError instanceof Error ? sdkError.message : 'Unknown SDK error';
+        
+        // Check if any error is related to checksum headers
+        const isChecksumError = (error: unknown) => {
+          if (!(error instanceof Error)) return false;
+          const msg = error.message.toLowerCase();
+          return msg.includes('x-amz-checksum') || 
+                 msg.includes('x-amz-sdk-checksum') ||
+                 msg.includes('checksum') ||
+                 msg.includes('unsupported header');
+        };
+        
+        if (isChecksumError(nativeError) || isChecksumError(presignedError) || isChecksumError(sdkError)) {
+          throw new Error(`❌ Backblaze B2 checksum compatibility issue. All upload methods failed due to incompatible headers. Error details:\n\n1. Native HTTP: ${nativeMsg}\n2. Presigned URL: ${presignedMsg}\n3. AWS SDK: ${sdkMsg}\n\nThis suggests a deeper compatibility issue between AWS SDK and Backblaze B2.`);
         }
         
-        throw new Error(`All upload methods failed. Last error: ${errorMessage}`);
+        throw new Error(`❌ All B2 upload methods failed. Error details:\n\n1. Native HTTP: ${nativeMsg}\n2. Presigned URL: ${presignedMsg}\n3. AWS SDK: ${sdkMsg}`);
       }
     }
   }

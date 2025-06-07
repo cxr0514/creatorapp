@@ -69,7 +69,7 @@ export function VideoUpload({ onUploadComplete }: VideoUploadProps) {
 
       // Use longer timeout for large file uploads
       const controller = new AbortController()
-      timeoutId = setTimeout(() => controller.abort(), 300000) // 5 minute timeout
+      timeoutId = setTimeout(() => controller.abort(), 600000) // 10 minute timeout to match backend
 
       const response = await fetch('/api/videos', {
         method: 'POST',
