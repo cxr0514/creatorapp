@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OpenAI Integration Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .test-section { background: #f5f5f5; padding: 20px; margin: 20px 0; border-radius: 8px; }
+        .success { color: #28a745; }
+        .error { color: #dc3545; }
+        .info { color: #17a2b8; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        button:disabled { background: #6c757d; cursor: not-allowed; }
+        .response { background: white; padding: 15px; margin-top: 10px; border-left: 4px solid #007bff; }
+        .loading { display: none; }
+        .loading.active { display: inline; }
+    </style>
+</head>
+<body>
+    <h1>🤖 OpenAI Integration Test</h1>
+    <p>This page tests the OpenAI integration in your CreatorApp.</p>
+
+    <div class="test-section">
+        <h2>1. Test tRPC AI Endpoint</h2>
+        <p>Tests the AI clip copy generation through tRPC</p>
+        <button onclick="testTRPCAI()" id="trpcBtn">Test AI Generation</button>
+        <span class="loading" id="trpcLoading">🔄 Generating...</span>
+        <div id="trpcResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>2. Test Direct API Endpoint</h2>
+        <p>Tests the AI clip copy generation through direct API</p>
+        <button onclick="testDirectAPI()" id="directBtn">Test Direct API</button>
+        <span class="loading" id="directLoading">🔄 Processing...</span>
+        <div id="directResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>3. Environment Check</h2>
+        <p>Check if OpenAI API key is properly configured</p>
+        <button onclick="checkEnvironment()" id="envBtn">Check Environment</button>
+        <div id="envResponse" class="response" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function testTRPCAI() {
+            const btn = document.getElementById('trpcBtn');
+            const loading = document.getElementById('trpcLoading');
+            const response = document.getElementById('trpcResponse');
+            
+            btn.disabled = true;
+            loading.classList.add('active');
+            response.style.display = 'none';
+            
+            try {
+                const result = await fetch('/api/trpc/ai.generateClipCopy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        videoContext: "A funny cat video where the cat is playing with a toy mouse",
+                        targetAudience: "pet lovers",
+                        platform: "instagram",
+                        tone: "funny",
+                        clipCount: 2
+                    })
+                });
+                
+                const data = await result.json();
+                
+                response.innerHTML = `
+                    <h4 class="${result.ok ? 'success' : 'error'}">
+                        ${result.ok ? '✅ Success!' : '❌ Error!'}
+                    </h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                response.style.display = 'block';
+                
+            } catch (error) {
+                response.innerHTML = `
+                    <h4 class="error">❌ Network Error!</h4>
+                    <pre>${error.message}</pre>
+                `;
+                response.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                loading.classList.remove('active');
+            }
+        }
+
+        async function testDirectAPI() {
+            const btn = document.getElementById('directBtn');
+            const loading = document.getElementById('directLoading');
+            const response = document.getElementById('directResponse');
+            
+            btn.disabled = true;
+            loading.classList.add('active');
+            response.style.display = 'none';
+            
+            try {
+                const result = await fetch('/api/ai/clip-copy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        videoTitle: "Amazing Cat Compilation",
+                        videoDescription: "Funny cats doing funny things",
+                        clipCount: 1,
+                        platform: "youtube",
+                        action: "generate"
+                    })
+                });
+                
+                const data = await result.json();
+                
+                response.innerHTML = `
+                    <h4 class="${result.ok ? 'success' : 'error'}">
+                        ${result.ok ? '✅ Success!' : '❌ Error!'}
+                    </h4>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                response.style.display = 'block';
+                
+            } catch (error) {
+                response.innerHTML = `
+                    <h4 class="error">❌ Network Error!</h4>
+                    <pre>${error.message}</pre>
+                `;
+                response.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+                loading.classList.remove('active');
+            }
+        }
+
+        async function checkEnvironment() {
+            const btn = document.getElementById('envBtn');
+            const response = document.getElementById('envResponse');
+            
+            btn.disabled = true;
+            response.style.display = 'none';
+            
+            try {
+                const result = await fetch('/api/debug/b2');
+                const data = await result.json();
+                
+                // This is a workaround since we can't directly check env vars from client
+                const hasOpenAI = !data.error || !data.error.includes('OPENAI_API_KEY');
+                
+                response.innerHTML = `
+                    <h4 class="info">🔍 Environment Status</h4>
+                    <p>Since we can't directly check environment variables from the browser, 
+                    you'll need to verify your OpenAI API key manually:</p>
+                    <ul>
+                        <li>Check your <code>.env.local</code> file</li>
+                        <li>Ensure <code>OPENAI_API_KEY=sk-your-actual-key</code></li>
+                        <li>Restart your development server after adding the key</li>
+                    </ul>
+                    <p class="info">💡 Run the test script: <code>node test-openai-integration.js</code></p>
+                `;
+                response.style.display = 'block';
+                
+            } catch (error) {
+                response.innerHTML = `
+                    <h4 class="error">❌ Environment Check Failed</h4>
+                    <pre>${error.message}</pre>
+                `;
+                response.style.display = 'block';
+            } finally {
+                btn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>

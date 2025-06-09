@@ -36,34 +36,7 @@ async function checkDatabase() {
       })
     }
     
-    // Check clips
-    const clips = await prisma.clip.findMany({
-      take: 10,
-      include: {
-        video: {
-          select: {
-            title: true
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-    
-    console.log('\n=== CLIPS IN DATABASE ===')
-    if (clips.length === 0) {
-      console.log('No clips found in database.')
-    } else {
-      clips.forEach(clip => {
-        console.log(`- ID: ${clip.id}, Title: ${clip.title}`)
-        console.log(`  Video: ${clip.video.title}`)
-        console.log(`  Status: ${clip.status}`)
-        console.log(`  Storage Key: ${clip.storageKey}`)
-        console.log(`  Storage URL: ${clip.storageUrl}`)
-        console.log('---')
-      })
-    }
+
     
   } catch (error) {
     console.error('Error:', error)

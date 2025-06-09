@@ -54,7 +54,6 @@ model User {
   stripeCustomerId         String?               @unique
   accounts                 Account[]
   adminProfile             Admin?
-  clips                    Clip[]
   paymentHistory           PaymentHistory[]
   scheduledPosts           ScheduledPost[]
   sessions                 Session[]
@@ -89,51 +88,10 @@ model Video {
   duration     Int?
   fileSize     Int?
   thumbnailUrl String?
-  clips        Clip[]
   user         User     @relation(fields: [userId], references: [id])
 }
 
-model Clip {
-  id                 Int             @id @default(autoincrement())
-  title              String
-  description        String?
-  hashtags           String[]        @default([])
-  tags               String[]        @default([])
-  createdAt          DateTime        @default(now())
-  userId             String
-  videoId            Int
-  storageKey         String
-  storageUrl         String
-  startTime          Int?
-  endTime            Int?
-  duration           Int?
-  aspectRatio        String          @default("16:9")
-  thumbnailUrl       String?
-  status             String          @default("draft")
-  processingProgress Int?            @default(0)
-  errorMessage       String?
-  metadata           Json?
-  user               User            @relation(fields: [userId], references: [id])
-  video              Video           @relation(fields: [videoId], references: [id])
-  exports            ClipExport[]
-  scheduledPosts     ScheduledPost[]
-}
 
-model ClipExport {
-  id            Int      @id @default(autoincrement())
-  clipId        Int
-  format        String
-  platform      String
-  storageKey    String
-  storageUrl    String
-  croppingType  String   @default("center")
-  thumbnailUrl  String?
-  createdAt     DateTime @default(now())
-  fileSize      Int?
-  clip          Clip     @relation(fields: [clipId], references: [id], onDelete: Cascade)
-
-  @@unique([clipId, format, platform])
-}
 
 model StyleTemplate {
   id                   String   @id @default(cuid())
@@ -183,7 +141,6 @@ model SocialAccount {
 model ScheduledPost {
   id               String    @id @default(cuid())
   userId           String
-  clipId           Int?
   title            String
   description      String?
   hashtags         String[]  @default([])
@@ -202,7 +159,6 @@ model ScheduledPost {
   parentPostId     String?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
-  clip             Clip?     @relation(fields: [clipId], references: [id])
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
@@ -348,7 +304,6 @@ model SubscriptionPlan {
   currency           String         @default("USD")
   maxVideos          Int            @default(-1)
   maxStorage         Int            @default(-1)
-  maxClipsPerVideo   Int            @default(-1)
   maxExportsPerMonth Int            @default(-1)
   hasAiEnhancement   Boolean        @default(true)
   hasScheduling      Boolean        @default(true)

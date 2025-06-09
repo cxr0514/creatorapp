@@ -2,7 +2,48 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { prisma } from '@/lib/prisma'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { deleteVideoFromB2 } from '@/lib/b2'
+import { deleteVideoFromB2, getPresignedUrl } from '@/lib/b2'
+
+// Helper function to generate presigned URLs for video files
+async function generatePresignedVideoUrl(video: { storageUrl: string | null, storageKey: string | null }): Promise<string | null> {
+  if (!video.storageUrl) return null;
+  
+  try {
+    // Check if this is a B2 URL that needs a presigned URL
+    if (video.storageUrl.includes('s3.us-east-005.backblazeb2.com') || video.storageUrl.includes('Clipverse') || video.storageUrl.includes('CreatorStorage')) {
+      // If we have a storage key, use it directly
+      if (video.storageKey) {
+        console.log('[VIDEO-URL] Generating presigned URL for storage key:', video.storageKey);
+        return await getPresignedUrl(video.storageKey, 3600); // 1 hour expiry
+      }
+      
+      // Otherwise, try to extract the storage key from the URL
+      const urlParts = video.storageUrl.split('/');
+      
+      // Look for bucket name in URL and extract path after it
+      let bucketIndex = urlParts.findIndex(part => part === 'Clipverse' || part === 'CreatorStorage');
+      if (bucketIndex === -1) {
+        // For direct B2 URLs like https://s3.us-east-005.backblazeb2.com/Clipverse/...
+        bucketIndex = urlParts.findIndex(part => part === 'Clipverse' || part === 'CreatorStorage');
+      }
+      
+      if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+        const storageKey = urlParts.slice(bucketIndex + 1).join('/');
+        console.log('[VIDEO-URL] Extracted storage key from URL:', storageKey);
+        return await getPresignedUrl(storageKey, 3600); // 1 hour expiry
+      }
+      
+      console.warn('[VIDEO-URL] Could not extract storage key from B2 URL:', video.storageUrl);
+      return null;
+    }
+    
+    // If it's not a B2 URL, return as-is (might be external CDN)
+    return video.storageUrl;
+  } catch (error) {
+    console.error('[VIDEO-URL] Failed to generate presigned URL:', error);
+    return null; // Return null if we can't generate presigned URL
+  }
+}
 
 export async function DELETE(
   request: NextRequest,
@@ -58,13 +99,6 @@ export async function DELETE(
     }
 
     try {
-      // Delete associated clips first (foreign key constraint)
-      const deletedClips = await prisma.clip.deleteMany({
-        where: { videoId: video.id }
-      })
-
-      console.log(`Deleted ${deletedClips.count} associated clips`)
-
       // Delete video from database
       await prisma.video.delete({
         where: { id: video.id }
@@ -80,7 +114,6 @@ export async function DELETE(
           title: video.title,
           storageKey: video.storageKey
         },
-        deletedClips: deletedClips.count,
         storage: {
           b2Deleted: b2DeleteSuccess,
           b2Error: b2DeleteError
@@ -141,13 +174,6 @@ export async function GET(
         user: {
           email: session.user.email
         }
-      },
-      include: {
-        _count: {
-          select: {
-            clips: true
-          }
-        }
       }
     })
 
@@ -155,16 +181,21 @@ export async function GET(
       return NextResponse.json({ error: 'Video not found or unauthorized' }, { status: 404 })
     }
 
+    // Generate presigned URL for the video
+    const presignedVideoUrl = await generatePresignedVideoUrl({ 
+      storageUrl: video.storageUrl, 
+      storageKey: video.storageKey 
+    });
+
     const formattedVideo = {
       id: video.id,
       title: video.title,
       filename: video.title,
-      url: video.storageUrl,
+      url: presignedVideoUrl || video.storageUrl, // Use presigned URL if available, fallback to original
       publicId: video.storageKey,
       thumbnailUrl: video.thumbnailUrl,
       duration: video.duration,
       createdAt: video.uploadedAt.toISOString(),
-      clipCount: video._count.clips,
       fileSize: video.fileSize
     }
 

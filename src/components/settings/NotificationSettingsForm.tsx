@@ -14,8 +14,6 @@ interface NotificationSettingsFormProps {
 }
 
 const ALL_NOTIFICATION_TYPES: NotificationType[] = [
-  'clip_generation_success',
-  'clip_generation_failure',
   'batch_export_success',
   'batch_export_failure',
   'new_ai_suggestion',
@@ -28,8 +26,6 @@ const CHANNEL_DISPLAY_NAMES: Record<NotificationChannel, string> = {
 };
 
 const TYPE_DISPLAY_NAMES: Record<NotificationType, string> = {
-  clip_generation_success: 'Clip Generated Successfully',
-  clip_generation_failure: 'Clip Generation Failed',
   batch_export_success: 'Batch Export Completed',
   batch_export_failure: 'Batch Export Failed',
   new_ai_suggestion: 'New AI Suggestions Available',

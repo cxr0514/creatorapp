@@ -29,7 +29,6 @@ interface AIMetadata {
 interface GenerateMetadataParams {
   videoTitle?: string
   videoDuration?: number
-  clipDuration?: number
   startTime?: number
   endTime?: number
   aspectRatio?: string
@@ -111,59 +110,7 @@ Respond in JSON format:
   }
 }
 
-export async function generateClipMetadata(params: GenerateMetadataParams): Promise<AIMetadata> {
-  try {
-    const clipDuration = params.clipDuration || (params.endTime && params.startTime ? params.endTime - params.startTime : 30)
-    
-    const prompt = `
-Generate SEO-optimized metadata for a video clip with the following details:
-- Source video: ${params.videoTitle || 'Untitled Video'}
-- Clip duration: ${Math.floor(clipDuration / 60)}:${(clipDuration % 60).toString().padStart(2, '0')}
-- Aspect ratio: ${params.aspectRatio || '16:9'}
-- Time range: ${params.startTime ? `${Math.floor(params.startTime / 60)}:${(params.startTime % 60).toString().padStart(2, '0')}` : '0:00'} - ${params.endTime ? `${Math.floor(params.endTime / 60)}:${(params.endTime % 60).toString().padStart(2, '0')}` : '0:30'}
-- Existing title: ${params.existingTitle || 'None'}
 
-Platform optimization for aspect ratio ${params.aspectRatio}:
-${params.aspectRatio === '9:16' ? '- Optimized for TikTok, Instagram Reels, YouTube Shorts' : ''}
-${params.aspectRatio === '1:1' ? '- Optimized for Instagram Posts, Twitter/X, LinkedIn' : ''}
-${params.aspectRatio === '16:9' ? '- Optimized for YouTube, Twitter/X, LinkedIn, General Web' : ''}
-
-Please provide:
-1. An engaging, platform-optimized title (max 60 characters)
-2. A compelling description (max 200 characters)
-3. 5-10 relevant hashtags without the # symbol (include platform-specific trending tags)
-4. 5-8 searchable tags/keywords
-
-Focus on viral potential, engagement, and platform-specific optimization.
-
-Respond in JSON format:
-{
-  "title": "engaging title here",
-  "description": "compelling description here", 
-  "hashtags": ["hashtag1", "hashtag2", "hashtag3"],
-  "tags": ["tag1", "tag2", "tag3"]
-}
-`
-
-    const openai = getOpenAIClient()
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      temperature: 0.8,
-      max_tokens: 500,
-    })
-
-    const content = response.choices[0]?.message?.content
-    if (!content) {
-      throw new Error('No response from OpenAI')
-    }
-
-    return JSON.parse(content)
-  } catch (error) {
-    console.error('Error generating clip metadata:', error)
-    throw new Error('Failed to generate AI metadata')
-  }
-}
 
 export async function improveMetadata(currentMetadata: AIMetadata, context?: string): Promise<AIMetadata> {
   try {

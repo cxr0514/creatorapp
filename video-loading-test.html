@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Loading Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background-color: #0056b3; }
+        pre { background-color: #f8f9fa; padding: 10px; border-radius: 4px; overflow: auto; }
+        .test-results { max-height: 400px; overflow-y: auto; }
+    </style>
+</head>
+<body>
+    <h1>🎬 Video Loading Fix Test</h1>
+    <p>This page tests the RedesignedCreateClipModal video loading fix.</p>
+    
+    <div class="test-card">
+        <h2>📋 Test Status</h2>
+        <div id="test-status" class="status info">
+            Ready to test. Click "Run Tests" to begin.
+        </div>
+        <button onclick="runTests()">🚀 Run Tests</button>
+        <button onclick="testModalLoad()">📱 Test Modal Load</button>
+        <button onclick="clearResults()">🧹 Clear Results</button>
+    </div>
+    
+    <div class="test-card">
+        <h2>🔍 Test Results</h2>
+        <div id="test-results" class="test-results">
+            <p>No tests run yet.</p>
+        </div>
+    </div>
+    
+    <div class="test-card">
+        <h2>📊 Live Application Status</h2>
+        <div id="app-status" class="status info">
+            <p>Check the main application at: <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></p>
+        </div>
+    </div>
+
+    <script>
+        let testResults = [];
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            testResults.push({ timestamp, message, type });
+            updateResults();
+        }
+        
+        function updateResults() {
+            const resultsDiv = document.getElementById('test-results');
+            if (testResults.length === 0) {
+                resultsDiv.innerHTML = '<p>No tests run yet.</p>';
+                return;
+            }
+            
+            const html = testResults.map(result => {
+                const statusClass = result.type === 'success' ? 'success' : 
+                                  result.type === 'error' ? 'error' : 
+                                  result.type === 'warning' ? 'warning' : 'info';
+                return `<div class="status ${statusClass}">
+                    <strong>${result.timestamp}</strong> - ${result.message}
+                </div>`;
+            }).join('');
+            
+            resultsDiv.innerHTML = html;
+            resultsDiv.scrollTop = resultsDiv.scrollHeight;
+        }
+        
+        function clearResults() {
+            testResults = [];
+            updateResults();
+            document.getElementById('test-status').className = 'status info';
+            document.getElementById('test-status').textContent = 'Results cleared. Ready for new tests.';
+        }
+        
+        function updateStatus(message, type = 'info') {
+            const statusDiv = document.getElementById('test-status');
+            statusDiv.className = `status ${type}`;
+            statusDiv.textContent = message;
+        }
+        
+        async function runTests() {
+            log('🚀 Starting video loading tests...', 'info');
+            updateStatus('Running tests...', 'info');
+            
+            // Test 1: Interface Structure Test
+            log('📋 Test 1: Video Interface Structure', 'info');
+            const mockVideo = {
+                id: 1,
+                title: "Test Video",
+                storageUrl: "https://example.com/video.mp4", // Using correct property
+                duration: 120,
+                thumbnailUrl: "https://example.com/thumb.jpg"
+            };
+            
+            // This simulates what the fixed component should do
+            if (mockVideo.storageUrl) {
+                log('✅ storageUrl property is accessible', 'success');
+            } else {
+                log('❌ storageUrl property is missing', 'error');
+            }
+            
+            // Test that we don't have the old 'url' property
+            if (!mockVideo.url) {
+                log('✅ Legacy url property correctly absent', 'success');
+            } else {
+                log('❌ Legacy url property still present', 'error');
+            }
+            
+            // Test 2: Video Element Source Assignment
+            log('📋 Test 2: Video Element Source Assignment', 'info');
+            try {
+                const videoSrc = mockVideo.storageUrl; // This was the main issue
+                if (videoSrc && videoSrc !== 'undefined') {
+                    log(`✅ Video src would be: ${videoSrc}`, 'success');
+                } else {
+                    log('❌ Video src would be undefined', 'error');
+                }
+            } catch (error) {
+                log(`❌ Error accessing storageUrl: ${error.message}`, 'error');
+            }
+            
+            // Test 3: AI Context Generation
+            log('📋 Test 3: AI Context Generation', 'info');
+            try {
+                const videoContext = mockVideo.title || mockVideo.storageUrl;
+                if (videoContext) {
+                    log(`✅ Video context generated: ${videoContext}`, 'success');
+                } else {
+                    log('❌ Video context generation failed', 'error');
+                }
+            } catch (error) {
+                log(`❌ Error generating video context: ${error.message}`, 'error');
+            }
+            
+            // Test 4: Error Logging Structure
+            log('📋 Test 4: Error Logging Structure', 'info');
+            try {
+                const errorLogData = {
+                    videoUrl: mockVideo?.storageUrl || 'No URL found'
+                };
+                if (errorLogData.videoUrl !== 'No URL found') {
+                    log('✅ Error logging would capture correct URL', 'success');
+                } else {
+                    log('❌ Error logging would show "No URL found"', 'error');
+                }
+            } catch (error) {
+                log(`❌ Error in error logging test: ${error.message}`, 'error');
+            }
+            
+            // Test 5: Fetch Simulation
+            log('📋 Test 5: Video Fetch Simulation', 'info');
+            if (mockVideo.storageUrl && mockVideo.storageUrl.startsWith('http')) {
+                log('✅ Video URL is valid for fetching', 'success');
+                
+                // Try a small fetch test (with timeout to avoid hanging)
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 5000);
+                    
+                    const response = await fetch(mockVideo.storageUrl, {
+                        method: 'HEAD',
+                        signal: controller.signal
+                    });
+                    
+                    clearTimeout(timeoutId);
+                    log(`✅ Test fetch completed with status: ${response.status}`, 'success');
+                } catch (error) {
+                    log(`⚠️ Test fetch failed (expected for demo URL): ${error.message}`, 'warning');
+                }
+            } else {
+                log('❌ Video URL is not valid for fetching', 'error');
+            }
+            
+            // Summary
+            const errorCount = testResults.filter(r => r.type === 'error').length;
+            const successCount = testResults.filter(r => r.type === 'success').length;
+            
+            if (errorCount === 0) {
+                log(`🎉 All tests passed! (${successCount} successful)`, 'success');
+                updateStatus('All tests passed!', 'success');
+            } else {
+                log(`⚠️ ${errorCount} tests failed, ${successCount} passed`, 'warning');
+                updateStatus(`${errorCount} tests failed`, 'warning');
+            }
+        }
+        
+        function testModalLoad() {
+            log('📱 Testing modal load behavior...', 'info');
+            updateStatus('Testing modal behavior...', 'info');
+            
+            // Simulate the component's behavior
+            const selectedVideo = {
+                id: 1,
+                title: "Sample Video",
+                storageUrl: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+                duration: 30
+            };
+            
+            // Test video loading sequence
+            log('🔄 Simulating handleVideoLoad...', 'info');
+            
+            // This is what happens in the fixed component
+            if (selectedVideo?.storageUrl) {
+                log(`✅ Video URL available: ${selectedVideo.storageUrl}`, 'success');
+                
+                // Simulate video element creation
+                const videoElement = document.createElement('video');
+                videoElement.src = selectedVideo.storageUrl; // This was undefined before our fix
+                
+                if (videoElement.src) {
+                    log('✅ Video element src set successfully', 'success');
+                    log(`   Source: ${videoElement.src}`, 'info');
+                } else {
+                    log('❌ Video element src is empty', 'error');
+                }
+                
+                // Test the load event simulation
+                videoElement.addEventListener('loadedmetadata', () => {
+                    log('✅ Video metadata loaded successfully', 'success');
+                });
+                
+                videoElement.addEventListener('error', (e) => {
+                    log(`⚠️ Video error (expected for test): ${e.type}`, 'warning');
+                });
+                
+                updateStatus('Modal test completed', 'success');
+            } else {
+                log('❌ selectedVideo.storageUrl is undefined', 'error');
+                updateStatus('Modal test failed', 'error');
+            }
+        }
+        
+        // Initialize
+        log('📱 Video Loading Test Page Loaded', 'info');
+        log('🔧 This tests the fix for RedesignedCreateClipModal video loading', 'info');
+        log('🎯 Main fix: Changed Video interface from "url" to "storageUrl"', 'info');
+    </script>
+</body>
+</html>

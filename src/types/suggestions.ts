@@ -1,6 +1,5 @@
-export interface SourceClipAnalysis {
+export interface SourceVideoAnalysis {
   videoId: number;
-  clipId?: number; // If analyzing an existing clip, not just a full video
   duration: number;
   keyMoments: Array<{ startTime: number; endTime: number; description: string; score: number }>;
   // Add other analysis metrics as needed, e.g., speech-to-text, visual elements, audio analysis
@@ -9,7 +8,6 @@ export interface SourceClipAnalysis {
 export interface RepurposingSuggestion {
   id: string;
   sourceVideoId: number;
-  sourceClipId?: number;
   suggestedTitle: string;
   description: string; // Why this suggestion is relevant
   suggestedFormat: string; // e.g., '9:16', '1:1'
@@ -25,7 +23,6 @@ export interface RepurposingSuggestion {
 
 export interface AISuggestionRequest {
   videoId: number;
-  clipId?: number;
   targetPlatforms?: string[];
   desiredFormats?: string[];
   maxSuggestions?: number;
@@ -33,6 +30,6 @@ export interface AISuggestionRequest {
 }
 
 export interface AISuggestionResponse {
-  analysis?: SourceClipAnalysis;
+  analysis?: SourceVideoAnalysis;
   suggestions: RepurposingSuggestion[];
 } 

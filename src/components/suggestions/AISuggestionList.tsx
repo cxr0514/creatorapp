@@ -9,11 +9,10 @@ import { AlertCircle, Wand2, PlusCircle } from 'lucide-react'; // Added Wand2, P
 
 interface AISuggestionListProps {
   videoId: number;
-  clipId?: number;
   onSuggestionSelect?: (suggestion: RepurposingSuggestion) => void; // Callback when a suggestion is chosen to be created
 }
 
-const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, onSuggestionSelect }) => {
+const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, onSuggestionSelect }) => {
   const [suggestions, setSuggestions] = useState<RepurposingSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +22,7 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
       setIsLoading(true);
       setError(null);
       try {
-        const requestBody: AISuggestionRequest = { videoId, clipId, maxSuggestions: 5 };
+        const requestBody: AISuggestionRequest = { videoId, maxSuggestions: 5 };
         const response = await fetch('/api/ai/suggestions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -46,7 +45,7 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
     if (videoId) {
       fetchSuggestions();
     }
-  }, [videoId, clipId]);
+  }, [videoId]);
 
   if (isLoading) {
     return (
@@ -98,7 +97,7 @@ const AISuggestionList: React.FC<AISuggestionListProps> = ({ videoId, clipId, on
                 onClick={() => onSuggestionSelect(suggestion)}
               >
                 <PlusCircle className="w-4 h-4 mr-2" />
-                Create this Clip
+                Create Content
               </Button>
             </CardFooter>
           )}

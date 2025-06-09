@@ -13,12 +13,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Calendar, Clock, Users, Zap, AlertCircle } from 'lucide-react'
 import { format, setHours, setMinutes } from 'date-fns'
 
-interface Clip {
+interface Video {
   id: number
   title: string
-  thumbnailUrl?: string
-  duration: number
-  aspectRatio: string
+  thumbnailUrl?: string | null
+  duration: number | null
+  storageUrl: string
 }
 
 interface Platform {
@@ -33,14 +33,14 @@ interface SchedulingModalProps {
   open: boolean
   onClose: () => void
   selectedDate?: Date
-  selectedClip?: Clip
+  selectedVideo?: Video
   platforms: Platform[]
   onSchedule: (scheduleData: ScheduleData) => void
   loading?: boolean
 }
 
 interface ScheduleData {
-  clipId: number
+  videoId: number
   platforms: string[]
   scheduledTime: Date
   title: string
@@ -53,14 +53,14 @@ export function SchedulingModal({
   open,
   onClose,
   selectedDate,
-  selectedClip,
+  selectedVideo,
   platforms,
   onSchedule,
   loading = false
 }: SchedulingModalProps) {
   const [formData, setFormData] = useState({
-    clipId: selectedClip?.id || 0,
-    title: selectedClip?.title || '',
+    videoId: selectedVideo?.id || 0,
+    title: selectedVideo?.title || '',
     description: '',
     hashtags: '',
     platforms: [] as string[],
@@ -72,14 +72,14 @@ export function SchedulingModal({
   const [optimalTimes, setOptimalTimes] = useState<Record<string, string>>({})
 
   useEffect(() => {
-    if (selectedClip) {
+    if (selectedVideo) {
       setFormData(prev => ({
         ...prev,
-        clipId: selectedClip.id,
-        title: selectedClip.title
+        videoId: selectedVideo.id,
+        title: selectedVideo.title
       }))
     }
-  }, [selectedClip])
+  }, [selectedVideo])
 
   useEffect(() => {
     if (selectedDate) {
@@ -124,7 +124,7 @@ export function SchedulingModal({
         const scheduledTime = setMinutes(setHours(formData.date, hours), minutes)
         
         onSchedule({
-          clipId: formData.clipId,
+          videoId: formData.videoId,
           platforms: [platformId],
           scheduledTime,
           title: formData.title,
@@ -139,7 +139,7 @@ export function SchedulingModal({
       const scheduledTime = setMinutes(setHours(formData.date, hours), minutes)
       
       onSchedule({
-        clipId: formData.clipId,
+        videoId: formData.videoId,
         platforms: formData.platforms,
         scheduledTime,
         title: formData.title,
@@ -164,24 +164,24 @@ export function SchedulingModal({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Clip Selection */}
-          {selectedClip && (
+          {/* Video Selection */}
+          {selectedVideo && (
             <Card>
               <CardContent className="p-4">
                 <div className="flex items-center gap-3">
-                  {selectedClip.thumbnailUrl && (
+                  {selectedVideo.thumbnailUrl && (
                     <Image
-                      src={selectedClip.thumbnailUrl}
-                      alt="Clip thumbnail"
+                      src={selectedVideo.thumbnailUrl}
+                      alt="Video thumbnail"
                       width={64}
                       height={64}
                       className="w-16 h-16 rounded object-cover"
                     />
                   )}
                   <div>
-                    <h4 className="font-medium">{selectedClip.title}</h4>
+                    <h4 className="font-medium">{selectedVideo.title}</h4>
                     <p className="text-sm text-muted-foreground">
-                      {Math.round(selectedClip.duration)}s • {selectedClip.aspectRatio}
+                      {selectedVideo.duration ? `${Math.round(selectedVideo.duration)}s` : 'Duration unknown'}
                     </p>
                   </div>
                 </div>

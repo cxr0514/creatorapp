@@ -1,10 +1,10 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
-import { AISuggestionRequest, AISuggestionResponse, RepurposingSuggestion, SourceClipAnalysis } from '@/types/suggestions';
+import { AISuggestionRequest, AISuggestionResponse, RepurposingSuggestion, SourceVideoAnalysis } from '@/types/suggestions';
 
 // Mock implementation - replace with actual AI suggestion logic
 async function generateMockSuggestions(requestData: AISuggestionRequest): Promise<AISuggestionResponse> {
-  const { videoId, clipId, maxSuggestions = 3 } = requestData;
+  const { videoId, maxSuggestions = 3 } = requestData;
 
   const mockKeyMoments = [
     { startTime: 10, endTime: 25, description: 'Key talking point 1', score: 0.9 },
@@ -12,22 +12,20 @@ async function generateMockSuggestions(requestData: AISuggestionRequest): Promis
     { startTime: 70, endTime: 75, description: 'Strong call to action', score: 0.92 },
   ];
 
-  const analysis: SourceClipAnalysis = {
+  const analysis: SourceVideoAnalysis = {
     videoId: videoId,
-    clipId: clipId,
     duration: 120, // Mock duration
     keyMoments: mockKeyMoments.slice(0, 2)
   };
 
   const suggestions: RepurposingSuggestion[] = [];
-  const baseTitle = clipId ? `Clip ${clipId} - Repurposed` : `Video ${videoId} - Repurposed`;
+  const baseTitle = `Video ${videoId} - Repurposed`;
 
   for (let i = 0; i < maxSuggestions; i++) {
     const moment = mockKeyMoments[i % mockKeyMoments.length];
     suggestions.push({
-      id: `sugg-${videoId}-${clipId || 'full'}-${Date.now()}-${i}`,
+      id: `sugg-${videoId}-${Date.now()}-${i}`,
       sourceVideoId: videoId,
-      sourceClipId: clipId,
       suggestedTitle: `${baseTitle} - Idea ${i + 1} (${moment.description.substring(0,15)}...)`,
       description: `This segment from ${moment.startTime}s to ${moment.endTime}s features a ${moment.description.toLowerCase()} and could be great for a short teaser.`,
       suggestedFormat: i % 2 === 0 ? '9:16' : '1:1',

@@ -10,10 +10,10 @@ async function generatePresignedThumbnailUrl(thumbnailUrl: string | null): Promi
   
   try {
     // Check if this is a B2 URL that needs a presigned URL
-    if (thumbnailUrl.includes('s3.us-east-005.backblazeb2.com') || thumbnailUrl.includes('Clipverse')) {
+    if (thumbnailUrl.includes('s3.us-east-005.backblazeb2.com') || thumbnailUrl.includes('CreatorStorage')) {
       // Extract the storage key from the URL
       const urlParts = thumbnailUrl.split('/');
-      const bucketIndex = urlParts.findIndex(part => part === 'Clipverse');
+      const bucketIndex = urlParts.findIndex(part => part === 'CreatorStorage');
       if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
         const storageKey = urlParts.slice(bucketIndex + 1).join('/');
         console.log('[VIDEO-THUMBNAIL] Generating presigned URL for storage key:', storageKey);
@@ -29,14 +29,78 @@ async function generatePresignedThumbnailUrl(thumbnailUrl: string | null): Promi
   }
 }
 
+// Helper function to generate presigned URLs for video files
+async function generatePresignedVideoUrl(video: { storageUrl: string | null, storageKey: string | null }): Promise<string | null> {
+  if (!video.storageUrl) return null;
+  
+  try {
+    // Check if this is a B2 URL that needs a presigned URL
+    if (video.storageUrl.includes('s3.us-east-005.backblazeb2.com') || video.storageUrl.includes('Clipverse') || video.storageUrl.includes('CreatorStorage')) {
+      // If we have a storage key, use it directly
+      if (video.storageKey) {
+        console.log('[VIDEO-URL] Generating presigned URL for storage key:', video.storageKey);
+        return await getPresignedUrl(video.storageKey, 3600); // 1 hour expiry
+      }
+      
+      // Otherwise, try to extract the storage key from the URL
+      const urlParts = video.storageUrl.split('/');
+      
+      // Look for bucket name in URL and extract path after it
+      let bucketIndex = urlParts.findIndex(part => part === 'Clipverse' || part === 'CreatorStorage');
+      if (bucketIndex === -1) {
+        // For direct B2 URLs like https://s3.us-east-005.backblazeb2.com/Clipverse/...
+        bucketIndex = urlParts.findIndex(part => part === 'Clipverse' || part === 'CreatorStorage');
+      }
+      
+      if (bucketIndex !== -1 && bucketIndex < urlParts.length - 1) {
+        const storageKey = urlParts.slice(bucketIndex + 1).join('/');
+        console.log('[VIDEO-URL] Extracted storage key from URL:', storageKey);
+        return await getPresignedUrl(storageKey, 3600); // 1 hour expiry
+      }
+      
+      console.warn('[VIDEO-URL] Could not extract storage key from B2 URL:', video.storageUrl);
+      return null;
+    }
+    
+    // If it's not a B2 URL, return as-is (might be external CDN)
+    return video.storageUrl;
+  } catch (error) {
+    console.error('[VIDEO-URL] Failed to generate presigned URL:', error);
+    return null; // Return null if we can't generate presigned URL
+  }
+}
+
 export async function GET(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions)
     
     // For development/testing: Allow access even without session
     if (!session?.user?.email) {
-      console.warn('No authenticated session found, returning empty videos list for development')
-      return NextResponse.json([])
+      console.warn('No authenticated session found, returning mock videos for development testing')
+      // Return mock data for testing modal functionality
+      const mockVideos = [
+        {
+          id: 1,
+          title: "Test Video for Modal Testing",
+          url: "https://sample-videos.com/zip/10/mp4/SampleVideo_1280x720_1mb.mp4",
+          duration: 30,
+          createdAt: new Date().toISOString(),
+          thumbnailUrl: null,
+          storageKey: "test/sample-video.mp4",
+          fileSize: 1000000
+        },
+        {
+          id: 2,
+          title: "Another Test Video",
+          url: "https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4",
+          duration: 45,
+          createdAt: new Date().toISOString(),
+          thumbnailUrl: null,
+          storageKey: "test/sample-video-2.mp4",
+          fileSize: 800000
+        }
+      ]
+      return NextResponse.json(mockVideos)
     }
 
     const { searchParams } = new URL(request.url)
@@ -98,32 +162,28 @@ export async function GET(request: NextRequest) {
           email: session.user.email
         }
       },
-      include: {
-        _count: {
-          select: {
-            clips: true
-          }
-        }
-      },
       orderBy: {
         uploadedAt: 'desc'
       }
     })
 
-    // Generate presigned URLs for video thumbnails
+    // Generate presigned URLs for video thumbnails and video files
     const formattedVideos = await Promise.all(videos.map(async video => {
       const presignedThumbnailUrl = await generatePresignedThumbnailUrl(video.thumbnailUrl);
+      const presignedVideoUrl = await generatePresignedVideoUrl({ 
+        storageUrl: video.storageUrl, 
+        storageKey: video.storageKey 
+      });
       
       return {
         id: video.id,
         title: video.title,
         filename: video.title, // Use title as filename since we store title based on filename
-        url: video.storageUrl,
+        url: presignedVideoUrl || video.storageUrl, // Use presigned URL if available, fallback to original
         publicId: video.storageKey,
         thumbnailUrl: presignedThumbnailUrl, // Use presigned URL
         duration: video.duration,
-        createdAt: video.uploadedAt.toISOString(),
-        clipCount: video._count.clips
+        createdAt: video.uploadedAt.toISOString()
       };
     }));
 

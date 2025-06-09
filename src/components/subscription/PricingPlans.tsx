@@ -19,7 +19,6 @@ interface SubscriptionPlan {
   limits: {
     videos: number;
     storage: number;
-    clips: number;
   };
   isPopular: boolean;
   isActive: boolean;
@@ -222,7 +221,6 @@ export default function PricingPlans() {
                 <h4 className="font-semibold text-sm">Limits</h4>
                 <div className="text-sm text-gray-600 space-y-1">
                   <div>Videos: {plan.limits.videos === -1 ? 'Unlimited' : plan.limits.videos}</div>
-                  <div>Clips: {plan.limits.clips === -1 ? 'Unlimited' : plan.limits.clips}</div>
                   <div>Storage: {formatStorage(plan.limits.storage)}</div>
                 </div>
               </div>

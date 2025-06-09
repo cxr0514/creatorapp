@@ -21,7 +21,6 @@ async function main() {
       currency: 'USD',
       maxVideos: 5,
       maxStorage: 100, // 100MB
-      maxClipsPerVideo: 3,
       maxExportsPerMonth: 10,
       hasAiEnhancement: true,
       hasScheduling: false,
@@ -51,7 +50,6 @@ async function main() {
       currency: 'USD',
       maxVideos: 50,
       maxStorage: 5000, // 5GB
-      maxClipsPerVideo: 10,
       maxExportsPerMonth: 100,
       hasAiEnhancement: true,
       hasScheduling: true,
@@ -82,7 +80,6 @@ async function main() {
       currency: 'USD',
       maxVideos: -1, // Unlimited
       maxStorage: -1, // Unlimited
-      maxClipsPerVideo: -1, // Unlimited
       maxExportsPerMonth: -1, // Unlimited
       hasAiEnhancement: true,
       hasScheduling: true,

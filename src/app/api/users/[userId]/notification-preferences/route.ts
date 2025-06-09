@@ -6,8 +6,6 @@ import { UserNotificationPreferences, NotificationPreference, NotificationType, 
 const mockUserPreferences: Record<string, UserNotificationPreferences> = {};
 
 const ALL_NOTIFICATION_TYPES: NotificationType[] = [
-  'clip_generation_success',
-  'clip_generation_failure',
   'batch_export_success',
   'batch_export_failure',
   'new_ai_suggestion',

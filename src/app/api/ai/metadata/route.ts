@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/app/api/auth/[...nextauth]/route'
-import { generateVideoMetadata, generateClipMetadata, improveMetadata } from '@/lib/ai'
+import { generateVideoMetadata, improveMetadata } from '@/lib/ai'
 import { AIMetadataService, type AIMetadataOptions } from '@/lib/ai/metadata-service'
 import { isAIAvailable } from '@/lib/ai/openai-client'
 
@@ -119,9 +119,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Handle legacy AI metadata generation types
-    if (!type || !['video', 'clip', 'improve'].includes(type)) {
+    if (!type || !['video', 'improve'].includes(type)) {
       return NextResponse.json({ 
-        error: 'Invalid type. Must be: title, description, hashtags, categories, complete, video, clip, or improve' 
+        error: 'Invalid type. Must be: title, description, hashtags, categories, complete, video, or improve' 
       }, { status: 400 })
     }
 
@@ -130,9 +130,6 @@ export async function POST(request: NextRequest) {
     switch (type) {
       case 'video':
         result = await generateVideoMetadata(legacyParams)
-        break
-      case 'clip':
-        result = await generateClipMetadata(legacyParams)
         break
       case 'improve':
         result = await improveMetadata(legacyParams.currentMetadata, legacyParams.context)

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Loading Test</title>
+    <link href="https://vjs.zencdn.net/8.12.0/video-js.css" rel="stylesheet">
+    <script src="https://vjs.zencdn.net/8.12.0/video.min.js"></script>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        .video-container {
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #0056b3; }
+        #videoUrl { 
+            width: 100%; 
+            padding: 8px; 
+            margin: 10px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🎥 Video Loading Test - CreateClipModal Integration</h1>
+        
+        <div id="status" class="status info">
+            Ready to test video loading...
+        </div>
+
+        <div>
+            <button onclick="fetchVideoFromAPI()">🔄 Fetch Video from API</button>
+            <button onclick="testVideoPlayback()">▶️ Test Video Playback</button>
+            <button onclick="clearTest()">🗑️ Clear Test</button>
+        </div>
+
+        <div>
+            <label for="videoUrl">Video URL:</label>
+            <input type="text" id="videoUrl" placeholder="Video URL will appear here...">
+        </div>
+
+        <div class="video-container">
+            <video
+                id="test-video"
+                class="video-js vjs-default-skin"
+                controls
+                preload="auto"
+                width="640"
+                height="360"
+                data-setup="{}"
+            >
+                <p class="vjs-no-js">
+                    To view this video please enable JavaScript, and consider upgrading to a web browser that
+                    <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+                </p>
+            </video>
+        </div>
+
+        <div id="logs" style="background: #f8f9fa; padding: 15px; margin: 20px 0; border-radius: 4px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto;"></div>
+    </div>
+
+    <script>
+        let player = null;
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logElement = document.getElementById('logs');
+            logElement.textContent += `[${timestamp}] ${message}\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+            
+            // Update status
+            const statusElement = document.getElementById('status');
+            statusElement.textContent = message;
+            statusElement.className = `status ${type}`;
+        }
+
+        function initializeVideoJS() {
+            if (player) {
+                player.dispose();
+            }
+            
+            player = videojs('test-video', {
+                fluid: true,
+                responsive: true,
+                playbackRates: [0.5, 1, 1.25, 1.5, 2],
+                controls: true
+            });
+
+            // VideoJS error handling
+            player.on('error', function() {
+                const error = player.error();
+                log(`❌ VideoJS Error: ${error.message} (Code: ${error.code})`, 'error');
+                
+                if (error.code === 4) {
+                    log('❌ MEDIA_ERR_SRC_NOT_SUPPORTED - This is the error we\'re trying to fix!', 'error');
+                }
+            });
+
+            player.on('loadstart', function() {
+                log('🔄 Video loading started...', 'info');
+            });
+
+            player.on('canplay', function() {
+                log('✅ Video can start playing (canplay event)', 'success');
+            });
+
+            player.on('canplaythrough', function() {
+                log('✅ Video loaded completely (canplaythrough event)', 'success');
+            });
+
+            player.on('loadeddata', function() {
+                log('✅ Video metadata loaded', 'success');
+            });
+
+            player.on('play', function() {
+                log('▶️ Video playback started', 'success');
+            });
+
+            return player;
+        }
+
+        async function fetchVideoFromAPI() {
+            log('🔄 Fetching video from API...', 'info');
+            
+            try {
+                const response = await fetch('/api/videos/6');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const videoData = await response.json();
+                log(`✅ API Response received: ${JSON.stringify(videoData, null, 2)}`, 'success');
+                
+                if (videoData.url) {
+                    document.getElementById('videoUrl').value = videoData.url;
+                    
+                    // Check if it's a presigned URL
+                    if (videoData.url.includes('X-Amz-Signature')) {
+                        log('✅ Presigned URL detected! This should solve the authentication issue.', 'success');
+                    } else {
+                        log('⚠️ No presigned URL detected - this might cause authentication issues', 'error');
+                    }
+                    
+                    return videoData.url;
+                } else {
+                    throw new Error('No video URL in API response');
+                }
+                
+            } catch (error) {
+                log(`❌ API fetch failed: ${error.message}`, 'error');
+                throw error;
+            }
+        }
+
+        async function testVideoPlayback() {
+            try {
+                log('🎬 Initializing VideoJS player...', 'info');
+                const videoPlayer = initializeVideoJS();
+                
+                // Fetch video URL from API
+                const videoUrl = await fetchVideoFromAPI();
+                
+                log(`🔗 Setting video source: ${videoUrl}`, 'info');
+                
+                // Set the video source
+                videoPlayer.src({
+                    type: 'video/mp4',
+                    src: videoUrl
+                });
+                
+                // Try to load the video
+                videoPlayer.load();
+                
+                log('✅ Video source set successfully! Check player above for loading status.', 'success');
+                
+            } catch (error) {
+                log(`❌ Test failed: ${error.message}`, 'error');
+            }
+        }
+
+        function clearTest() {
+            if (player) {
+                player.dispose();
+                player = null;
+            }
+            document.getElementById('videoUrl').value = '';
+            document.getElementById('logs').textContent = '';
+            log('🗑️ Test cleared', 'info');
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Video loading test initialized', 'success');
+            log('This test simulates the CreateClipModal video loading workflow', 'info');
+        });
+    </script>
+</body>
+</html>

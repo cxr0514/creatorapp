@@ -4,14 +4,12 @@ import { useState } from 'react'
 import { useSession, signOut } from 'next-auth/react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import { VideoUpload } from './video-upload'
+import { VideoUpload } from './video-upload-enhanced'
 import { VideoList } from './video-list'
-import { ClipList } from './clip-list'
-import { CreateClipModal } from './create-clip-modal'
+
 import {
   HomeIcon,
   VideoCameraIcon,
-  ScissorsIcon,
   CalendarIcon,
   ChartBarIcon,
   Cog6ToothIcon,
@@ -27,33 +25,18 @@ import {
 
 export function Dashboard() {
   const { data: session } = useSession()
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'uploads' | 'clips' | 'calendar' | 'analytics' | 'workflows' | 'profile' | 'pricing'>('uploads')
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'uploads' | 'calendar' | 'analytics' | 'workflows' | 'profile' | 'pricing'>('uploads')
   const [showVideoUpload, setShowVideoUpload] = useState(false)
-  const [showCreateClipModal, setShowCreateClipModal] = useState(false)
-  const [selectedVideoId, setSelectedVideoId] = useState<number>()
   const [refreshKey, setRefreshKey] = useState(0)
-  const [clipRefreshKey, setClipRefreshKey] = useState(0)
 
   const handleUploadComplete = () => {
     setShowVideoUpload(false)
     setRefreshKey((prev) => prev + 1)
   }
 
-  const handleCreateClip = (video?: { id: number }) => {
-    setSelectedVideoId(video?.id)
-    setShowCreateClipModal(true)
-  }
-
-  const handleClipCreated = () => {
-    setShowCreateClipModal(false)
-    setActiveTab('clips')
-    setClipRefreshKey((prev) => prev + 1)
-  }
-
   const sidebarNavigation = [
     { name: 'Dashboard', href: 'dashboard', icon: HomeIcon },
     { name: 'Videos', href: 'uploads', icon: VideoCameraIcon },
-    { name: 'Clips', href: 'clips', icon: ScissorsIcon },
     { name: 'Calendar', href: 'calendar', icon: CalendarIcon },
     { name: 'Analytics', href: 'analytics', icon: ChartBarIcon },
     { name: 'Workflows', href: 'workflows', icon: Cog6ToothIcon },
@@ -65,7 +48,7 @@ export function Dashboard() {
   ] as const
 
   const stats = [
-    { name: 'Generated', value: '247', change: '+12%', icon: ScissorsIcon, color: 'text-purple-600' },
+    { name: 'Videos', value: '247', change: '+12%', icon: VideoCameraIcon, color: 'text-purple-600' },
     { name: 'Published', value: '189', change: '+8%', icon: PlayIcon, color: 'text-green-600' },
     { name: 'Scheduled', value: '23', change: '+15%', icon: ClockIcon, color: 'text-blue-600' },
     { name: 'Storage', value: '4.2GB', change: '+2%', icon: CircleStackIcon, color: 'text-orange-600' },
@@ -156,7 +139,7 @@ export function Dashboard() {
                   <input
                     id="search-field"
                     className="block w-full h-full pl-8 pr-3 py-2 border-transparent text-gray-900 placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-0 focus:border-transparent sm:text-sm"
-                    placeholder="Search videos, clips, or workflows..."
+                    placeholder="Search videos or workflows..."
                     type="search"
                   />
                 </div>
@@ -254,7 +237,7 @@ export function Dashboard() {
               <div className="container mx-auto px-4 py-8">
                 <div className="mb-8">
                   <h2 className="text-xl font-semibold text-gray-900 mb-2">Dashboard</h2>
-                  <p className="text-gray-600">Transform your videos into engaging clips</p>
+                  <p className="text-gray-600">Transform your videos into engaging content</p>
                 </div>
 
                 <div className="bg-white rounded-lg shadow-sm border">
@@ -269,16 +252,6 @@ export function Dashboard() {
                         }`}
                       >
                         Uploads
-                      </button>
-                      <button
-                        onClick={() => setActiveTab('clips')}
-                        className={`py-4 px-1 border-b-2 font-medium text-sm whitespace-nowrap ${
-                          activeTab === 'clips'
-                            ? 'border-blue-500 text-blue-600'
-                            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                        }`}
-                      >
-                        Clips
                       </button>
                       <button
                         onClick={() => setActiveTab('calendar')}
@@ -346,21 +319,8 @@ export function Dashboard() {
                         {showVideoUpload ? (
                           <VideoUpload onUploadComplete={handleUploadComplete} />
                         ) : (
-                          <VideoList key={refreshKey} onCreateClip={handleCreateClip} />
+                          <VideoList key={refreshKey} />
                         )}
-                      </div>
-                    )}
-
-                    {activeTab === 'clips' && (
-                      <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                          <h3 className="text-lg font-medium text-gray-900">Created Clips</h3>
-                          <Button onClick={() => handleCreateClip()}>
-                            Create New Clip
-                          </Button>
-                        </div>
-                        
-                        <ClipList key={clipRefreshKey} />
                       </div>
                     )}
 
@@ -497,7 +457,7 @@ export function Dashboard() {
                               <div className="text-3xl font-bold text-gray-900 mb-4">$0<span className="text-sm text-gray-500 font-normal">/month</span></div>
                               <ul className="text-sm text-gray-600 space-y-2 mb-6">
                                 <li>• Up to 5 videos</li>
-                                <li>• Basic clip creation</li>
+                                <li>• Basic video features</li>
                                 <li>• Standard quality</li>
                               </ul>
                               <Button variant="outline" disabled className="w-full">
@@ -547,13 +507,6 @@ export function Dashboard() {
           </div>
         </main>
       </div>
-
-      <CreateClipModal
-        isOpen={showCreateClipModal}
-        onClose={() => setShowCreateClipModal(false)}
-        videoId={selectedVideoId}
-        onClipCreated={handleClipCreated}
-      />
     </div>
   )
 }

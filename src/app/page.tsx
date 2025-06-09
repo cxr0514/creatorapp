@@ -1,7 +1,7 @@
 'use client'
 
 import { useSession } from 'next-auth/react'
-import { ModernDashboard } from '@/components/dashboard/modern-dashboard'
+import ModernDashboard from '@/components/dashboard/modern-dashboard'
 import { LandingPage } from '@/components/landing/enhanced-landing-page'
 
 export default function HomePage() {

@@ -110,7 +110,6 @@ export async function POST(request: NextRequest) {
         limits: planData.limits || {},
         maxVideos: planData.maxVideos || -1,
         maxStorage: planData.maxStorage || -1,
-        maxClipsPerVideo: planData.maxClipsPerVideo || -1,
         maxExportsPerMonth: planData.maxExportsPerMonth || -1,
         hasAiEnhancement: planData.hasAiEnhancement ?? true,
         hasScheduling: planData.hasScheduling ?? true,

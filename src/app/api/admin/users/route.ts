@@ -47,8 +47,7 @@ export async function GET() {
         },
         _count: {
           select: {
-            videos: true,
-            clips: true
+            videos: true
           }
         }
       },

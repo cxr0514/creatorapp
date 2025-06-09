@@ -19,14 +19,14 @@ export async function GET(request: NextRequest) {
     const mockPosts = [
       {
         id: '1',
-        clipId: 1,
+        videoId: 1,
         userId: session.user.id,
         platform: 'youtube',
         accountId: 'UC1234567890',
         scheduledTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
         status: 'pending',
         title: 'Amazing content coming soon!',
-        description: 'Check out this awesome clip from our latest video',
+        description: 'Check out this awesome video from our latest content',
         hashtags: ['content', 'video', 'amazing'],
         thumbnailUrl: 'https://example.com/thumbnail.jpg',
         videoUrl: 'https://example.com/video.mp4',
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
       },
       {
         id: '2',
-        clipId: 2,
+        videoId: 2,
         userId: session.user.id,
         platform: 'tiktok',
         accountId: '@your_tiktok',
@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
     }
 
     const {
-      clipId,
+      videoId,
       platform,
       accountId,
       scheduledTime,
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
     } = await request.json()
 
     // Validate required fields
-    if (!clipId || !platform || !accountId || !scheduledTime || !title || !videoUrl) {
+    if (!videoId || !platform || !accountId || !scheduledTime || !title || !videoUrl) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -113,7 +113,7 @@ export async function POST(request: NextRequest) {
     // For now, create a mock scheduled post
     const mockPost = {
       id: Math.random().toString(36).substr(2, 9),
-      clipId,
+      videoId,
       userId: session.user.id,
       platform,
       accountId,

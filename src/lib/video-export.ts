@@ -29,7 +29,7 @@ export interface CroppingStrategyInfo {
 }
 
 export interface BatchExportRequest {
-  clipIds: number[];
+  videoIds: number[];
   formats: ExportFormat[];
   platforms: string[];
   croppingStrategy?: string;
@@ -40,7 +40,7 @@ export interface BatchExportRequest {
 
 export interface ExportQueueItem {
   id: string;
-  clipId: number;
+  videoId: number;
   format: string;
   platform: string;
   status: 'pending' | 'processing' | 'completed' | 'failed';
@@ -350,13 +350,13 @@ export function generateBatchExportQueue(request: BatchExportRequest): ExportQue
   const queue: ExportQueueItem[] = [];
   const timestamp = Date.now();
 
-  request.clipIds.forEach((clipId, index) => {
+  request.videoIds.forEach((videoId, index) => {
     request.formats.forEach(format => {
       request.platforms.forEach(platform => {
-        const estimatedTime = estimateProcessingTime(30, format); // Assuming 30s clips by default
+        const estimatedTime = estimateProcessingTime(30, format); // Assuming 30s videos by default
         queue.push({
-          id: `${clipId}-${format.format}-${platform}-${timestamp}-${index}`,
-          clipId,
+          id: `${videoId}-${format.format}-${platform}-${timestamp}-${index}`,
+          videoId,
           format: format.format,
           platform,
           status: 'pending',

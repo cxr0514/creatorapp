@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/session-provider";
+import { TRPCReactProvider } from "@/trpc/react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "AI Content Wizard",
-  description: "Transform your long videos into engaging, shareable clips with AI",
+  description: "Transform your long videos into engaging, shareable content with AI",
 };
 
 export default function RootLayout({
@@ -28,9 +29,11 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
-        <SessionProvider>
-          {children}
-        </SessionProvider>
+        <TRPCReactProvider>
+          <SessionProvider>
+            {children}
+          </SessionProvider>
+        </TRPCReactProvider>
       </body>
     </html>
   );

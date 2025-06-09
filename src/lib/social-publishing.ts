@@ -26,7 +26,7 @@ export interface SocialAccount {
 
 export interface ScheduledPost {
   id: string;
-  clipId: number;
+  videoId: number;
   userId: string;
   platform: string;
   accountId: string;

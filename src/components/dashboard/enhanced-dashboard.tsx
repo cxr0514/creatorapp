@@ -344,7 +344,7 @@ export function EnhancedDashboard({ stats, recentMetrics, quickActions, userName
           </h3>
           <div className="space-y-4">
             {[
-              { action: 'Created new clip', target: '"Best Moments"', time: '2h ago', icon: ScissorsIcon },
+              { action: 'Created new content', target: '"Best Moments"', time: '2h ago', icon: ScissorsIcon },
               { action: 'Video uploaded', target: '"Tutorial Series #3"', time: '4h ago', icon: CloudArrowUpIcon },
               { action: 'Post scheduled', target: 'Instagram', time: '6h ago', icon: CalendarIcon },
             ].map((activity, index) => (

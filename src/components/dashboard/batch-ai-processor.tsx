@@ -1,4 +1,4 @@
-// Batch AI processing component for multiple videos/clips
+// Batch AI processing component for multiple videos
 'use client'
 
 import React, { useState, useCallback } from 'react'
@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast'
 
 interface BatchItem {
   id: string
-  type: 'video' | 'clip'
+  type: 'video'
   title: string
   description?: string
   status: 'pending' | 'processing' | 'completed' | 'error'
@@ -32,7 +32,7 @@ interface BatchItem {
 interface BatchAIProcessorProps {
   items: {
     id: string
-    type: 'video' | 'clip'
+    type: 'video'
     title: string
     description?: string
   }[]
@@ -371,7 +371,7 @@ export function BatchAIProcessor({
           Batch AI Processing
         </CardTitle>
         <CardDescription>
-          Generate AI metadata for multiple videos and clips at once.
+          Generate AI metadata for multiple videos at once.
         </CardDescription>
       </CardHeader>
       

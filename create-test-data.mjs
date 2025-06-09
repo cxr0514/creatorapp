@@ -61,27 +61,7 @@ async function createTestData() {
       console.log(`  File Size: ${video.fileSize} bytes`)
     })
     
-    // Check clips
-    const clips = await prisma.clip.findMany({
-      where: { userId: user.id },
-      include: {
-        video: {
-          select: { title: true }
-        }
-      }
-    })
-    
-    console.log('\n=== Current Clips ===')
-    if (clips.length === 0) {
-      console.log('No clips found')
-    } else {
-      clips.forEach(clip => {
-        console.log(`ID: ${clip.id}, Title: ${clip.title}`)
-        console.log(`  Video: ${clip.video.title}`)
-        console.log(`  Status: ${clip.status}`)
-        console.log(`  Storage Key: ${clip.storageKey}`)
-      })
-    }
+
     
     console.log('\nTest data creation complete!')
     

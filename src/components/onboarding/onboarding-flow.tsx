@@ -113,7 +113,7 @@ export function OnboardingFlow({ onComplete, onSkip }: OnboardingFlowProps) {
     { id: 'scheduling', label: 'Content Scheduling', description: 'Auto-post to platforms' },
     { id: 'analytics', label: 'Performance Analytics', description: 'Track content performance' },
     { id: 'templates', label: 'Style Templates', description: 'Consistent branding' },
-    { id: 'batch_processing', label: 'Batch Processing', description: 'Process multiple clips at once' },
+    { id: 'batch_processing', label: 'Batch Processing', description: 'Process multiple videos at once' },
     { id: 'cross_posting', label: 'Cross-Platform Posting', description: 'Post to multiple platforms' }
   ]
 

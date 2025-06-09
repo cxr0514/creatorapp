@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
           await prisma.scheduledPost.create({
             data: {
               userId: session.user.id,
-              clipId,
+              videoId,
               platform,
               title,
               description,

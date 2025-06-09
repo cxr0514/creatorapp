@@ -36,7 +36,7 @@ export function LandingPage() {
           
           <p className="text-xl md:text-2xl text-text-secondary mb-12 max-w-3xl mx-auto leading-relaxed">
             Harness the power of AI to optimize every facet of your content creation.
-            Transform your long videos into engaging, shareable clips with unprecedented precision.
+            Transform your long videos into engaging, shareable content with unprecedented precision.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-16">
@@ -90,7 +90,7 @@ export function LandingPage() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-text-primary mb-1">1M+</div>
-              <div className="text-sm text-text-muted">Clips created</div>
+              <div className="text-sm text-text-muted">Videos created</div>
             </div>
           </div>
 
@@ -103,7 +103,7 @@ export function LandingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-text-primary mb-3">Smart Upload</h3>
-              <p className="text-text-muted leading-relaxed">Easily upload your long-form videos and let our AI automatically detect the best moments for clipping.</p>
+              <p className="text-text-muted leading-relaxed">Easily upload your long-form videos and let our AI automatically detect the best moments for content creation.</p>
             </div>
 
             <div className="group p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-border hover:border-primary/50 transition-all duration-300 hover:transform hover:scale-105">
@@ -113,7 +113,7 @@ export function LandingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-text-primary mb-3">AI Processing</h3>
-              <p className="text-text-muted leading-relaxed">Our advanced AI analyzes your content to identify engaging moments, trending topics, and optimal clip timing.</p>
+              <p className="text-text-muted leading-relaxed">Our advanced AI analyzes your content to identify engaging moments, trending topics, and optimal timing for your videos.</p>
             </div>
 
             <div className="group p-8 rounded-2xl bg-surface/50 backdrop-blur-sm border border-border hover:border-primary/50 transition-all duration-300 hover:transform hover:scale-105">
@@ -123,7 +123,7 @@ export function LandingPage() {
                 </svg>
               </div>
               <h3 className="text-xl font-semibold text-text-primary mb-3">Instant Sharing</h3>
-              <p className="text-text-muted leading-relaxed">Download your perfectly crafted clips and share them instantly across all your social media platforms.</p>
+              <p className="text-text-muted leading-relaxed">Download your perfectly crafted content and share them instantly across all your social media platforms.</p>
             </div>
           </div>
         </div>

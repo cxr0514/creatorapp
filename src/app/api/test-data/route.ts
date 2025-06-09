@@ -36,7 +36,7 @@ export async function POST() {
       console.log('Creating test video...')
       testVideo = await prisma.video.create({
         data: {
-          title: 'Test Video for Clip Creation',
+          title: 'Test Video for Content Creation',
           storageUrl: 'https://f005.backblazeb2.com/file/test-bucket/videos/test/sample-video.mp4',
           storageKey: 'videos/' + user.id + '/sample-video.mp4',
           fileSize: 50000000,
@@ -55,16 +55,11 @@ export async function POST() {
     const allVideos = await prisma.video.findMany({
       where: { userId: user.id }
     })
-    
-    const clips = await prisma.clip.findMany({
-      where: { userId: user.id }
-    })
-    
+
     return NextResponse.json({
       success: true,
       user: { id: user.id, email: user.email },
       videos: allVideos,
-      clips: clips,
       message: 'Test data created successfully'
     })
     

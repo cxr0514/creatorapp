@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 
 interface ScheduledPost {
   id: string
-  clipId: number
+  videoId: number
   userId: string
   platform: string
   accountId: string

@@ -1,6 +1,4 @@
 export type NotificationType = 
-  | 'clip_generation_success'
-  | 'clip_generation_failure'
   | 'batch_export_success'
   | 'batch_export_failure'
   | 'new_ai_suggestion'
@@ -39,7 +37,7 @@ export interface NotificationPayload {
   message: string;
   timestamp: Date;
   read: boolean;
-  link?: string; // Optional link to relevant content (e.g., the generated clip)
+  link?: string; // Optional link to relevant content (e.g., the generated video)
   metadata?: Record<string, unknown>; // For extra data specific to the notification type
   priority?: 'low' | 'normal' | 'high' | 'urgent';
   category?: string;

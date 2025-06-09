@@ -168,7 +168,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { action, workflowId, clipId, ...workflowData } = body
+    const { action, workflowId, ...workflowData } = body
 
     // If no action is provided, treat as workflow creation
     if (!action) {
@@ -198,45 +198,6 @@ export async function POST(request: NextRequest) {
     }
 
     switch (action) {
-      case 'apply':
-        // Apply workflow to a clip
-        if (!workflowId || !clipId) {
-          return NextResponse.json({ error: 'Missing workflowId or clipId' }, { status: 400 })
-        }
-
-        const workflow = MOCK_WORKFLOWS.find(w => w.id === workflowId)
-        if (!workflow) {
-          return NextResponse.json({ error: 'Workflow not found' }, { status: 404 })
-        }
-
-        if (!workflow.isActive) {
-          return NextResponse.json({ error: 'Workflow is not active' }, { status: 400 })
-        }
-
-        // Simulate applying workflow
-        console.log(`Applying workflow "${workflow.name}" to clip ${clipId}`)
-
-        // Update workflow stats
-        const workflowIndex = MOCK_WORKFLOWS.findIndex(w => w.id === workflowId)
-        if (workflowIndex !== -1) {
-          MOCK_WORKFLOWS[workflowIndex].lastRun = new Date()
-          MOCK_WORKFLOWS[workflowIndex].totalRuns += 1
-          MOCK_WORKFLOWS[workflowIndex].updatedAt = new Date()
-        }
-
-        // In a real app, this would:
-        // 1. Create workflow execution record
-        // 2. Queue background jobs for each action
-        // 3. Send notifications
-        // 4. Update clip status
-
-        return NextResponse.json({
-          success: true,
-          message: `Workflow "${workflow.name}" applied to clip ${clipId}`,
-          executionId: `exec_${Date.now()}`,
-          estimatedCompletion: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
-        })
-
       case 'create':
         // Create new workflow (legacy support)
         const newWorkflow: Workflow = {

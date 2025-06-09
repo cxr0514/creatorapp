@@ -10,7 +10,7 @@ import { errorMonitor, ErrorMetrics } from './error-monitoring'
 export interface ScheduledPostJob {
   id: string
   userId: string
-  clipId?: number
+  videoId?: number
   platform: string
   title: string
   description?: string
@@ -93,7 +93,7 @@ export class EnhancedScheduledPostProcessor {
         },
         include: {
           user: true,
-          clip: true
+          video: true
         }
       })
       */
@@ -307,7 +307,7 @@ export class EnhancedScheduledPostProcessor {
       /*
       const post = await prisma.scheduledPost.findUnique({
         where: { id: postId },
-        include: { user: true, clip: true }
+        include: { user: true, video: true }
       })
 
       if (!post) {
@@ -321,14 +321,14 @@ export class EnhancedScheduledPostProcessor {
       const job: ScheduledPostJob = {
         id: post.id,
         userId: post.userId,
-        clipId: post.clipId,
+        videoId: post.videoId,
         platform: post.platform,
         title: post.title,
         description: post.description,
         hashtags: post.hashtags,
-        videoUrl: post.clip?.cloudinaryUrl || '',
-        thumbnailUrl: post.clip?.thumbnailUrl,
-        aspectRatio: post.clip?.aspectRatio || '16:9',
+        videoUrl: post.video?.storageUrl || '',
+        thumbnailUrl: post.video?.thumbnailUrl,
+        aspectRatio: post.video?.aspectRatio || '16:9',
         scheduledFor: new Date(),
         platformSettings: post.platformSettings as Record<string, unknown>,
         retryCount: 0, // Reset retry count for manual retry

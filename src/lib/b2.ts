@@ -5,7 +5,7 @@ import * as https from 'https';
 
 // B2 Configuration - read environment variables at runtime
 export function getB2Config() {
-  const BUCKET_NAME = process.env.B2_BUCKET_NAME || process.env.B2_BUCKET || 'Clipverse';
+  const BUCKET_NAME = process.env.B2_BUCKET_NAME || process.env.B2_BUCKET || 'CreatorStorage';
   const B2_ENDPOINT = process.env.B2_ENDPOINT || 'https://s3.us-east-005.backblazeb2.com';
   const B2_KEY_ID = process.env.B2_KEY_ID || process.env.B2_ACCESS_KEY_ID || '';
   const B2_APP_KEY = process.env.B2_APP_KEY || process.env.B2_SECRET_ACCESS_KEY || '';

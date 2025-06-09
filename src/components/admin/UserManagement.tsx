@@ -52,7 +52,6 @@ interface User {
   };
   _count: {
     videos: number;
-    clips: number;
   };
 }
 
@@ -260,7 +259,6 @@ export default function AdminUserManagement() {
                   <TableCell>
                     <div className="text-sm">
                       <div>{user._count.videos} videos</div>
-                      <div>{user._count.clips} clips</div>
                     </div>
                   </TableCell>
                   <TableCell>{formatStorage(user.totalStorage)}</TableCell>

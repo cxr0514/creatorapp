@@ -54,9 +54,9 @@ export function CreateWorkflow() {
       icon: <RectangleStackIcon className="h-6 w-6" />
     },
     {
-      id: 'create-clips',
-      title: 'Create clips from long-form content',
-      description: 'Automatically generate short clips from longer videos',
+      id: 'create-content',
+      title: 'Create content from long-form videos',
+      description: 'Automatically generate short content from longer videos',
       icon: <ScissorsIcon className="h-6 w-6" />
     },
     {

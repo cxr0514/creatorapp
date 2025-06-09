@@ -6,7 +6,7 @@ import { PlatformIcon } from '@/lib/platform-icons'
 import { Calendar, Clock, AlertTriangle, CheckCircle } from 'lucide-react'
 import Image from 'next/image'
 
-interface Clip {
+interface MediaContent {
   id: number
   title: string
   description?: string
@@ -18,7 +18,7 @@ interface Clip {
 }
 
 interface PublishingModalEnhancedProps {
-  clip: Clip
+  video: MediaContent
   isOpen: boolean
   onClose: () => void
   onPublishComplete: (results: Record<string, unknown>) => void
@@ -81,13 +81,13 @@ const PLATFORM_CONFIGS = [
   }
 ]
 
-export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComplete }: PublishingModalEnhancedProps) {
+export function PublishingModalEnhanced({ video, isOpen, onClose, onPublishComplete }: PublishingModalEnhancedProps) {
   const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set())
   const [platformStatuses, setPlatformStatuses] = useState<PlatformStatus[]>([])
   const [postContent, setPostContent] = useState<PostContent>({
-    title: clip.title,
-    description: clip.description || '',
-    hashtags: clip.hashtags || []
+    title: video.title,
+    description: video.description || '',
+    hashtags: video.hashtags || []
   })
   const [publishing, setPublishing] = useState(false)
   const [publishingProgress, setPublishingProgress] = useState<Record<string, string>>({})
@@ -205,12 +205,12 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
       const publishData = {
         platforms: Array.from(selectedPlatforms),
         post: {
-          id: `clip_${clip.id}`,
+          id: `video_${video.id}`,
           platform: '', // Will be set for each platform
           title: postContent.title,
           description: postContent.description,
-          videoUrl: clip.videoUrl,
-          thumbnailUrl: clip.thumbnailUrl,
+          videoUrl: video.videoUrl,
+          thumbnailUrl: video.thumbnailUrl,
           tags: postContent.hashtags,
           scheduledFor: isScheduled && scheduledDate && scheduledTime 
             ? new Date(`${scheduledDate}T${scheduledTime}`)
@@ -294,7 +294,7 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
           <div className="flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Publish Content</h2>
-              <p className="text-gray-600 mt-1">Share &quot;{clip.title}&quot; across your connected platforms</p>
+              <p className="text-gray-600 mt-1">Share &quot;{video.title}&quot; across your connected platforms</p>
             </div>
             <Button variant="ghost" onClick={onClose} disabled={publishing}>
               ×
@@ -307,21 +307,21 @@ export function PublishingModalEnhanced({ clip, isOpen, onClose, onPublishComple
           <div className="bg-gray-50 rounded-lg p-4">
             <h3 className="font-semibold text-gray-900 mb-3">Content Preview</h3>
             <div className="flex gap-4">
-              {clip.thumbnailUrl && (
+              {video.thumbnailUrl && (
                 <Image 
-                  src={clip.thumbnailUrl} 
-                  alt={clip.title}
+                  src={video.thumbnailUrl} 
+                  alt={video.title}
                   width={128}
                   height={80}
                   className="w-32 h-20 object-cover rounded-lg"
                 />
               )}
               <div className="flex-1">
-                <h4 className="font-medium text-gray-900">{clip.title}</h4>
-                <p className="text-sm text-gray-600 mt-1">{clip.description}</p>
-                {clip.duration && (
+                <h4 className="font-medium text-gray-900">{video.title}</h4>
+                <p className="text-sm text-gray-600 mt-1">{video.description}</p>
+                {video.duration && (
                   <p className="text-xs text-gray-500 mt-1">
-                    Duration: {Math.floor(clip.duration / 60)}:{(clip.duration % 60).toString().padStart(2, '0')}
+                    Duration: {Math.floor(video.duration / 60)}:{(video.duration % 60).toString().padStart(2, '0')}
                   </p>
                 )}
               </div>

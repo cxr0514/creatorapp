@@ -9,7 +9,7 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay, isSameM
 
 interface ScheduledPost {
   id: string
-  clipId: number
+  videoId: number
   platform: string
   scheduledTime: Date
   status: 'pending' | 'published' | 'failed'
