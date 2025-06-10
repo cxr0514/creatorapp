@@ -16,7 +16,7 @@ import { useEffect, useState, useRef } from "react";
 import VideoJSPlayer from "./video-js-player"; 
 import "video.js/dist/video-js.css";
 import { Slider } from "@/components/ui/slider";
-import { Loader2, Sparkles, Play, Pause, RotateCcw, AlertTriangle, GripVertical, Grid3X3, Calendar } from "lucide-react";
+import { Loader2, Sparkles, RotateCcw, Grid3X3, Calendar } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -29,6 +29,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
+import { ClipRow } from "./clip-row";
 
 interface ClipSegment {
   id: string;
@@ -199,20 +200,6 @@ export function CreateClipModal({
     if (value.length === 2) {
       setStartTime(value[0]);
       setEndTime(value[1]);
-    }
-  };
-
-  const handleAdvancedSliderChange = (clipId: string, values: number[]) => {
-    if (values.length === 2) {
-      const [start, end] = values;
-      updateClip(clipId, { startTime: start, endTime: end });
-    }
-  };
-
-  const handleTimeInputChange = (clipId: string, field: 'startTime' | 'endTime', value: string) => {
-    const numValue = parseFloat(value);
-    if (!isNaN(numValue) && numValue >= 0 && numValue <= videoDuration) {
-      updateClip(clipId, { [field]: numValue });
     }
   };
 
@@ -703,126 +690,25 @@ export function CreateClipModal({
               {/* Individual Clip Timelines */}
               <div className="lg:col-span-2 space-y-4">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-medium">Individual Clip Timelines</h3>
+                  <h3 className="text-lg font-medium">Individual Clip Previews</h3>
                   <Badge variant="secondary">
                     {clips.length} clip{clips.length !== 1 ? 's' : ''}
                   </Badge>
                 </div>
 
-                <div className="space-y-4 max-h-[60vh] overflow-y-auto">
-                  {clips.map((clip) => {
-                    const hasOverlap = clip.hasOverlap;
-
-                    return (
-                      <Card key={clip.id} className={cn(
-                        "relative",
-                        hasOverlap && "border-yellow-500 bg-yellow-50"
-                      )}>
-                        <CardHeader className="pb-3">
-                          <div className="flex items-center justify-between">
-                            <CardTitle className="text-sm flex items-center gap-2">
-                              <GripVertical className="h-4 w-4 text-muted-foreground" />
-                              {clip.label}
-                              <Badge variant={hasOverlap ? "destructive" : "secondary"}>
-                                {formatTime(clip.duration)}
-                              </Badge>
-                            </CardTitle>
-
-                            <div className="flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => seekToClipStart(clip)}
-                                className="h-6 w-6 p-0"
-                              >
-                                ⏭
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => playClipPreview(clip)}
-                                className="h-6 w-6 p-0"
-                              >
-                                {isPlaying ? <Pause className="h-3 w-3" /> : <Play className="h-3 w-3" />}
-                              </Button>
-                            </div>
-                          </div>
-
-                          {hasOverlap && (
-                            <div className="flex items-center gap-1 text-xs text-yellow-600">
-                              <AlertTriangle className="h-3 w-3" />
-                              Overlaps with another clip
-                            </div>
-                          )}
-                        </CardHeader>
-
-                        <CardContent className="pt-0 space-y-3">
-                          {/* Timeline Slider */}
-                          <div>
-                            <div className="flex justify-between text-xs text-muted-foreground mb-1">
-                              <span>Start: {formatTime(clip.startTime)}</span>
-                              <span>End: {formatTime(clip.endTime)}</span>
-                            </div>
-                            <Slider
-                              min={0}
-                              max={videoDuration}
-                              step={0.1}
-                              value={[clip.startTime, clip.endTime]}
-                              onValueChange={(values) => handleAdvancedSliderChange(clip.id, values)}
-                              className="w-full"
-                              disabled={videoDuration === 0}
-                            />
-                          </div>
-
-                          {/* Time Inputs */}
-                          <div className="grid grid-cols-2 gap-2">
-                            <div>
-                              <Label htmlFor={`start-${clip.id}`} className="text-xs">Start (s)</Label>
-                              <Input
-                                id={`start-${clip.id}`}
-                                type="number"
-                                min={0}
-                                max={videoDuration}
-                                step={0.1}
-                                value={clip.startTime.toFixed(1)}
-                                onChange={(e) => handleTimeInputChange(clip.id, 'startTime', e.target.value)}
-                                className="h-8 text-xs"
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor={`end-${clip.id}`} className="text-xs">End (s)</Label>
-                              <Input
-                                id={`end-${clip.id}`}
-                                type="number"
-                                min={0}
-                                max={videoDuration}
-                                step={0.1}
-                                value={clip.endTime.toFixed(1)}
-                                onChange={(e) => handleTimeInputChange(clip.id, 'endTime', e.target.value)}
-                                className="h-8 text-xs"
-                              />
-                            </div>
-                          </div>
-
-                          {/* Clip-specific metadata */}
-                          <div className="grid grid-cols-1 gap-2">
-                            <Input
-                              placeholder={`Title for ${clip.label}`}
-                              value={clip.title || ''}
-                              onChange={(e) => updateClip(clip.id, { title: e.target.value })}
-                              className="h-8 text-xs"
-                            />
-                            <Input
-                              placeholder={`Description for ${clip.label}`}
-                              value={clip.description || ''}
-                              onChange={(e) => updateClip(clip.id, { description: e.target.value })}
-                              className="h-8 text-xs"
-                            />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    );
-                  })}
+                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                  {clips.map((clip) => (
+                    <ClipRow
+                      key={clip.id}
+                      clip={clip}
+                      videoUrl={videoUrl}
+                      videoDuration={videoDuration}
+                      onUpdateClip={updateClip}
+                      onSeekToStart={seekToClipStart}
+                      onPlayPreview={playClipPreview}
+                      isPlaying={isPlaying}
+                    />
+                  ))}
                 </div>
               </div>
             </div>

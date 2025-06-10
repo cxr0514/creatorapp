@@ -13,7 +13,8 @@ import {
   BuildingOfficeIcon,
   LifebuoyIcon,
   CpuChipIcon,
-  XMarkIcon
+  XMarkIcon,
+  RectangleStackIcon
 } from '@heroicons/react/24/outline'
 
 interface SidebarNavigationProps {
@@ -33,6 +34,7 @@ interface NavigationItem {
 const getSidebarNavigation = (isAdmin: boolean): NavigationItem[] => [
   { name: 'Dashboard', href: 'dashboard', icon: HomeIcon },
   { name: 'Videos', href: 'uploads', icon: VideoCameraIcon },
+  { name: 'Clips', href: 'clips', icon: RectangleStackIcon },
   { name: 'AI Enhancement', href: 'ai', icon: SparklesIcon },
   { name: 'Calendar', href: 'calendar', icon: CalendarIcon },
   { name: 'Analytics', href: 'analytics', icon: ChartBarIcon },

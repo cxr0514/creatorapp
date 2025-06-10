@@ -2,10 +2,12 @@
 // This file starts all background workers for the application
 
 import { captionWorker } from '@/lib/queues/caption-worker'
+import { clipProcessingWorker } from '@/lib/queues/clip-processing-queue'
 
 // Worker status tracking
 const workerStatus = {
-  captions: false
+  captions: false,
+  clipProcessing: false
 }
 
 // Initialize all workers
@@ -16,6 +18,10 @@ export function initializeWorkers() {
     // The caption worker is already created, just need to track its status  
     console.log('[WORKERS] Caption worker started')
     workerStatus.captions = true
+
+    // The clip processing worker is already created, just need to track its status
+    console.log('[WORKERS] Clip processing worker started')
+    workerStatus.clipProcessing = true
 
     console.log('[WORKERS] All background workers initialized successfully')
   } catch (error) {
@@ -32,6 +38,10 @@ export async function stopWorkers() {
     await captionWorker.close()
     console.log('[WORKERS] Caption worker stopped')
     workerStatus.captions = false
+
+    await clipProcessingWorker.close()
+    console.log('[WORKERS] Clip processing worker stopped')
+    workerStatus.clipProcessing = false
 
     console.log('[WORKERS] All background workers stopped')
   } catch (error) {

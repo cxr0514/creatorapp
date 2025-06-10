@@ -65,6 +65,7 @@ model User {
   userOnboarding           UserOnboarding?
   userPreferences          UserPreferences?
   videos                   Video[]
+  clips                    Clip[]
   ownedWorkspaces          Workspace[]
   workspaceInvitationsSent WorkspaceInvitation[]
   workspaceMemberships     WorkspaceMember[]
@@ -89,6 +90,42 @@ model Video {
   fileSize     Int?
   thumbnailUrl String?
   user         User     @relation(fields: [userId], references: [id])
+  clips        Clip[]
+}
+
+model Clip {
+  id            Int      @id @default(autoincrement())
+  title         String
+  description   String?
+  hashtags      String[] @default([])
+  startTime     Int      // Start time in seconds
+  endTime       Int      // End time in seconds
+  duration      Int?     // Calculated duration in seconds
+  aspectRatio   String   @default("16:9") // "16:9", "9:16", "1:1", "4:3"
+  status        String   @default("processing") // "processing", "ready", "failed"
+  createdAt     DateTime @default(now())
+  userId        String
+  videoId       Int
+  storageKey    String?  // B2 storage key for the clip file
+  storageUrl    String?  // B2 storage URL for the clip file
+  thumbnailUrl  String?
+  metadata      Json?    // Additional metadata like AI suggestions
+  user          User     @relation(fields: [userId], references: [id])
+  video         Video    @relation(fields: [videoId], references: [id])
+  exports       ClipExport[]
+}
+
+model ClipExport {
+  id           Int      @id @default(autoincrement())
+  clipId       Int
+  format       String   // Export format identifier
+  platform     String   // Target platform
+  storageKey   String   // B2 storage key for exported file
+  storageUrl   String   // B2 storage URL for exported file
+  croppingType String?  // Type of cropping applied
+  fileSize     Int?     // File size in bytes
+  createdAt    DateTime @default(now())
+  clip         Clip     @relation(fields: [clipId], references: [id], onDelete: Cascade)
 }
 
 

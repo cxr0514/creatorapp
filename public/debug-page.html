@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Page</title>
+    <script>
+        console.log('Debug page loaded');
+        
+        // Test if we can reach the main page
+        fetch('/')
+            .then(response => {
+                console.log('Main page response status:', response.status);
+                return response.text();
+            })
+            .then(html => {
+                console.log('Main page HTML length:', html.length);
+                console.log('Contains 404?', html.includes('404'));
+                console.log('Contains spinner?', html.includes('animate-spin'));
+                
+                // Check if there are any script errors in the HTML
+                const scriptTags = html.match(/<script[^>]*>(.*?)<\/script>/gs);
+                console.log('Number of script tags:', scriptTags ? scriptTags.length : 0);
+            })
+            .catch(error => {
+                console.error('Error fetching main page:', error);
+            });
+            
+        // Test the session API
+        fetch('/api/auth/session')
+            .then(response => response.json())
+            .then(session => {
+                console.log('Session data:', session);
+            })
+            .catch(error => {
+                console.error('Session API error:', error);
+            });
+    </script>
+</head>
+<body>
+    <h1>Debug Page</h1>
+    <p>Check the browser console for debug information.</p>
+    <button onclick="window.open('/', '_blank')">Open Main Page in New Tab</button>
+</body>
+</html>

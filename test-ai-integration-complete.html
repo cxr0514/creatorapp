@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Integration Complete Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+        }
+        .test-form {
+            display: grid;
+            gap: 15px;
+        }
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+        label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input, select, textarea {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .result-container {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #6366f1;
+        }
+        .success {
+            border-left-color: #10b981;
+            background: #ecfdf5;
+        }
+        .error {
+            border-left-color: #ef4444;
+            background: #fef2f2;
+        }
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .result-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: white;
+            border-radius: 5px;
+            border: 1px solid #e5e7eb;
+        }
+        .result-label {
+            font-weight: bold;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        .result-content {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        .hashtags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .hashtag {
+            background: #ede9fe;
+            color: #7c3aed;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+        .test-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .status-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+            border: 1px solid #f59e0b;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🤖 AI Integration Complete Test Suite</h1>
+        <p>Testing the OpenAI integration for clip copy generation. This verifies that the AI endpoints are working correctly with real OpenAI API calls.</p>
+        
+        <div id="status" class="test-status status-pending">
+            🔄 Ready to test AI integration
+        </div>
+
+        <div class="test-section">
+            <h2>✨ AI Clip Copy Generator Test</h2>
+            <p>This tests the <code>/api/ai/clip-copy</code> endpoint that was updated to use real OpenAI API calls instead of mock data.</p>
+            
+            <div class="test-form">
+                <div class="form-group">
+                    <label for="title">Video Title:</label>
+                    <input type="text" id="title" value="Creating Engaging Social Media Content" placeholder="Enter your video title">
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Video Description:</label>
+                    <textarea id="description" placeholder="Describe your video content">Tips and tricks for making viral social media videos that get maximum engagement</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="videoContext">Video Context:</label>
+                    <textarea id="videoContext" placeholder="Provide context about your video">Tutorial video showing 5 quick editing tricks for viral TikTok content creation</textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="platform">Platform:</label>
+                    <select id="platform">
+                        <option value="tiktok">TikTok</option>
+                        <option value="instagram">Instagram Reels</option>
+                        <option value="youtube">YouTube Shorts</option>
+                        <option value="twitter">Twitter</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="targetAudience">Target Audience:</label>
+                    <select id="targetAudience">
+                        <option value="content creators">Content Creators</option>
+                        <option value="general">General Audience</option>
+                        <option value="developers">Developers</option>
+                        <option value="entrepreneurs">Entrepreneurs</option>
+                        <option value="students">Students</option>
+                    </select>
+                </div>
+                
+                <button onclick="testAIClipCopy()" id="testButton">
+                    🚀 Generate AI Clip Copy
+                </button>
+            </div>
+            
+            <div id="result" class="result-container" style="display: none;">
+                <!-- Results will be displayed here -->
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🎯 Quick Tests</h2>
+            <p>Pre-configured test scenarios to verify different use cases:</p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-top: 15px;">
+                <button onclick="quickTest('cooking')">🍳 Cooking Tutorial</button>
+                <button onclick="quickTest('tech')">💻 Tech Review</button>
+                <button onclick="quickTest('fitness')">💪 Fitness Tips</button>
+                <button onclick="quickTest('education')">📚 Educational Content</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>🔍 API Status Check</h2>
+            <button onclick="checkAPIStatus()">Check OpenAI API Status</button>
+            <div id="apiStatus" class="result-container" style="display: none;">
+                <!-- API status will be displayed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        async function testAIClipCopy() {
+            const button = document.getElementById('testButton');
+            const result = document.getElementById('result');
+            const status = document.getElementById('status');
+            
+            // Get form values
+            const data = {
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                videoContext: document.getElementById('videoContext').value,
+                platform: document.getElementById('platform').value,
+                targetAudience: document.getElementById('targetAudience').value
+            };
+            
+            // Validation
+            if (!data.title || !data.videoContext) {
+                alert('Please fill in at least the title and video context fields');
+                return;
+            }
+            
+            // Update UI
+            button.disabled = true;
+            button.innerHTML = '<div class="loading"></div>Generating AI Content...';
+            status.className = 'test-status status-pending';
+            status.innerHTML = '🔄 Testing AI integration...';
+            result.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/ai/clip-copy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseData = await response.json();
+                
+                if (!response.ok) {
+                    throw new Error(responseData.error || 'API request failed');
+                }
+                
+                // Display results
+                displayResults(responseData.data);
+                status.className = 'test-status status-success';
+                status.innerHTML = '✅ AI integration test successful!';
+                
+            } catch (error) {
+                console.error('Test failed:', error);
+                result.innerHTML = `<div class="error"><strong>❌ Test Failed:</strong> ${error.message}</div>`;
+                result.style.display = 'block';
+                status.className = 'test-status status-error';
+                status.innerHTML = '❌ AI integration test failed';
+            } finally {
+                button.disabled = false;
+                button.innerHTML = '🚀 Generate AI Clip Copy';
+            }
+        }
+        
+        function displayResults(data) {
+            const result = document.getElementById('result');
+            
+            let html = '<h3>🎉 AI Generated Content:</h3>';
+            
+            // Titles
+            if (data.titles && data.titles.length > 0) {
+                html += '<div class="result-item">';
+                html += '<div class="result-label">📝 Generated Titles:</div>';
+                html += '<div class="result-content">';
+                data.titles.forEach(title => {
+                    html += `<div style="margin-bottom: 8px; padding: 8px; background: #f9fafb; border-radius: 4px;">${title}</div>`;
+                });
+                html += '</div></div>';
+            }
+            
+            // Descriptions
+            if (data.descriptions && data.descriptions.length > 0) {
+                html += '<div class="result-item">';
+                html += '<div class="result-label">📄 Generated Descriptions:</div>';
+                html += '<div class="result-content">';
+                data.descriptions.forEach(desc => {
+                    html += `<div style="margin-bottom: 12px; padding: 12px; background: #f9fafb; border-radius: 4px; line-height: 1.6;">${desc.replace(/\n/g, '<br>')}</div>`;
+                });
+                html += '</div></div>';
+            }
+            
+            // Hashtags
+            if (data.hashtags && data.hashtags.length > 0) {
+                html += '<div class="result-item">';
+                html += '<div class="result-label">#️⃣ Generated Hashtags:</div>';
+                html += '<div class="hashtags">';
+                data.hashtags.forEach(tag => {
+                    html += `<span class="hashtag">#${tag}</span>`;
+                });
+                html += '</div></div>';
+            }
+            
+            // Ideas
+            if (data.ideas && data.ideas.length > 0) {
+                html += '<div class="result-item">';
+                html += '<div class="result-label">💡 Additional Ideas:</div>';
+                html += '<div class="result-content">';
+                data.ideas.forEach(idea => {
+                    html += `<div style="margin-bottom: 6px; padding: 6px; background: #f0f9ff; border-radius: 4px;">${idea}</div>`;
+                });
+                html += '</div></div>';
+            }
+            
+            result.innerHTML = html;
+            result.className = 'result-container success';
+            result.style.display = 'block';
+        }
+        
+        async function quickTest(type) {
+            const testData = {
+                cooking: {
+                    title: "Quick 5-Minute Pasta Recipe",
+                    description: "Easy weeknight dinner recipe",
+                    videoContext: "Step-by-step cooking tutorial showing how to make delicious pasta in just 5 minutes with simple ingredients",
+                    platform: "tiktok",
+                    targetAudience: "general"
+                },
+                tech: {
+                    title: "iPhone vs Android 2024",
+                    description: "Comprehensive comparison review",
+                    videoContext: "Detailed tech review comparing the latest iPhone and Android features, performance, and value",
+                    platform: "youtube",
+                    targetAudience: "developers"
+                },
+                fitness: {
+                    title: "10-Minute Morning Workout",
+                    description: "No equipment home workout",
+                    videoContext: "High-energy fitness routine that can be done at home without any equipment to start your day",
+                    platform: "instagram",
+                    targetAudience: "general"
+                },
+                education: {
+                    title: "JavaScript Basics Explained",
+                    description: "Programming fundamentals tutorial",
+                    videoContext: "Educational content teaching JavaScript programming basics for beginners with clear examples",
+                    platform: "youtube",
+                    targetAudience: "students"
+                }
+            };
+            
+            const data = testData[type];
+            if (!data) return;
+            
+            // Set form values
+            document.getElementById('title').value = data.title;
+            document.getElementById('description').value = data.description;
+            document.getElementById('videoContext').value = data.videoContext;
+            document.getElementById('platform').value = data.platform;
+            document.getElementById('targetAudience').value = data.targetAudience;
+            
+            // Run test
+            await testAIClipCopy();
+        }
+        
+        async function checkAPIStatus() {
+            const statusDiv = document.getElementById('apiStatus');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<div class="loading"></div>Checking API status...';
+            
+            try {
+                const response = await fetch('/api/test-openai');
+                const data = await response.json();
+                
+                if (data.success) {
+                    statusDiv.innerHTML = `
+                        <div class="success">
+                            <strong>✅ OpenAI API Status: Working</strong><br>
+                            <small>API Key Length: ${data.keyLength} characters</small><br>
+                            <small>Test Response: "${data.aiResponse}"</small>
+                        </div>
+                    `;
+                } else {
+                    statusDiv.innerHTML = `
+                        <div class="error">
+                            <strong>❌ OpenAI API Status: Failed</strong><br>
+                            <small>Error: ${data.error || 'Unknown error'}</small>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `
+                    <div class="error">
+                        <strong>❌ API Check Failed</strong><br>
+                        <small>Error: ${error.message}</small>
+                    </div>
+                `;
+            }
+        }
+        
+        // Auto-check API status on page load
+        window.addEventListener('load', () => {
+            checkAPIStatus();
+        });
+    </script>
+</body>
+</html>

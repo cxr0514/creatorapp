@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { color: #16a085; }
+        .error { color: #e74c3c; }
+        .info { color: #3498db; }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .log {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔐 CreatorApp Authentication Test</h1>
+    
+    <div class="test-section">
+        <h3>1. Authentication Status</h3>
+        <div id="auth-status">Checking...</div>
+        <button onclick="checkAuthStatus()">🔄 Refresh Status</button>
+    </div>
+    
+    <div class="test-section">
+        <h3>2. Quick Authentication Test</h3>
+        <div>
+            <button onclick="signInGoogle()">🔐 Sign In with Google</button>
+            <button onclick="signInCredentials()">📧 Sign In with Email</button>
+            <button onclick="signOut()">🚪 Sign Out</button>
+        </div>
+    </div>
+    
+    <div class="test-section">
+        <h3>3. API Access Test</h3>
+        <button onclick="testProtectedAPI()">🔒 Test Protected Videos API</button>
+        <div id="api-result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>4. Debug Logs</h3>
+        <div id="logs" class="log">Ready for testing...\n</div>
+        <button onclick="clearLogs()">🗑️ Clear Logs</button>
+    </div>
+
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.textContent += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+        }
+
+        async function checkAuthStatus() {
+            log('🔍 Checking authentication status...');
+            const statusDiv = document.getElementById('auth-status');
+            
+            try {
+                const response = await fetch('/api/auth/session');
+                const session = await response.json();
+                
+                if (session && session.user) {
+                    statusDiv.innerHTML = `<span class="success">✅ Authenticated as: ${session.user.email || session.user.name || 'Unknown User'}</span>`;
+                    log(`✅ Authenticated as: ${session.user.email || session.user.name}`);
+                } else {
+                    statusDiv.innerHTML = `<span class="error">❌ Not authenticated</span>`;
+                    log('❌ Not authenticated');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<span class="error">❌ Error checking auth: ${error.message}</span>`;
+                log(`❌ Auth check error: ${error.message}`);
+            }
+        }
+
+        function signInGoogle() {
+            log('🔐 Redirecting to Google OAuth...');
+            window.location.href = '/api/auth/signin/google';
+        }
+
+        function signInCredentials() {
+            log('📧 Redirecting to credentials sign-in...');
+            window.location.href = '/api/auth/signin/credentials';
+        }
+
+        function signOut() {
+            log('🚪 Signing out...');
+            window.location.href = '/api/auth/signout';
+        }
+
+        async function testProtectedAPI() {
+            log('🔒 Testing protected videos API...');
+            const resultDiv = document.getElementById('api-result');
+            
+            try {
+                const response = await fetch('/api/videos');
+                
+                if (response.ok) {
+                    const videos = await response.json();
+                    log(`✅ API call successful! Found ${videos.length} videos`);
+                    
+                    // Check if presigned URLs are being generated
+                    if (videos.length > 0) {
+                        const firstVideo = videos[0];
+                        if (firstVideo.url && firstVideo.url.includes('X-Amz-Signature')) {
+                            log('✅ Presigned URLs detected in response!');
+                            resultDiv.innerHTML = `<span class="success">✅ Protected API working! Found ${videos.length} videos with presigned URLs</span>`;
+                        } else {
+                            log('ℹ️ Standard URLs (non-B2) in response');
+                            resultDiv.innerHTML = `<span class="info">ℹ️ API working! Found ${videos.length} videos</span>`;
+                        }
+                    } else {
+                        resultDiv.innerHTML = `<span class="info">ℹ️ API working but no videos found</span>`;
+                    }
+                } else if (response.status === 401) {
+                    log('❌ API returned 401 Unauthorized - need to authenticate first');
+                    resultDiv.innerHTML = `<span class="error">❌ Unauthorized - Please sign in first</span>`;
+                } else {
+                    log(`❌ API error: ${response.status} ${response.statusText}`);
+                    resultDiv.innerHTML = `<span class="error">❌ API Error: ${response.status}</span>`;
+                }
+            } catch (error) {
+                log(`❌ API test failed: ${error.message}`);
+                resultDiv.innerHTML = `<span class="error">❌ Error: ${error.message}</span>`;
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').textContent = 'Logs cleared...\n';
+        }
+
+        // Check auth status on page load
+        window.addEventListener('load', () => {
+            log('🚀 Authentication test page loaded');
+            checkAuthStatus();
+        });
+    </script>
+</body>
+</html>

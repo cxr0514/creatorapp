@@ -2,6 +2,7 @@
 
 import { VideoUpload } from '../video-upload-enhanced'
 import { VideoList } from '../video-list'
+import { ClipList } from '../clip-list'
 import { SocialConnections } from '../social-connections'
 import { CalendarWidget } from '../../calendar/calendar-widget'
 import { WorkflowBuilder } from '../workflow-builder'
@@ -274,7 +275,17 @@ export function TabContent({
                 />
               </div>
             )}
-            <VideoList key={refreshKey} />
+            <VideoList key={refreshKey} onUploadClick={() => setShowVideoUpload(true)} />
+          </div>
+        )
+
+      case 'clips':
+        return (
+          <div className="space-y-6">
+            <div className="flex justify-between items-center">
+              <h1 className="text-2xl font-bold text-foreground">Clips</h1>
+            </div>
+            <ClipList />
           </div>
         )
 

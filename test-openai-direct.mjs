@@ -5,15 +5,15 @@ async function testOpenAI() {
   console.log('🧪 Testing OpenAI API directly...\n');
   
   // Read the API key from .env.local manually
-  const fs = require('fs');
-  const path = require('path');
+  const fs = await import('fs');
+  const path = await import('path');
   
   try {
-    const envContent = fs.readFileSync(path.join(process.cwd(), '.env.local'), 'utf8');
+    const envContent = fs.default.readFileSync(path.default.join(process.cwd(), '.env'), 'utf8');
     const apiKeyMatch = envContent.match(/OPENAI_API_KEY=(.+)/);
     
     if (!apiKeyMatch || !apiKeyMatch[1]) {
-      console.log('❌ No OpenAI API key found in .env.local');
+      console.log('❌ No OpenAI API key found in .env');
       return;
     }
     
