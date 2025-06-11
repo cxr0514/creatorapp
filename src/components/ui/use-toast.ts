@@ -25,3 +25,4 @@ toast.info = (message: string) => sonnerToast.info(message)
 toast.warning = (message: string) => sonnerToast.warning(message)
 
 export { toast }
+export const useToast = () => ({ toast })
