@@ -52,6 +52,7 @@ model User {
   totalStorage             Int                   @default(0)
   usageStats               Json?
   stripeCustomerId         String?               @unique
+  youtubeRefreshToken      String?               @db.Text
   accounts                 Account[]
   adminProfile             Admin?
   paymentHistory           PaymentHistory[]
