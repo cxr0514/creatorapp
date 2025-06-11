@@ -39,6 +39,8 @@ const getSidebarNavigation = (isAdmin: boolean): NavigationItem[] => [
   { name: 'Calendar', href: 'calendar', icon: CalendarIcon },
   { name: 'Analytics', href: 'analytics', icon: ChartBarIcon },
   { name: 'Workflows', href: 'workflows', icon: Cog6ToothIcon },
+  { name: 'Profile', href: 'profile', icon: UserIcon },
+  { name: 'Subscription', href: 'subscription', icon: CreditCardIcon },
   { name: 'Workspaces', href: 'workspaces', icon: BuildingOfficeIcon },
   { name: 'Support', href: 'support', icon: LifebuoyIcon },
   ...(isAdmin ? [{ name: 'Admin Portal', href: 'admin', icon: ShieldCheckIcon }] : []),

@@ -29,7 +29,6 @@ export default function ModernDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [refreshKey, setRefreshKey] = useState(0)
   const [showVideoUpload, setShowVideoUpload] = useState(false)
-  const [profileTab, setProfileTab] = useState('settings')
   const [scheduledPosts] = useState<ScheduledPost[]>([])
   const [isMobile, setIsMobile] = useState(false)
   const [platforms] = useState<Platform[]>([
@@ -107,8 +106,6 @@ export default function ModernDashboard() {
                   handleScheduleNew={handleScheduleNew}
                   platforms={platforms}
                   isMobile={isMobile}
-                  profileTab={profileTab}
-                  setProfileTab={setProfileTab}
                 />
               )}
             </div>

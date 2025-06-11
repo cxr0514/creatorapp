@@ -12,7 +12,6 @@ import { BatchAIProcessor } from '../batch-ai-processor'
 import { EnhancedDashboard } from '../enhanced-dashboard'
 import { AdvancedAnalytics } from '../advanced-analytics'
 import { MobileDashboard } from '../mobile-dashboard'
-import { UserPreferencesForm } from '../../preferences/user-preferences-form'
 import AdminDashboard from '../../admin/AdminDashboard'
 import PricingPlans from '../../subscription/PricingPlans'
 import WorkspaceManagement from '../../workspace/WorkspaceManagement'
@@ -20,6 +19,8 @@ import SupportTickets from '../../support/SupportTickets'
 import SystemMonitoring from '../../admin/SystemMonitoring'
 import { DashboardStats } from '../widgets/dashboard-stats'
 import { Button } from '@/components/ui/button'
+import { ConnectYouTubeButton, VideoAnalyticsCard } from '@/components/youtube'
+import { ProfilePage } from '@/components/dashboard/profile/profile-page'
 import { 
   CloudArrowUpIcon,
   EyeIcon,
@@ -77,8 +78,6 @@ interface TabContentProps {
   platforms: Platform[]
   isMobile: boolean
   session: Session
-  profileTab: string
-  setProfileTab: (tab: string) => void
 }
 
 export function TabContent({
@@ -92,9 +91,7 @@ export function TabContent({
   handleScheduleNew,
   platforms: _platforms, // eslint-disable-line @typescript-eslint/no-unused-vars
   isMobile,
-  session,
-  profileTab,
-  setProfileTab
+  session
 }: TabContentProps) {
   // Sample data for dashboard components
   const mobileStats = [
@@ -346,11 +343,44 @@ export function TabContent({
           <div className="space-y-4">
             <h1 className="text-xl font-bold text-foreground">Analytics</h1>
             <AdvancedAnalytics timeRange="7d" />
+            
+            {/* YouTube Analytics Section */}
+            <div className="space-y-4">
+              <h2 className="text-lg font-semibold">YouTube Analytics</h2>
+              <ConnectYouTubeButton />
+              <VideoAnalyticsCard 
+                videoId="dQw4w9WgXcQ" 
+                title="Sample Video Analytics" 
+              />
+            </div>
           </div>
         ) : (
           <div className="space-y-6">
             <AnalyticsDashboard />
             <AdvancedAnalytics timeRange="30d" />
+            
+            {/* YouTube Analytics Section */}
+            <div className="space-y-6">
+              <div className="border-t pt-6">
+                <h2 className="text-2xl font-bold mb-4">YouTube Analytics</h2>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Connect YouTube</h3>
+                    <ConnectYouTubeButton />
+                    <p className="text-sm text-muted-foreground">
+                      Connect your YouTube account to access detailed analytics and performance metrics.
+                    </p>
+                  </div>
+                  <div className="space-y-4">
+                    <h3 className="text-lg font-semibold">Video Analytics</h3>
+                    <VideoAnalyticsCard 
+                      videoId="dQw4w9WgXcQ" 
+                      title="Sample Video Performance" 
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )
 
@@ -378,101 +408,7 @@ export function TabContent({
         )
 
       case 'profile':
-        return (
-          <div className="space-y-6">
-            <div className="border-b border-border">
-              <nav className="-mb-px flex space-x-8">
-                {[
-                  { id: 'settings', name: 'Settings' },
-                  { id: 'profile', name: 'Profile' },
-                  { id: 'notifications', name: 'Notifications' }
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setProfileTab(tab.id)}
-                    className={`${
-                      profileTab === tab.id
-                        ? 'border-primary text-primary'
-                        : 'border-transparent text-muted-foreground hover:text-foreground hover:border-border'
-                    } whitespace-nowrap py-2 px-1 border-b-2 font-medium text-sm`}
-                  >
-                    {tab.name}
-                  </button>
-                ))}
-              </nav>
-            </div>
-
-            {profileTab === 'settings' && (
-              <UserPreferencesForm userId={session?.user?.id || 'default-user'} />
-            )}
-
-            {profileTab === 'profile' && (
-              <div className="bg-card rounded-lg border border-border p-6">
-                <h3 className="text-lg font-medium text-foreground mb-4">Profile Information</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center space-x-4">
-                    <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center">
-                      <span className="text-2xl font-bold text-primary-foreground">
-                        {session?.user?.name?.[0] || 'U'}
-                      </span>
-                    </div>
-                    <div>
-                      <Button disabled size="sm" variant="outline">
-                        Change Picture
-                      </Button>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="block text-sm font-medium text-foreground">Name</label>
-                      <input
-                        type="text"
-                        value={session?.user?.name || ''}
-                        disabled
-                        className="mt-1 block w-full border border-border rounded-md px-3 py-2 bg-muted text-muted-foreground"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-foreground">Email</label>
-                      <input
-                        type="email"
-                        value={session?.user?.email || ''}
-                        disabled
-                        className="mt-1 block w-full border border-border rounded-md px-3 py-2 bg-muted text-muted-foreground"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {profileTab === 'notifications' && (
-              <div className="bg-card rounded-lg border border-border p-6">
-                <h3 className="text-lg font-medium text-foreground mb-4">Notification Preferences</h3>
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-foreground">Email Notifications</div>
-                      <div className="text-sm text-muted-foreground">Get notified about important updates</div>
-                    </div>
-                    <Button disabled size="sm" variant="outline">
-                      Manage
-                    </Button>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-sm font-medium text-foreground">Push Notifications</div>
-                      <div className="text-sm text-muted-foreground">Get real-time notifications in browser</div>
-                    </div>
-                    <Button disabled size="sm" variant="outline">
-                      Configure
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )
+        return <ProfilePage />
 
       default:
         return <DashboardStats />
